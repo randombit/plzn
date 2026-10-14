@@ -1,0 +1,13 @@
+plzn tls "client/tls12-serverhello-version-too-low" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ServerHello {
+      legacy_version: 0x0300
+    }
+  }
+  expect alert fatal/protocol_version
+}

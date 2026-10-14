@@ -1,0 +1,15 @@
+plzn tls "client/tls13-offers-every-enabled-version" {
+  rfc 9846 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13, tls12] }
+  flow handshake {
+    recv ClientHello {
+      supported_versions: [tls13, tls12]
+      lacks_supported_version: tls11
+      lacks_supported_version: tls10
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

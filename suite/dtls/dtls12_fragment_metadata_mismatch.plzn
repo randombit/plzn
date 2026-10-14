@@ -1,0 +1,44 @@
+plzn tls "dtls12/fragment-type-mismatch-to-server" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ type_mismatch 16 }
+  expect alert fatal/{decode_error, handshake_failure}
+  expect alert fatal/illegal_parameter if boringssl
+}
+
+plzn tls "dtls12/fragment-type-mismatch-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "does not compare the handshake type across fragments for one message_seq"
+  flow handshake { send ServerHello @ type_mismatch 16 }
+  expect alert fatal/{decode_error, handshake_failure}
+  expect alert fatal/illegal_parameter if boringssl
+  xfail libressl "does not compare the handshake type across fragments for one message_seq"
+}
+
+plzn tls "dtls12/fragment-length-field-mismatch-to-server" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment_length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls12/fragment-length-field-mismatch-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake { send ServerHello @ fragment_length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+  expect alert fatal/unexpected_message if libressl
+}

@@ -1,0 +1,172 @@
+plzn tls "client/tls13-rejects-grease-version-selection" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { +ext supported_versions = $grease }
+  }
+  expect alert fatal
+  expect any { alert fatal, close, reset } if go
+}
+
+plzn tls "client/tls13-rejects-grease-cipher-selection" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { cipher_suite: $grease }
+  }
+  expect alert fatal
+  expect any { alert fatal, close, reset } if go
+  expect close if wolfssl
+}
+
+plzn tls "client/tls13-rejects-grease-serverhello-extension" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts an unsolicited GREASE ServerHello extension"
+  xfail openssl "accepts any unknown unsolicited ServerHello extension, GREASE or not"
+  xfail gnutls "accepts an unsolicited GREASE ServerHello extension"
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { +ext $grease = zeros 25 }
+  }
+  expect alert fatal
+  xfail libressl "accepts an unsolicited GREASE ServerHello extension"
+}
+
+plzn tls "client/tls13-rejects-grease-encrypted-extensions-extension" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts an unsolicited GREASE EncryptedExtensions extension"
+  xfail openssl "accepts any unknown unsolicited EncryptedExtensions extension, GREASE or not"
+  xfail gnutls "accepts an unsolicited GREASE EncryptedExtensions extension"
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send EncryptedExtensions { +ext $grease = zeros 25 }
+  }
+  expect alert fatal
+  xfail libressl "accepts an unsolicited GREASE EncryptedExtensions extension"
+}
+
+plzn tls "client/tls13-rejects-grease-certificate-verify-signature" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send CertificateVerify { algorithm: $grease }
+  }
+  expect alert fatal
+}
+
+plzn tls "client/tls13-ignores-grease-new-session-ticket-extension" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake after recv Finished {
+    send NewSessionTicket { +ext $grease = zeros 25 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-rejects-grease-hrr-version-selection" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { capabilities: [hrr] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send HelloRetryRequest { +ext supported_versions = $grease }
+  }
+  expect alert fatal
+}
+
+plzn tls "client/tls13-rejects-grease-hrr-cipher-selection" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { capabilities: [hrr] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send HelloRetryRequest { cipher_suite: $grease }
+  }
+  expect alert fatal
+  expect close if wolfssl
+}
+
+plzn tls "client/tls13-rejects-grease-hrr-extension" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { capabilities: [hrr] }
+  xfail gnutls "accepts an unsolicited GREASE HelloRetryRequest extension"
+  xfail openssl "accepts any unknown unsolicited HelloRetryRequest extension, GREASE or not"
+  xfail go "accepts an unsolicited GREASE HelloRetryRequest extension"
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send HelloRetryRequest { +ext $grease = zeros 25 }
+  }
+  expect alert fatal
+  xfail libressl "accepts an unsolicited GREASE HelloRetryRequest extension"
+}
+
+plzn tls "client/tls13-rejects-grease-hrr-group-selection" {
+  rfc 8701
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { capabilities: [hrr] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send HelloRetryRequest { key_share_group: $grease }
+  }
+  expect alert fatal
+}
+
+plzn tls "client/tls13-ignores-grease-certificate-request-signature-algorithm" {
+  rfc 8701 section 4.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  # RFC 8701 4.1: a server MAY advertise GREASE signature algorithm values in
+  # the CertificateRequest; 4.2: the client MUST ignore them and pick one of
+  # the remaining schemes.
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send CertificateRequest {
+      +ext signature_algorithms = [$grease, rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256]
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

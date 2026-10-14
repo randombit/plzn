@@ -1,0 +1,11 @@
+plzn tls "client/tls13-ch-mandatory-suite" {
+  rfc 8446 section 9.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello {
+      cipher_suites: [AES_128_GCM_SHA256]
+    }
+  }
+  expect ok
+}

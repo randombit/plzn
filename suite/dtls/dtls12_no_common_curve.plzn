@@ -1,0 +1,11 @@
+plzn tls "dtls12/no-common-curve" {
+  rfc 6347 section 4.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    curves: [secp521r1]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

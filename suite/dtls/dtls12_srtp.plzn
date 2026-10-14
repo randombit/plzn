@@ -1,0 +1,202 @@
+plzn tls "dtls12/srtp-server" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80, srtp_aes128_cm_hmac_sha1_32]
+    expect_srtp_profile: srtp_aes128_cm_hmac_sha1_80
+  }
+  flow handshake {
+    send ClientHello { +ext use_srtp = [40, srtp_aes128_cm_hmac_sha1_80, 42] }
+    recv ServerHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/srtp-client" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80, srtp_aes128_cm_hmac_sha1_32]
+    expect_srtp_profile: srtp_aes128_cm_hmac_sha1_80
+  }
+  flow {
+    recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80, srtp_aes128_cm_hmac_sha1_32] }
+    send HelloVerifyRequest
+    recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80, srtp_aes128_cm_hmac_sha1_32] }
+    send ServerHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/srtp-server-no-match" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80, srtp_aes128_cm_hmac_sha1_32]
+    expect_srtp_profile: 0
+  }
+  flow handshake {
+    send ClientHello { +ext use_srtp = [100, 101, 102] }
+    recv ServerHello { lacks_ext: use_srtp }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/srtp-client-reject-unoffered" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+  }
+  flow handshake {
+    send ServerHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_32] }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter}
+}
+
+plzn tls "dtls12/srtp-server-ignore-mki" {
+  rfc 5764 section 4.1.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+    expect_srtp_profile: srtp_aes128_cm_hmac_sha1_80
+  }
+  flow handshake {
+    send ClientHello { +ext use_srtp = raw "0002000105626f677573" }
+    recv ServerHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/srtp-server-resumption" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+    expect_srtp_profile: srtp_aes128_cm_hmac_sha1_80
+  }
+
+  session initial {
+    flow handshake {
+      send ClientHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+      recv ServerHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+      recv ServerHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "dtls12/srtp-client-resumption" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+    expect_srtp_profile: srtp_aes128_cm_hmac_sha1_80
+  }
+
+  session initial {
+    flow handshake {
+      recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send ServerHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send ServerHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail libressl "its DTLS client fails every abbreviated handshake with an internal error (transcript never freed)"
+}
+
+# A client re-offers the session's SRTP profile on resumption; a server that
+# resumes without it would silently drop DTLS-SRTP from the session.
+plzn tls "dtls12/srtp-client-rejects-resumption-dropping-profile" {
+  rfc 5764 section 4.1.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+  }
+
+  session initial {
+    flow handshake {
+      recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send ServerHello { +ext use_srtp = [srtp_aes128_cm_hmac_sha1_80] }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello { ext use_srtp == [srtp_aes128_cm_hmac_sha1_80] }
+      send ServerHello { -ext use_srtp }
+    }
+    expect alert fatal/{handshake_failure, illegal_parameter}
+  }
+  xfail libressl "its DTLS client fails every abbreviated handshake with an internal error (transcript never freed)"
+  xfail openssl "accepts a resumption that drops the session's SRTP profile"
+}
+
+# The client offers an empty srtp_mki, so a server's non-empty MKI is one the
+# client did not offer.
+plzn tls "dtls12/srtp-client-rejects-server-mki" {
+  rfc 5764 section 4.1.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    srtp_profiles: [srtp_aes128_cm_hmac_sha1_80]
+  }
+  flow handshake {
+    send ServerHello { +ext use_srtp = raw "0002000105626f677573" }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if openssl
+}

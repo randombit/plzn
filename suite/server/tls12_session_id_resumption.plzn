@@ -1,0 +1,41 @@
+plzn tls "server/tls12-session-id-resumption/issued-session-id-resumes" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      recv ServerHello { resumed: false }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls12-session-id-resumption/unrecognized-session-id-starts-full-handshake" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send ClientHello { legacy_session_id: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] }
+    recv ServerHello { resumed: false }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

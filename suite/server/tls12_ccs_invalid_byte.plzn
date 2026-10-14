@@ -1,0 +1,14 @@
+plzn tls "server/tls12-ccs-invalid-byte" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ChangeCipherSpec { type: 0x00 }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/illegal_parameter if libressl
+}

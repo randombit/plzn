@@ -1,0 +1,219 @@
+plzn tls "dtls12/alert" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send alert fatal/record_overflow
+    wait 300ms
+  }
+  # The fatal alert is inbound to the UUT; the recipient need not answer it.
+  expect close
+}
+
+plzn tls "dtls12/fragment-alert" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    send record 21 raw "02"
+    send record 21 raw "16"
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect close if libressl
+}
+
+plzn tls "dtls12/double-alert" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    send record 21 raw "0216 0216"
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect close if libressl
+}
+
+plzn tls "dtls12/app-data-after-change-cipher-spec" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "buffers application data received before Finished and delivers it afterwards (RFC 6347 4.2.4 permits buffering); this flow asserts the discard alternative"
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send AppData
+    send Finished
+    send AppData
+    recv AppData
+    wait 200ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/empty-app-data-after-change-cipher-spec" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send empty_record application_data
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/alert-after-change-cipher-spec" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "buffers a fatal alert received between ChangeCipherSpec and Finished as reordered data and keeps waiting for Finished"
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send alert fatal/record_overflow
+    wait 300ms
+  }
+  # The fatal alert is inbound to the UUT; the recipient need not answer it.
+  expect close
+  skip libressl "aborts without an alert, which this DTLS flow cannot tell apart from completion"
+}
+
+plzn tls "dtls12/bad-change-cipher-spec-dtls-value" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    # A raw record avoids advancing plzn's own write epoch while sending the invalid byte.
+    send record 20 raw "02"
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "dtls12/bad-change-cipher-spec-dtls-length" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send record 20 raw "0101"
+    wait 300ms
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+}
+
+plzn tls "dtls12/bad-client-change-cipher-spec-value" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send record 20 raw "02"
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "dtls12/bad-client-change-cipher-spec-length" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send record 20 raw "0101"
+    wait 300ms
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+}
+
+plzn tls "dtls12/bad-client-change-cipher-spec-type-override" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send ChangeCipherSpec { type: 0x02 }
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "dtls12/bad-server-change-cipher-spec-type-override" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send ChangeCipherSpec { type: 0x02 }
+    wait 300ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}

@@ -1,0 +1,25 @@
+plzn tls "server/tls13-keyupdate-crossing" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    records_per_traffic_key: 3
+    session_tickets: 0
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    send KeyUpdate { request_update: update_requested }
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    send AppData
+    recv KeyUpdate { request_update: update_not_requested }
+    recv AppData
+  }
+  expect ok
+}

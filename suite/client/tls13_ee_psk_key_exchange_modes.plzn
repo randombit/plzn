@@ -1,0 +1,13 @@
+plzn tls "client/tls13-ee-psk-key-exchange-modes" {
+  rfc 8446 section 4.2.9
+  chain: [default]
+  xfail rustls "ignores psk_key_exchange_modes in EncryptedExtensions and completes (RFC 8446 4.2 MUST abort)"
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext psk_key_exchange_modes = [psk_dhe_ke]
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+}

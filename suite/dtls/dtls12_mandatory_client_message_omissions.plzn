@@ -1,0 +1,132 @@
+plzn tls "dtls12/mandatory-client-message-omissions/initial-client-hello" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow {
+    send raw "16fefd0000000000000000000c100000000000000000000000"
+    wait 300ms
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/mandatory-client-message-omissions/certificate-after-certificate-request" {
+  rfc 5246 section 7.4.6
+  chain: [ecdsa_p256]
+  client_chain: [rsa_2048]
+  uut server {
+    versions: [dtls12], require_client_cert: true
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow handshake until send Certificate {
+    send Certificate
+    send ClientKeyExchange
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    hold_flight
+    release_flight [1, 2, 3, 4]
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+  }
+  expect timeout
+}
+
+plzn tls "dtls12/mandatory-client-message-omissions/client-key-exchange" {
+  rfc 5246 section 7.4.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    hold_flight
+    release_flight [1, 2]
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+  }
+  expect timeout
+}
+
+plzn tls "dtls12/mandatory-client-message-omissions/certificate-verify-after-client-certificate" {
+  rfc 5246 section 7.4.8
+  chain: [ecdsa_p256]
+  client_chain: [rsa_2048]
+  uut server {
+    versions: [dtls12], require_client_cert: true
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow handshake until send Certificate {
+    send Certificate
+    send ClientKeyExchange
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    hold_flight
+    release_flight [0, 1, 3, 4]
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+  }
+  expect timeout
+}
+
+plzn tls "dtls12/mandatory-client-message-omissions/change-cipher-spec" {
+  rfc 5246 section 7.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    hold_flight
+    release_flight [0, 2]
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+  }
+  expect timeout
+}
+
+plzn tls "dtls12/mandatory-client-message-omissions/finished" {
+  rfc 5246 section 7.4.9
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    hold_flight
+    release_flight [0, 1]
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+  }
+  expect timeout
+}

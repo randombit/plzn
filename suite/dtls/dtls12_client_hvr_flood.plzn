@@ -1,0 +1,13 @@
+plzn tls "dtls12/client-hvr-flood" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    dtls_max_hello_verify_requests: 4
+  }
+  flow {
+    recv ClientHello
+    hvr_flood 24 max_answers 4
+  }
+  expect ok
+}

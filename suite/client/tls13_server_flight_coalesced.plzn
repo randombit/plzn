@@ -1,0 +1,18 @@
+plzn tls "client/tls13-server-flight-coalesced" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send ServerHello {
+    coalesce {
+      send ServerHello
+      send EncryptedExtensions
+      send Certificate
+      send CertificateVerify
+      send Finished
+    }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

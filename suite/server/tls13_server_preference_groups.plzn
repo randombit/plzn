@@ -1,0 +1,22 @@
+plzn tls "server/tls13-server-preference-groups" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  skip rustls "no group-order preference API; server_preference reaches suites only"
+  uut server {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+    server_preference: true
+  }
+  peer { capabilities: [secp256r1, x25519] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [secp256r1, x25519]
+    }
+    recv ServerHello { key_share_group: x25519 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  skip libressl "TLS 1.3 key share selection always takes the client's most-preferred common group; server preference orders only suites and TLS 1.2 curves"
+}

@@ -1,0 +1,37 @@
+plzn tls "server/tls12-etm-accepts-padding-only-fragment" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    recv ServerHello { has_ext: encrypt_then_mac }
+    send empty_record application_data
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-etm-rejects-authenticated-invalid-padding" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: true
+  }
+  xfail gnutls "accepts EtM ciphertext with a valid outer MAC but invalid CBC padding"
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    recv ServerHello { has_ext: encrypt_then_mac }
+    send AppData { size: 16 } @ cbc_pad 20, xor[record.padding, 0] = 1
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

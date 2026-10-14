@@ -1,0 +1,330 @@
+# RFC 6347 4.1.2.7: a DTLS record that is invalid (bad formatting, length, MAC,
+# epoch, ...) is silently discarded and the association preserved. The shim
+# CLIENT counterpart of dtls12_stray_records_to_server.plzn: each case hands
+# the client one stray datagram from plzn's server, then proves the association
+# still works with an application-data round trip and silence afterwards.
+#
+# plzn's server batches a flight into one datagram, so the established-
+# association cases separate the stray record from the real request with a
+# `wait` (the stray is flushed and probed on its own) to keep each stray in its
+# own datagram; packing a stray behind a valid record is a different property,
+# tested by dtls12_client_tampered_record_same_datagram. The handshake cases
+# inject a raw datagram (its own datagram already) between the client's
+# cookie-bearing ClientHello and the server's flight.
+
+plzn tls "dtls12/stray-record-to-client/future-epoch" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # A sealed epoch-1 record relabelled as epoch 5: no keys for that epoch, so
+    # it is dropped before MAC verification and must not move the replay window.
+    send AppData { reply: none } @ set[record.epoch, 1] = 0x05
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/previous-epoch" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # The same ciphertext labelled epoch 0: a record from an earlier epoch
+    # after the handshake, which RFC 6347 4.1 says to discard.
+    send AppData { reply: none } @ set[record.epoch, 1] = 0x00
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/far-future-sequence-number" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # The header claims sequence 0xff0000000000 while the body was sealed under
+    # the real number, so authentication fails. The receive window is updated
+    # only after a successful MAC check: the genuine record that follows, with
+    # a much lower sequence number, must still be accepted.
+    send AppData { reply: none } @ set[record.sequence_number, 0] = 0xff
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  xfail libressl "a silently discarded bad-MAC record leaves an error queued, so SSL_read reports SSL_ERROR_SSL"
+}
+
+plzn tls "dtls12/stray-record-to-client/record-version-dtls10" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # A protected record whose header says {254, 255} (DTLS 1.0) on a DTLS 1.2
+    # association. The AEAD additional data covers the on-the-wire version, so
+    # the tag no longer verifies and the record is discarded.
+    send AppData { reply: none } @ set[record.version, 1] = 0xff
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/record-version-tls" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # A TLS-looking version {3, 3} in a DTLS record header.
+    send AppData { reply: none } @ set[record.version, 0] = 0x03
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/empty-protected-record" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # A zero-length epoch-1 application-data record: shorter than any
+    # authentication tag, so it cannot be opened.
+    send raw "17 fefd 0001 00000000ffff 0000"
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/truncated-protected-record" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip gnutls "GnuTLS returns a fatal GNUTLS_E_UNEXPECTED_PACKET_LENGTH to the caller for a malformed-length or sub-header DTLS datagram instead of silently discarding it (RFC 6347 4.1.2.7)"
+  flow handshake {
+    # A record header claiming 256 bytes in a datagram that carries two.
+    send raw "17 fefd 0001 00000000fffe 0100 0102"
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/short-datagram" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip gnutls "GnuTLS returns a fatal GNUTLS_E_UNEXPECTED_PACKET_LENGTH to the caller for a malformed-length or sub-header DTLS datagram instead of silently discarding it (RFC 6347 4.1.2.7)"
+  flow handshake {
+    # Three bytes: not even a record header.
+    send raw "17 fefd 00"
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/future-epoch-app-data-before-server-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ServerHello {
+    # Between the client's second ClientHello and the server's flight: a
+    # protected-looking application-data record from an epoch the handshake
+    # has not reached.
+    send raw "17 fefd 0005 000000000001 0010 00112233445566778899aabbccddeeff"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/future-epoch-handshake-before-server-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ServerHello {
+    send raw "16 fefd 0005 000000000001 0010 00112233445566778899aabbccddeeff"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/truncated-record-before-server-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip gnutls "GnuTLS returns a fatal GNUTLS_E_UNEXPECTED_PACKET_LENGTH to the caller for a malformed-length or sub-header DTLS datagram instead of silently discarding it (RFC 6347 4.1.2.7)"
+  flow handshake until send ServerHello {
+    # An epoch-0 record header claiming 256 bytes in a two-byte datagram body.
+    send raw "16 fefd 0000 ffffffffffff 0100 0102"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/empty-handshake-record-before-server-flight" {
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ServerHello {
+    # A zero-length handshake record, which RFC 5246 6.2.1 forbids sending.
+    send raw "16 fefd 0000 ffffffffffff 0000"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/short-datagram-before-server-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip gnutls "GnuTLS returns a fatal GNUTLS_E_UNEXPECTED_PACKET_LENGTH to the caller for a malformed-length or sub-header DTLS datagram instead of silently discarding it (RFC 6347 4.1.2.7)"
+  flow handshake until send ServerHello {
+    send raw "16 fefd 00"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/near-wrap-epoch" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # A sealed epoch-1 record relabelled to epoch 0xffff, close to the epoch
+    # wrap boundary (RFC 6347 4.1 forbids wrapping the epoch). No keys exist for
+    # it, so it is dropped before MAC verification; the epoch bookkeeping must
+    # not choke on the near-maximal value and the association stays usable.
+    send AppData { reply: none } @ set[record.epoch, 0] = 0xff, set[record.epoch, 1] = 0xff
+    wait 50ms
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/stray-record-to-client/near-wrap-epoch-before-server-flight" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ServerHello {
+    # A raw handshake record claiming epoch 0xffff, injected during the
+    # handshake while the client is still at epoch 0.
+    send raw "16 fefd ffff 000000000001 0010 00112233445566778899aabbccddeeff"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}

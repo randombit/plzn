@@ -1,0 +1,27 @@
+plzn tls "dtls13/server-cipher-suite-sweep" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls13] }
+  matrix {
+    suite in [AES_128_GCM_SHA256, AES_256_GCM_SHA384, CHACHA20_POLY1305_SHA256]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-cipher-suite-sweep" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13] }
+  matrix {
+    suite in [AES_128_GCM_SHA256, AES_256_GCM_SHA384, CHACHA20_POLY1305_SHA256]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,24 @@
+plzn tls "client/tls12-no-renegotiation-warning-during-handshake-client" {
+  rfc 5746 section 4.2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello
+    send alert warning/no_renegotiation
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+}

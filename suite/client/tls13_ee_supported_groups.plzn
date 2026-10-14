@@ -1,0 +1,13 @@
+plzn tls "client/tls13-ee-supported-groups" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext supported_groups = [x25519, secp256r1, secp384r1]
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,12 @@
+plzn tls "server/tls13-close-notify" {
+  rfc 8446 section 6.1
+  rfc 8446 section D.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

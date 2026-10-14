@@ -1,0 +1,12 @@
+plzn tls "client/tls13-hrr-unoffered-group" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr] }
+  flow handshake {
+    send HelloRetryRequest { key_share_group: 0xdada }
+  }
+  expect alert fatal/illegal_parameter
+}

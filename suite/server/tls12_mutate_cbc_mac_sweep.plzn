@@ -1,0 +1,20 @@
+plzn tls "server/legacy-cbc-mac-sweep" {
+  rfc 2246 section 6.2.3.2
+  rfc 4346 section 6.2.3.2
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [$version]
+  }
+  peer { capabilities: [cbc] }
+  matrix {
+    version in [tls10, tls11, tls12]
+    pos in 0..19
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

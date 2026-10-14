@@ -1,0 +1,21 @@
+plzn tls "client/tls13-client-keyupdate-back-to-back-unlimited" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    min_key_update_interval_ms: 0
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: update_not_requested }
+    send KeyUpdate { request_update: update_not_requested }
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: update_requested }
+    send AppData
+    recv KeyUpdate { request_update: update_not_requested }
+    recv AppData
+  }
+  expect ok
+}

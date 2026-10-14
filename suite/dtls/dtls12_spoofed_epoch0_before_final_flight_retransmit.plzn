@@ -1,0 +1,17 @@
+plzn tls "dtls12/spoofed-epoch0-before-final-flight-retransmit" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after send Finished {
+    discard_flight
+    send raw "15 fefd 0000 ffffffffffff 0002 0228"
+    send raw "16 fefd 0000 fffffffffffe 000c ff0000000000000000000000"
+    wait 200ms
+    retransmit_flight
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

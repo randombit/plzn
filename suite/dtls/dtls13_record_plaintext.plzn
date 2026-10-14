@@ -1,0 +1,75 @@
+plzn tls "dtls13/server-accepts-record-padding" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.4
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData @ record_pad 10
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-accepts-record-padding" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.4
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData @ record_pad 10
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-rejects-empty-inner-plaintext" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send empty_record 0x00
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decrypt_error if boringssl
+}
+
+plzn tls "dtls13/client-rejects-empty-inner-plaintext" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.2
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send empty_record 0x00
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decrypt_error if boringssl
+}
+
+plzn tls "dtls13/server-rejects-only-padding-inner-plaintext" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send record 0 raw 0x00 * 10
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decrypt_error if boringssl
+}
+
+plzn tls "dtls13/client-rejects-only-padding-inner-plaintext" {
+  rfc 9147 section 4.2.3
+  rfc 8446 section 5.2
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send record 0 raw 0x00 * 10
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decrypt_error if boringssl
+}

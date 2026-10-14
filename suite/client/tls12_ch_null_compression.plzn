@@ -1,0 +1,11 @@
+plzn tls "client/tls12-ch-null-compression" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv ClientHello {
+      compression_methods: [0x00]
+    }
+  }
+  expect ok
+}

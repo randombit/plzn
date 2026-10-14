@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "overrides": {
+    "client/tls12-client-rejects-small-dh-group[bits=1024]": {
+      "xfail": "accepts a 1024-bit finite-field DHE group"
+    },
+    "client/tls12-client-rejects-small-dh-group[bits=768]": "alert fatal/illegal_parameter",
+    "server/tls12-certificate-malformed/fuzz-empty-certificate-lengths[i=3,j=0]": "close",
+    "server/tls12-certificate-malformed/fuzz-first-certificate-length[v=16]": "close",
+    "server/tls12-certificate-malformed/fuzz-first-certificate-length[v=1]": "close",
+    "server/tls12-certificate-malformed/fuzz-first-certificate-length[v=32]": "close",
+    "server/tls12-certificate-malformed/fuzz-first-certificate-length[v=4]": "close",
+    "server/tls12-certificate-malformed/fuzz-first-certificate-length[v=64]": "close",
+    "server/tls12-invalid-client-hello/cipher-suites-length-odd[i=255]": "close",
+    "server/tls12-invalid-client-hello/cipher-suites-length-odd[i=5]": "close",
+    "server/tls12-invalid-client-hello/compression-methods-length-fuzz[i=128]": "close",
+    "server/tls12-invalid-client-hello/compression-methods-length-fuzz[i=254]": "close",
+    "server/tls12-invalid-client-hello/compression-methods-length-fuzz[i=255]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=127]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=128]": "alert fatal/illegal_parameter",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=1]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=254]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=255]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=2]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=32]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=33]": "close",
+    "server/tls12-invalid-client-hello/session-id-length-fuzz[i=3]": "close"
+  }
+}

@@ -1,0 +1,15 @@
+plzn tls "server/tls12-unknown-sigalg-numbers" {
+  rfc 5246 section 7.4.1.4.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = raw "00021545"
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}

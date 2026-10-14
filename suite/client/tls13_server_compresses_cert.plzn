@@ -1,0 +1,10 @@
+plzn tls "client/tls13-server-compresses-cert" {
+  rfc 8879 section 4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {}
+  expect ok
+}

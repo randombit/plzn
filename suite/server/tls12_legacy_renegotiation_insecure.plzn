@@ -1,0 +1,21 @@
+plzn tls "server/tls12-legacy-renegotiation/insecure" {
+  rfc 5746 section 3.5
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  skip rustls "never renegotiates"
+  flow handshake {
+    send ClientHello { -ext renegotiation_info }
+    send AppData
+    recv AppData
+    renegotiate insecure
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert warning/no_renegotiation if libressl
+  # OpenSSL declines insecure legacy renegotiation (RFC 5746 4.4) unless
+  # SSL_OP_ALLOW_UNSAFE_LEGACY_RENEGOTIATION is set, which the shim does not expose.
+  expect alert warning/no_renegotiation if openssl
+}

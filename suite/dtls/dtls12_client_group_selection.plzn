@@ -1,0 +1,15 @@
+plzn tls "dtls12/client-group-x25519-first" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    recv ClientHello { has_ext: supported_groups }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

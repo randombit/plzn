@@ -1,0 +1,11 @@
+plzn tls "client/tls13-server-empty-app-data-record" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after recv Finished {
+    send empty_record application_data
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

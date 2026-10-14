@@ -1,0 +1,24 @@
+plzn tls "dtls12/epoch0-restart-ch1-retransmit" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_epoch0_restart: true
+  }
+  flow handshake after recv Finished {
+    restart
+    send ClientHello
+    recv HelloVerifyRequest
+    resend_flight
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

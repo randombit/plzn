@@ -1,0 +1,230 @@
+# Floods of consecutive warning alerts at a TLS 1.2 client: the mirror of
+# suite/server/tls12_warning_alert_flood.plzn, whose header lists each
+# library's cap and source constant. Every library reacts the same way in
+# this role. Positions: warning alerts before the ServerHello, as
+# application data after the handshake, and interleaved with application
+# data.
+
+plzn tls "client/tls12-warning-alert-flood/handshake-before-server-hello-one-to-four" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-warning-alert-flood/handshake-before-server-hello-five-to-sixteen" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [5, 6, 16]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-warning-alert-flood/handshake-before-server-hello-seventeen-to-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [17, 32]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/internal_error if gnutls
+}
+
+plzn tls "client/tls12-warning-alert-flood/handshake-before-server-hello-over-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-warning-alert-flood/application-data-one-to-four" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-warning-alert-flood/application-data-five-to-sixteen" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [5, 6, 16]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-warning-alert-flood/application-data-seventeen-to-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [17, 32]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "client/tls12-warning-alert-flood/application-data-over-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-warning-alert-flood/interleaved-with-application-data-one-burst" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [1]
+  }
+  flow handshake {
+    repeat $count {
+      repeat 4 { send alert warning/user_canceled }
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-warning-alert-flood/interleaved-with-application-data-two-or-more-bursts" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    count in [2, 3, 5]
+  }
+  flow handshake {
+    repeat $count {
+      repeat 4 { send alert warning/user_canceled }
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+  expect close if rustls
+  expect close if wolfssl
+}

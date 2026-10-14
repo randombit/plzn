@@ -1,0 +1,25 @@
+plzn tls "client/tls13-resume-declined" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut client { versions: [tls13] }
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session second {
+    flow handshake {
+      recv ClientHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip libressl "its client does not resume TLS 1.3 sessions"
+}

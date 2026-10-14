@@ -1,0 +1,51 @@
+plzn tls "server/tls12-aes-gcm-nonces/aes-128-gcm-unique" {
+  rfc 5288 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  flow handshake {
+    repeat 8 {
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+  assert gcm_nonces_unique
+}
+
+plzn tls "server/tls12-aes-gcm-nonces/aes-256-gcm-unique" {
+  rfc 5288 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  flow handshake {
+    repeat 8 {
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+  assert gcm_nonces_unique
+}
+
+plzn tls "server/tls12-aes-gcm-nonces/aes-128-gcm-sequence-number-nonce" {
+  rfc 5288 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  skip rustls "rustls draws a random explicit nonce per TLS 1.2 GCM record (RFC 5288 3 only requires distinctness)"
+  flow handshake {
+    repeat 8 {
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+  assert gcm_nonces_monotonic
+}

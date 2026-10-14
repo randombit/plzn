@@ -1,0 +1,14 @@
+plzn tls "server/tls12-only-client-vs-tls12-13-server" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12, tls13]
+  }
+  flow handshake {
+    recv ServerHello { legacy_version: 0x0303, lacks_ext: supported_versions }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

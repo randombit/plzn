@@ -1,0 +1,23 @@
+plzn tls "dtls12/client-server-finished-wrong-verify-data" {
+  rfc 5246 section 7.4.9
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send Finished { verify_data: 0x00 * 12 }
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "dtls12/client-server-finished-corrupt" {
+  rfc 5246 section 7.4.9
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send Finished @ xor[handshake.verify_data, 0] = 0xff
+  }
+  expect alert fatal/decrypt_error
+}

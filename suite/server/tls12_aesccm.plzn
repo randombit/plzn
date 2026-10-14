@@ -1,0 +1,166 @@
+plzn tls "server/tls12-aesccm/suite-in-tls-1-1" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send ClientHello { legacy_version: 0x0302 }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure,protocol_version,insufficient_security}
+}
+
+plzn tls "server/tls12-aesccm/empty-app-data" {
+  rfc 5246 section 6.2.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send empty_record application_data
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-aesccm/empty-app-data-with-app-data" {
+  rfc 5246 section 6.2.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send empty_record application_data
+    send AppData
+    recv AppData
+    send empty_record application_data
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-aesccm/maximum-size-app-data" {
+  rfc 5246 section 6.2.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send AppData { size: 16384 }
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-aesccm/too-big-app-data" {
+  rfc 5246 section 6.2.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  xfail rustls "does not enforce the 2^14-byte plaintext record limit"
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send AppData { size: 16385 }
+    recv AppData
+  }
+  expect alert fatal/{record_overflow,decompression_failure}
+}
+
+plzn tls "server/tls12-aesccm/corrupted-tag-app-data" {
+  rfc 5246 section 6.2.3.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f]
+    pos in [-16, -9, -8, -1]
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.aead_tag, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-aesccm/corrupted-tag-app-data-8-byte-tag" {
+  rfc 6655 section 3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+    pos in [-8, -1]
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.aead_tag, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-aesccm/0-byte-ciphertext-record" {
+  rfc 5246 section 6.2.3.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send raw "1703030000"
+    recv AppData
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+}
+
+plzn tls "server/tls12-aesccm/1-byte-ciphertext-record" {
+  rfc 5246 section 6.2.3.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send raw "1703030001aa"
+    recv AppData
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+}
+
+plzn tls "server/tls12-aesccm/8-byte-ciphertext-record" {
+  rfc 5246 section 6.2.3.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send raw "1703030008aaaaaaaaaaaaaaaa"
+    recv AppData
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+}
+
+plzn tls "server/tls12-aesccm/15-byte-ciphertext-record" {
+  rfc 5246 section 6.2.3.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc09c, 0xc09d, 0xc09e, 0xc09f, 0xc0a0, 0xc0a1, 0xc0a2, 0xc0a3]
+  }
+  flow handshake {
+    send raw "170303000faaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    recv AppData
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+}

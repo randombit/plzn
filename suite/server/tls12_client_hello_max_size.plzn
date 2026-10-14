@@ -1,0 +1,44 @@
+plzn tls "server/tls12-client-hello-max-size" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      legacy_session_id: zeros 32
+      compression_methods: [0x00..0xfe]
+      cipher_suites: [0x005d..0x005f, 0x006e..0x0083, 0x00c6..0x00fe, 0x00ff..0x55ff, 0x5601..0x80aa, ECDHE_RSA_WITH_AES_128_GCM_SHA256, EMPTY_RENEGOTIATION_INFO_SCSV]
+      +ext alpn = [["A" * 255] * 252, "B" * 239, "http/1.1"]
+    } @ fragment 16384
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if botan
+  expect close if rustls
+}
+
+plzn tls "server/tls12-client-hello-max-size/no-alpn" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      legacy_session_id: zeros 32
+      compression_methods: [0x00..0xfe]
+      cipher_suites: [0x005d..0x005f, 0x006e..0x0083, 0x00c6..0x00fe, 0x00ff..0x55ff, 0x5601..0x80aa, ECDHE_RSA_WITH_AES_128_GCM_SHA256, EMPTY_RENEGOTIATION_INFO_SCSV]
+    } @ fragment 16384
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if botan
+  expect close if rustls
+}

@@ -1,0 +1,12 @@
+plzn tls "client/tls12-client-auth" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv Certificate { }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

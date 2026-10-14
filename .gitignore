@@ -1,0 +1,10 @@
+callgrind.out.*
+*.log
+*.pdf
+.#*
+.claude/
+/3rd_party/
+/shims/build/
+/target
+/notes
+CLAUDE.md

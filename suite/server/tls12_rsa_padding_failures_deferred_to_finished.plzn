@@ -1,0 +1,297 @@
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/valid-pkcs1-padding" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { padding_byte: 0x55 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-3" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.block_type, 0] = 0x03
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-1" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.block_type, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-in-padding" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.padding, 2] = 0x00
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding-end" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.padding, -1] = 0x00
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding-start" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.padding, 0] = 0x00
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-leading-zero" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.em, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-padding-separator" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.separator, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-separator-before-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x01 * 48 } @ set[pkcs1.separator, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/two-byte-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: [0x01, 0x01] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/three-byte-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: [0x01, 0x01, 0x00] } @ set[pkcs1.separator, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/wrong-premaster-version" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[1] = 0x04
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/49-byte-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 49 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/47-byte-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 47 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-1-with-ff-padding" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange { padding_byte: 0xff } @ set[pkcs1.block_type, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/non-random-nonzero-padding" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    suite in [0x002f, 0x0035, 0x003c]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.padding, 0] = 0x01
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-3-no-early-response" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange @ set[pkcs1.block_type, 0] = 0x03
+    wait 200 ms
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}

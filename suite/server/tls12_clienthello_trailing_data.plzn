@@ -1,0 +1,9 @@
+plzn tls "server/tls12-clienthello-trailing-data" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello @ pad +4
+  }
+  expect alert fatal/decode_error
+}

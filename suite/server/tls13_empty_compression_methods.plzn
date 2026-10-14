@@ -1,0 +1,12 @@
+plzn tls "server/tls13-empty-compression-methods" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      compression_methods: []
+    }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if libressl
+}

@@ -1,0 +1,15 @@
+plzn tls "server/tls12-serverhello-random/tls12" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  repeat 8
+  flow handshake {
+    recv ServerHello { random: capture $r }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $r
+}

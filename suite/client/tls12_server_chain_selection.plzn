@@ -1,0 +1,28 @@
+plzn tls "client/tls12-ecdhe-server-picks-ecdsa-chain" {
+  rfc 5246 section 7.4.2
+  chain: [rsa_2048, ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    verify_prefs: [ecdsa_secp256r1_sha256]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-ecdhe-single-ecdsa-chain" {
+  rfc 8422 section 5.1.3
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  chain: [ecdsa_p256]
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

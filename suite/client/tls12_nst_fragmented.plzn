@@ -1,0 +1,27 @@
+plzn tls "client/tls12-nst-fragmented" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_ticket] }
+  matrix {
+    size in [1, 16, 64]
+  }
+  flow {
+    recv ClientHello { has_ext: session_ticket }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send NewSessionTicket @ fragment $size
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

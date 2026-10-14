@@ -1,0 +1,70 @@
+plzn tls "server/legacy-cbc-accepts-maximum-padding" {
+  rfc 2246 section 6.2.3.2
+  rfc 4346 section 6.2.3.2
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11, tls12] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send AppData { size: 12 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cbc-accepts-maximum-padding-sha256" {
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA256]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send AppData { size: 16 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cbc-accepts-maximum-padding-sha384" {
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_256_CBC_SHA384]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send AppData { size: 16 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-cbc-rejects-corrupt-first-byte-of-maximum-padding" {
+  rfc 2246 section 6.2.3.2
+  rfc 4346 section 6.2.3.2
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11, tls12] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send AppData { size: 12 } @ cbc_pad 256, xor[record.padding, 0] = 1
+    recv AppData
+  }
+  xfail wolfssl "MaskPadding checks only 255 bytes of a 256-byte padding block, never its first byte (MAC-then-encrypt only)"
+  expect alert fatal/bad_record_mac
+}

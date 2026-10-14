@@ -1,0 +1,14 @@
+plzn tls "server/aead-ciphertext-xor" {
+  rfc 5246 section 6.2.3.3
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    pos in 8..23
+    bit in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 19 } @ xor[record.encrypted_record, $pos] = $bit
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

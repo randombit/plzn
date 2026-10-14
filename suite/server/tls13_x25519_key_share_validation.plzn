@@ -1,0 +1,128 @@
+plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-uncompressed" {
+  rfc 7748 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { +ext ec_point_formats = [uncompressed] }
+    recv ServerHello { key_share_group: x25519 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-prime" {
+  rfc 7748 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { +ext ec_point_formats = [ansix962_compressed_prime] }
+    recv ServerHello { key_share_group: x25519 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if botan
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-char2" {
+  rfc 7748 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { +ext ec_point_formats = [ansix962_compressed_char2] }
+    recv ServerHello { key_share_group: x25519 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if botan
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/all-zero-key-share" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { key_share_point: zero }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/low-order-key-share-one" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { key_share_point: one }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/31-byte-key-share" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { key_share_point: 0x37 * 31 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/empty-key-share" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { key_share_point: empty }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+}
+
+plzn tls "server/tls13-x25519-key-share-validation/33-byte-key-share" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello { key_share_point: 0x37 * 33 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

@@ -1,0 +1,99 @@
+plzn tls "server/tls12-invalid-client-hello/handshake-type-fuzz" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x02, 0x03, 0x04, 0x08, 0x10, 0x7f, 0x80, 0xfe, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ xor[handshake.msg_type] = $i
+    recv ServerHello
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/{unexpected_message,decode_error} if rustls
+}
+
+plzn tls "server/tls12-invalid-client-hello/session-id-length-fuzz" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x02, 0x03, 0x10, 0x20, 0x21, 0x7f, 0x80, 0xfe, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.session_id_length] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-invalid-client-hello/cipher-suites-length-high-byte" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x02, 0x10, 0x80, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.cipher_suites_length, 0] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}
+
+plzn tls "server/tls12-invalid-client-hello/cipher-suites-length-odd" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x03, 0x05, 0x7f, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.cipher_suites_length, 1] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-invalid-client-hello/compression-methods-length-fuzz" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x02, 0x03, 0x08, 0x10, 0x80, 0xfe, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.compression_methods_length] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-invalid-client-hello/extensions-length-high-byte" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x02, 0x10, 0x80, 0xff] }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.extensions_length, 0] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-invalid-client-hello/extensions-length-low-byte-fuzz" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80] }
+  flow handshake until send ClientHello {
+    send ClientHello @ xor[handshake.extensions_length, 1] = $i
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}

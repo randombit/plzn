@@ -1,0 +1,14 @@
+plzn tls "server/tls12-3des-bad-mac" {
+  rfc 5246 section 6.2.3
+  chain: [rsa_2048]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [ECDHE_RSA_WITH_3DES_EDE_CBC_SHA]
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    send AppData { size: 18 } @ xor[record.mac, 0] = 0x01
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

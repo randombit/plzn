@@ -1,0 +1,40 @@
+# RFC 7366 3.1: "implementations MUST NOT renegotiate a downgrade from
+# encrypt-then-MAC to MAC-then-encrypt."
+plzn tls "server/tls12-renegotiation-keeps-etm/drop-etm" {
+  rfc 7366 section 3.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    send AppData
+    recv AppData
+    renegotiate { -ext encrypt_then_mac }
+    send AppData
+    recv AppData
+  }
+  xfail openssl "renegotiates from encrypt-then-MAC to MAC-then-encrypt"
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-renegotiation-keeps-etm/keep-etm" {
+  rfc 7366 section 3.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    send AppData
+    recv AppData
+    renegotiate { +ext encrypt_then_mac }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

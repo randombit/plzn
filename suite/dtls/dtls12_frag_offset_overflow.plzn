@@ -1,0 +1,12 @@
+plzn tls "dtls12/frag-offset-overflow" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ offset_overflow }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if openssl
+  expect alert fatal/illegal_parameter if libressl
+}

@@ -1,0 +1,52 @@
+plzn tls "server/tls12-large-number-of-extensions/n-empty-extensions" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [1, 5, 30, 31, 32, 62, 63, 64, 1022, 1023, 1024, 4094, 4095, 4096, 8190, 8191, 8192] }
+  flow handshake {
+    send ClientHello {
+      +ext each 64..$n + 63
+    } @ fragment 16384
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-number-of-extensions/16000-empty-extensions" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext each [64..13171, 13173..16064]
+    } @ fragment 16384
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-number-of-extensions/n-empty-extensions-with-ems" {
+  rfc 7627 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [1, 5, 30, 31, 32, 62, 63, 64, 1022, 1023, 1024, 4094, 4095, 4096] }
+  flow handshake {
+    send ClientHello {
+      +ext each 64..$n + 63
+      +ext extended_master_secret
+    } @ fragment 16384
+    recv ServerHello { has_ext: extended_master_secret }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement extended_master_secret"
+}

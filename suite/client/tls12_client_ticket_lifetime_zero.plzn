@@ -1,0 +1,24 @@
+plzn tls "client/tls12-ticket-lifetime-zero-is-unspecified" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  skip wolfssl "TLS 1.2 ticket resumption is not functional in the current wolfSSL shim"
+
+  session initial {
+    flow handshake {
+      send NewSessionTicket { ticket_lifetime: 0 }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake after recv Finished {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

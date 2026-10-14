@@ -1,0 +1,12 @@
+plzn tls "server/tls13-ccs-before-finished" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send raw "140303000101"
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,14 @@
+plzn tls "server/tls12-empty-cipher-suites" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: []
+    }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if libressl
+}

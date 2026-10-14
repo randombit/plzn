@@ -1,0 +1,71 @@
+plzn tls "server/tls13-multi-chain-picks-p384" {
+  rfc 8446 section 4.4.2.2
+  uut server { versions: [tls13] }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multi-chain-picks-p256" {
+  rfc 8446 section 4.4.2.2
+  uut server { versions: [tls13] }
+  chain: [rsa_2048, ecdsa_p384, ecdsa_p256]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multi-chain-picks-rsa" {
+  rfc 8446 section 4.4.2.2
+  uut server { versions: [tls13] }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multi-chain-none-fits" {
+  rfc 8446 section 4.4.2.2
+  uut server { versions: [tls13] }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ed25519] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+  }
+  expect alert fatal/handshake_failure
+}

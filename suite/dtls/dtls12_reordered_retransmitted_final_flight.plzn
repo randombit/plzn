@@ -1,0 +1,17 @@
+plzn tls "dtls12/reordered-retransmitted-final-flight" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  skip openssl "answers a partial retransmitted flight at once (RFC 6347 4.2.4 read-retransmit); Botan waits for the complete flight"
+  skip boringssl "answers a partial retransmitted flight at once, as permitted by RFC 6347 4.2.4's read-retransmit rule"
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after send Finished {
+    discard_flight
+    retransmit_flight split [0, 2, 1]
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+  skip libressl "answers a partial retransmitted flight at once (RFC 6347 4.2.4 read-retransmit); Botan waits for the complete flight"
+}

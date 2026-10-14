@@ -1,0 +1,25 @@
+plzn tls "client/tls12-client-ecdhe-group-sweep" {
+  rfc 8422 section 5.4
+  rfc 7027 section 2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  peer { capabilities: [ecdhe] }
+  matrix {
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+              ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+              ECDHE_ECDSA_WITH_AES_128_CBC_SHA, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,
+              ECDHE_ECDSA_WITH_AES_256_CBC_SHA, ECDHE_ECDSA_WITH_AES_256_CBC_SHA384,
+              ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM,
+              ECDHE_ECDSA_WITH_AES_128_CCM_8, ECDHE_ECDSA_WITH_AES_256_CCM_8]
+    group in [x25519, x448, secp256r1, secp384r1, secp521r1, brainpoolP256r1, brainpoolP384r1]
+  }
+  flow handshake {
+    recv ClientHello { cipher_suites: [$suite], supported_groups: [$group] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

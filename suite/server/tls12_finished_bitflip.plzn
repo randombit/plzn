@@ -1,0 +1,15 @@
+plzn tls "server/tls12-finished-bitflip" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    pos in -12..-1
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send Finished @ xor[$pos] = $val
+  }
+  expect alert fatal/decrypt_error
+}

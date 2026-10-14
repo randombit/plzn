@@ -1,0 +1,30 @@
+plzn tls "client/tls13-hrr-empty-cookie" {
+  rfc 8446 section 4.2.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  xfail openssl "ignores an empty HRR cookie instead of rejecting its invalid zero length"
+  xfail gnutls "accepts an empty HRR cookie"
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    send HelloRetryRequest { +ext cookie = raw "0000" }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+  xfail libressl "ignores an empty HRR cookie instead of rejecting its invalid zero length"
+}
+
+plzn tls "client/tls13-hrr-missing-supported-versions" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    send HelloRetryRequest { -ext supported_versions }
+  }
+  expect alert fatal/{missing_extension,illegal_parameter,decode_error,protocol_version}
+}

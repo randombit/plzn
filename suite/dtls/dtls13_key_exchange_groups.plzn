@@ -1,0 +1,23 @@
+plzn tls "dtls13/server-key-exchange-group-sweep" {
+  rfc 9147 section 5.6
+  chain: [default]
+  uut server { versions: [dtls13] }
+  matrix { group in [x25519, secp256r1, secp384r1, X25519MLKEM768] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-key-exchange-group-sweep" {
+  rfc 9147 section 5.6
+  chain: [default]
+  uut client { versions: [dtls13] }
+  matrix { group in [x25519, secp256r1, secp384r1, X25519MLKEM768] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

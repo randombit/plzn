@@ -1,0 +1,11 @@
+plzn tls "client/tls13-ch-null-compression" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello {
+      compression_methods: [0x00]
+    }
+  }
+  expect ok
+}

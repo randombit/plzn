@@ -1,0 +1,14 @@
+plzn tls "server/ccs-byte-sweep" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    byte in [0x00, 0x02, 0xff]
+  }
+  flow handshake {
+    send ChangeCipherSpec { type: $byte }
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}

@@ -1,0 +1,53 @@
+plzn tls "dtls12/client-interleave-cert-ske" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate @ fragment 64
+    send ServerKeyExchange @ fragment 16
+    interleave_flight
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-interleave-cert-ske-split" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate @ fragment 64
+    send ServerKeyExchange @ fragment 16
+    interleave_flight split
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

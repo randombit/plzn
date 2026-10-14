@@ -1,0 +1,83 @@
+plzn tls "dtls13/server-rejects-nonempty-legacy-cookie" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello { cookie: [0x63, 0x6f, 0x6f, 0x6b, 0x69, 0x65] }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls13/client-rejects-serverhello-legacy-session-id" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send ServerHello { legacy_session_id_echo: [0xaa, 0xbb, 0xcc, 0xdd] }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls13/client-rejects-hello-verify-request" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake after recv ClientHello {
+    send HelloVerifyRequest {
+      legacy_version: 0xfeff
+      cookie: [0x00 * 32]
+    }
+    recv ClientHello
+    send ServerHello
+    recv Alert
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/protocol_version if boringssl
+}
+
+plzn tls "dtls13/client-rejects-empty-cookie-hello-verify-request" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake after recv ClientHello {
+    send HelloVerifyRequest {
+      legacy_version: 0xfeff
+      cookie: []
+    }
+    recv ClientHello
+    send ServerHello
+    recv Alert
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/protocol_version if boringssl
+}
+
+plzn tls "dtls13/client-rejects-dtls13-after-dtls12-cookie-retry" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13, dtls12] }
+  flow handshake after recv ClientHello {
+    send HelloVerifyRequest {
+      legacy_version: 0xfefd
+      cookie: [0x63, 0x6f, 0x6f, 0x6b, 0x69, 0x65]
+    }
+    recv ClientHello
+    send ServerHello
+    recv Alert
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/client-rejects-hello-verify-request-trailing-byte" {
+  rfc 6347 section 4.2.1
+  chain: [default]
+  uut client { versions: [dtls13, dtls12] }
+  flow handshake after recv ClientHello {
+    send HelloVerifyRequest {
+      legacy_version: 0xfefd
+      cookie: [0x63, 0x6f, 0x6f, 0x6b, 0x69, 0x65]
+    } @ pad +1
+    recv Alert
+  }
+  expect alert fatal/decode_error
+}

@@ -1,0 +1,69 @@
+plzn tls "server/tls13-keyupdate/empty-keyupdate-message" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send KeyUpdate { request_update: update_requested } @ pad -1
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-keyupdate/large-keyupdate-message" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send KeyUpdate { request_update: update_requested } @ pad +1
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if openssl
+}
+
+plzn tls "server/tls13-keyupdate/invalid-message-type" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix { t in [2, 3, 0x7f, 0xff] }
+  flow handshake {
+    send KeyUpdate { request_update: update_requested } @ set[0] = $t
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+}
+
+plzn tls "server/tls13-keyupdate/two-keyupdates-in-one-record-with-future-keys" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    coalesce hold_keys {
+      send KeyUpdate { request_update: update_not_requested }
+      send KeyUpdate { request_update: update_requested }
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}
+
+plzn tls "server/tls13-keyupdate/fragmented-keyupdate-appdata-between" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix { n in [1, 2, 3, 4] }
+  flow handshake {
+    send KeyUpdate { request_update: update_requested } @ fragment $n hold_old_keys
+    send AppData
+    flush_fragment
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect close if rustls
+}

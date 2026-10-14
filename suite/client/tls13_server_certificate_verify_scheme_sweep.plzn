@@ -1,0 +1,112 @@
+plzn tls "client/tls13-server-certificate-verify-scheme/rsa-pss-rsae" {
+  rfc 8446 section 4.4.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+  }
+  matrix {
+    scheme in [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+  }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [$scheme] }
+    send CertificateVerify { algorithm: $scheme }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/rsa-pss-pss" {
+  rfc 8446 section 4.4.3
+  chain: [rsa_pss]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+  }
+  matrix {
+    scheme in [rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+  }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [$scheme] }
+    send CertificateVerify { algorithm: $scheme }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/ecdsa-p256" {
+  rfc 8446 section 4.4.3
+  chain: [ecdsa_p256]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [ecdsa_secp256r1_sha256] }
+    send CertificateVerify { algorithm: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/ecdsa-p384" {
+  rfc 8446 section 4.4.3
+  chain: [ecdsa_p384]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [ecdsa_secp384r1_sha384] }
+    send CertificateVerify { algorithm: ecdsa_secp384r1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/ecdsa-p521" {
+  rfc 8446 section 4.4.3
+  chain: [ecdsa_p521]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [ecdsa_secp521r1_sha512]
+  }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [ecdsa_secp521r1_sha512] }
+    send CertificateVerify { algorithm: ecdsa_secp521r1_sha512 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/ed25519" {
+  rfc 8446 section 4.4.3
+  chain: [ed25519]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [ed25519]
+  }
+  skip botan "no Ed25519 TLS signature scheme"
+  flow handshake {
+    recv ClientHello { signature_algorithms: [ed25519] }
+    send CertificateVerify { algorithm: ed25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-verify-scheme/unoffered" {
+  rfc 8446 section 4.4.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [rsa_pss_rsae_sha256]
+  }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [rsa_pss_rsae_sha256] }
+    send CertificateVerify { algorithm: rsa_pss_rsae_sha384 }
+    wait 300ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if openssl
+}

@@ -1,0 +1,72 @@
+plzn tls "server/tls13-psk-empty-identity" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f"
+  }
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { psk_identity: "" }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "server/tls13-unknown-psk-identity-falls-back-to-certificate" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f"
+  }
+  uut server { versions: [tls13] }
+  xfail gnutls "commits to the first external PSK identity and aborts when it is unknown instead of declining it"
+  flow {
+    send ClientHello { psk_identity: "unknown-identity" }
+    recv ServerHello { lacks_ext: pre_shared_key }
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-psk-modes-ignore-unknown-values" {
+  rfc 8446 section 4.2.9
+  chain: []
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f"
+  }
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = raw "02ff01" }
+    recv ServerHello { has_ext: pre_shared_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# RFC 8446 4.2.9: psk_dhe_ke requires a key_share; without supported_groups
+# and key_share only psk_ke would remain, which servers need not support.
+plzn tls "server/tls13-psk-dhe-ke-without-key-share" {
+  rfc 8446 section 4.2.9
+  chain: [default]
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f"
+  }
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      -ext key_share
+      -ext supported_groups
+    }
+  }
+  expect alert fatal/{missing_extension, handshake_failure}
+}

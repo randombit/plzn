@@ -1,0 +1,13 @@
+plzn tls "client/tls13-x448-group" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [x448] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

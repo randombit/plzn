@@ -1,0 +1,45 @@
+plzn tls "dtls12/hello-verify-request-cookie-255" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest { cookie: [0x41 * 255] }
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/hello-verify-request-cookie-0" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest { cookie: [] }
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

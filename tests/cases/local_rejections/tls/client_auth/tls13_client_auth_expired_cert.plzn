@@ -1,0 +1,11 @@
+plzn tls "selftest/local-rejection/tls13-client-auth-expired-cert" {
+  rfc 8446 section 4.4.2.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    client_cert: expired
+  }
+  peer { request_client_cert: true }
+  flow handshake {}
+  expect reject fatal/certificate_expired
+}

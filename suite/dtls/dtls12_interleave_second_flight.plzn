@@ -1,0 +1,58 @@
+plzn tls "dtls12/interleave-certificate-cke" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12], require_client_cert: true
+  }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate @ fragment 64
+    send ClientKeyExchange @ fragment 16
+    interleave_flight
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/interleave-certificate-cke-split" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12], require_client_cert: true
+  }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate @ fragment 64
+    send ClientKeyExchange @ fragment 16
+    # `split` puts each interleaved fragment in a separate datagram.
+    interleave_flight split
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

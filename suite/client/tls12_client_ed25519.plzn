@@ -1,0 +1,20 @@
+plzn tls "client/tls12-client-ed25519" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [ed25519]
+  uut client {
+    versions: [tls12]
+    verify_prefs: [ed25519]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  matrix {
+    group in [x25519, secp256r1, secp384r1]
+  }
+  flow handshake {
+    recv ClientHello { supported_groups: [$group], signature_algorithms: [ed25519] }
+    send ServerKeyExchange { signature_scheme: ed25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

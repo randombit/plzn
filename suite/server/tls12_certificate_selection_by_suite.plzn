@@ -1,0 +1,265 @@
+plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-first" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ECDHE_ECDSA_WITH_AES_256_CBC_SHA, ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, ECDHE_ECDSA_WITH_NULL_SHA, ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256, ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384, ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256, ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384, ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM, ECDHE_ECDSA_WITH_AES_128_CCM_8, ECDHE_ECDSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-second" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048, ecdsa_p256]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ECDHE_ECDSA_WITH_AES_256_CBC_SHA, ECDHE_ECDSA_WITH_AES_256_CBC_SHA384, ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA, ECDHE_ECDSA_WITH_NULL_SHA, ECDHE_ECDSA_WITH_ARIA_128_GCM_SHA256, ECDHE_ECDSA_WITH_ARIA_256_GCM_SHA384, ECDHE_ECDSA_WITH_CAMELLIA_128_GCM_SHA256, ECDHE_ECDSA_WITH_CAMELLIA_256_GCM_SHA384, ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM, ECDHE_ECDSA_WITH_AES_128_CCM_8, ECDHE_ECDSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-first" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048, ecdsa_p256]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_256_GCM_SHA384, ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_256_CBC_SHA384, ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, ECDHE_RSA_WITH_NULL_SHA, ECDHE_RSA_WITH_ARIA_128_GCM_SHA256, ECDHE_RSA_WITH_ARIA_256_GCM_SHA384, ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256, ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-second" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_256_GCM_SHA384, ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_256_CBC_SHA384, ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, ECDHE_RSA_WITH_NULL_SHA, ECDHE_RSA_WITH_ARIA_128_GCM_SHA256, ECDHE_RSA_WITH_ARIA_256_GCM_SHA384, ECDHE_RSA_WITH_CAMELLIA_128_GCM_SHA256, ECDHE_RSA_WITH_CAMELLIA_256_GCM_SHA384]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-first" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048, ecdsa_p256]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [DHE_RSA_WITH_AES_128_GCM_SHA256, DHE_RSA_WITH_AES_256_GCM_SHA384, DHE_RSA_WITH_CHACHA20_POLY1305_SHA256, DHE_RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA256, DHE_RSA_WITH_AES_256_CBC_SHA, DHE_RSA_WITH_AES_256_CBC_SHA256, DHE_RSA_WITH_3DES_EDE_CBC_SHA, DHE_RSA_WITH_ARIA_128_GCM_SHA256, DHE_RSA_WITH_ARIA_256_GCM_SHA384, DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256, DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384, DHE_RSA_WITH_AES_128_CCM, DHE_RSA_WITH_AES_256_CCM, DHE_RSA_WITH_AES_128_CCM_8, DHE_RSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-second" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [DHE_RSA_WITH_AES_128_GCM_SHA256, DHE_RSA_WITH_AES_256_GCM_SHA384, DHE_RSA_WITH_CHACHA20_POLY1305_SHA256, DHE_RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA256, DHE_RSA_WITH_AES_256_CBC_SHA, DHE_RSA_WITH_AES_256_CBC_SHA256, DHE_RSA_WITH_3DES_EDE_CBC_SHA, DHE_RSA_WITH_ARIA_128_GCM_SHA256, DHE_RSA_WITH_ARIA_256_GCM_SHA384, DHE_RSA_WITH_CAMELLIA_128_GCM_SHA256, DHE_RSA_WITH_CAMELLIA_256_GCM_SHA384, DHE_RSA_WITH_AES_128_CCM, DHE_RSA_WITH_AES_256_CCM, DHE_RSA_WITH_AES_128_CCM_8, DHE_RSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-first" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048, ecdsa_p256]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [RSA_WITH_AES_128_GCM_SHA256, RSA_WITH_AES_256_GCM_SHA384, RSA_WITH_AES_128_CBC_SHA, RSA_WITH_AES_128_CBC_SHA256, RSA_WITH_AES_256_CBC_SHA, RSA_WITH_AES_256_CBC_SHA256, RSA_WITH_3DES_EDE_CBC_SHA, RSA_WITH_ARIA_128_GCM_SHA256, RSA_WITH_ARIA_256_GCM_SHA384, RSA_WITH_CAMELLIA_128_GCM_SHA256, RSA_WITH_CAMELLIA_256_GCM_SHA384, RSA_WITH_AES_128_CCM, RSA_WITH_AES_256_CCM, RSA_WITH_AES_128_CCM_8, RSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-second" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server { versions: [tls12] }
+  matrix {
+    suite in [RSA_WITH_AES_128_GCM_SHA256, RSA_WITH_AES_256_GCM_SHA384, RSA_WITH_AES_128_CBC_SHA, RSA_WITH_AES_128_CBC_SHA256, RSA_WITH_AES_256_CBC_SHA, RSA_WITH_AES_256_CBC_SHA256, RSA_WITH_3DES_EDE_CBC_SHA, RSA_WITH_ARIA_128_GCM_SHA256, RSA_WITH_ARIA_256_GCM_SHA384, RSA_WITH_CAMELLIA_128_GCM_SHA256, RSA_WITH_CAMELLIA_256_GCM_SHA384, RSA_WITH_AES_128_CCM, RSA_WITH_AES_256_CCM, RSA_WITH_AES_128_CCM_8, RSA_WITH_AES_256_CCM_8]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$suite]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: $suite }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-ecdsa-suite-no-match" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure, unsupported_certificate, access_denied}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-certificate-selection-rsa-suite-no-match" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure, unsupported_certificate, access_denied}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-certificate-selection-static-rsa-ignores-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  xfail openssl "applies signature_algorithms to static-RSA certificate selection"
+  uut server {
+    versions: [tls12]
+    cipher_suites: [RSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_GCM_SHA256]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello { cipher_suite: RSA_WITH_AES_128_GCM_SHA256 }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-no-ecdhe-falls-back-to-rsa" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, RSA_WITH_AES_128_GCM_SHA256]
+    curves: [secp256r1]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: RSA_WITH_AES_128_GCM_SHA256 }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-selection-requires-mutually-enabled-suite" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256, rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256]
+    }
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

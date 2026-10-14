@@ -1,0 +1,16 @@
+plzn tls "client/tls13-client-auth-no-cert" {
+  rfc 8446 section 4.4.2.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [secp256r1]
+    client_cert: none
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv Certificate { entries: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

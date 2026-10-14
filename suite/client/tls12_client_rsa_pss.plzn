@@ -1,0 +1,16 @@
+plzn tls "client/tls12-client-rsa-pss" {
+  rfc 8446 section 4.2.3
+  chain: [rsa_pss]
+  uut client {
+    versions: [tls12]
+    verify_prefs: [rsa_pss_pss_sha256]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [rsa_pss_pss_sha256] }
+    send ServerKeyExchange { signature_scheme: rsa_pss_pss_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

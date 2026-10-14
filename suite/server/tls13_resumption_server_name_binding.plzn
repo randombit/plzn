@@ -1,0 +1,187 @@
+# TLS 1.3 deliberately drops the RFC 6066 3 session/server_name binding: "the
+# SNI value is always explicitly specified in the resumption handshake, and
+# there is no need for the server to associate an SNI value with the ticket"
+# (RFC 8446 4.2.11), while a server that "declines all PSK identities with
+# different SNI values" is equally conforming (4.6.1). The rows below resume by
+# ticket under the same name, a different name, no name, a name the original
+# session never had, and a case-only variant; the backends that still bind the
+# ticket to the name are skipped with their reason rather than marked as
+# failing. The HRR rows change the name between ClientHello1 and ClientHello2
+# instead, which RFC 8446 4.1.2 forbids.
+
+plzn tls "server/tls13-resumption-server-name-binding/same-name-resumes" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip wolfssl "this build has no HAVE_SESSION_TICKET, so its TLS 1.3 server issues no NewSessionTicket to resume from"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/different-name-resumes" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "other.invalid" }
+      recv ServerHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip botan "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip rustls "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip wolfssl "this build has no HAVE_SESSION_TICKET, so its TLS 1.3 server issues no NewSessionTicket to resume from"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/name-omitted-resumes" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      recv ServerHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip botan "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip rustls "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip wolfssl "this build has no HAVE_SESSION_TICKET, so its TLS 1.3 server issues no NewSessionTicket to resume from"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/name-added-resumes" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+
+  session initial {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip botan "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip rustls "declines PSK resumption unless the ClientHello names exactly the host the ticket was issued for; RFC 8446 4.2.11 leaves that binding to the server"
+  skip wolfssl "this build has no HAVE_SESSION_TICKET, so its TLS 1.3 server issues no NewSessionTicket to resume from"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/case-only-difference-resumes" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "LOCALHOST" }
+      recv ServerHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip wolfssl "this build has no HAVE_SESSION_TICKET, so its TLS 1.3 server issues no NewSessionTicket to resume from"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/hrr-second-clienthello-different-name" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  peer { capabilities: [hrr, secp256r1] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello { +ext server_name = "other.invalid" }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unrecognized_name if libressl
+  expect close if rustls
+  xfail openssl "does not compare server_name across ClientHello1 and ClientHello2; the second hello's name simply replaces the first"
+  xfail gnutls "does not compare server_name across ClientHello1 and ClientHello2"
+  xfail wolfssl "does not compare server_name across ClientHello1 and ClientHello2"
+}
+
+plzn tls "server/tls13-resumption-server-name-binding/hrr-second-clienthello-name-omitted" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  peer { capabilities: [hrr, secp256r1] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello { -ext server_name }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect close if rustls
+  xfail openssl "does not compare server_name across ClientHello1 and ClientHello2; the second hello's missing name simply clears the first"
+  xfail gnutls "does not compare server_name across ClientHello1 and ClientHello2"
+  xfail wolfssl "does not compare server_name across ClientHello1 and ClientHello2"
+}

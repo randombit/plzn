@@ -1,0 +1,12 @@
+plzn tls "server/tls13-chain-ecdsa-p256" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13] }
+  chain: [ecdsa_p256]
+  flow handshake {
+    recv CertificateVerify { algorithm: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

@@ -1,0 +1,18 @@
+plzn tls "server/tls12-ecdhe-rsa-key-share-random/tls12" {
+  rfc 8422 section 5.4
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  matrix { group in groups(tls12) }
+  repeat 8
+  flow handshake {
+    recv ServerHello { random: capture $r }
+    recv ServerKeyExchange { named_group: $group, key_share: capture $ks }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $r, $ks
+}

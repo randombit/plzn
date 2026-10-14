@@ -1,0 +1,12 @@
+plzn tls "client/tls13-server-wrong-encrypted-extensions-type" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    mtype in [0x01, 0x02, 0x14, 0xff]
+  }
+  flow handshake {
+    send EncryptedExtensions @ set[handshake.msg_type, 0] = $mtype
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+}

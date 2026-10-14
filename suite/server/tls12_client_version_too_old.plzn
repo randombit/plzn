@@ -1,0 +1,11 @@
+plzn tls "server/tls12-client-version-too-old" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { -ext supported_versions }
+  }
+  expect alert fatal/protocol_version
+}

@@ -1,0 +1,10 @@
+plzn tls "server/finished-bad-verify-data-tls13" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send Finished { verify_data: 0x00 * 32 }
+    recv AppData
+  }
+  expect alert fatal/decrypt_error
+}

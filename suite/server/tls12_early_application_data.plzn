@@ -1,0 +1,38 @@
+plzn tls "server/tls12-early-application-data/before-client-key-exchange" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientKeyExchange {
+    send AppData
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls12-early-application-data/before-change-cipher-spec" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send AppData
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls12-early-application-data/before-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ChangeCipherSpec {
+    send AppData
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+}

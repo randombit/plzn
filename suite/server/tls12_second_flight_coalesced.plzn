@@ -1,0 +1,21 @@
+plzn tls "server/tls12-second-flight-coalesced" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake until send Certificate {
+    coalesce {
+      send Certificate
+      send ClientKeyExchange
+      send CertificateVerify
+    }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,18 @@
+plzn tls "client/tls13-server-appdata-aead-corrupt" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.aead_tag, 0] = 0xff
+  }
+  expect alert fatal/bad_record_mac
+  xfail libressl "closes without the bad_record_mac alert RFC 8446 5.2 requires"
+}

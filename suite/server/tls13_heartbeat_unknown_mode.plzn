@@ -1,0 +1,14 @@
+plzn tls "server/tls13-heartbeat-unknown-mode" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext heartbeat = raw "03"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

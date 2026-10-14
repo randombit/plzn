@@ -1,0 +1,14 @@
+plzn tls "client/tls13-serverhello-invalid-legacy-version" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    legacy_version in [0x0304, 0x0505]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: $legacy_version }
+  }
+  expect any { ok, alert fatal/protocol_version }
+  expect alert fatal/{decode_error,protocol_version} if boringssl
+  expect reset if go
+}

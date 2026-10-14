@@ -1,0 +1,97 @@
+# RFC 8446 4.1.2: after a HelloRetryRequest "the client MUST send the same
+# ClientHello without modification, except as follows". These rows change
+# the second ClientHello in ways the list does not permit, or in the ways it
+# does permit.
+
+plzn tls "server/tls13-hrr-client-hello2-changes/legacy-version" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello { legacy_version: 0x0301 }
+    wait 200 ms
+  }
+  xfail openssl "accepts a second ClientHello whose legacy_version changed"
+  xfail rustls "accepts a second ClientHello whose legacy_version changed"
+  expect alert fatal/illegal_parameter
+}
+
+# RFC 8446 4.2.2: the client copies the cookie "received in the
+# HelloRetryRequest"; one that the server never sent is not a copy.
+plzn tls "server/tls13-hrr-client-hello2-changes/unsolicited-cookie" {
+  rfc 8446 section 4.2.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1, lacks_ext: cookie }
+    send ClientHello { +ext cookie = raw "0004deadbeef" }
+    wait 200 ms
+  }
+  xfail openssl "accepts a cookie that the HelloRetryRequest did not send"
+  xfail rustls "accepts a cookie that the HelloRetryRequest did not send"
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/decode_error if libressl
+}
+
+# PSKs may only be removed from the second ClientHello, not replaced.
+plzn tls "server/tls13-hrr-client-hello2-changes/psk-identity-replaced" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+  }
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello { psk_identity: "other-identity" }
+    wait 200 ms
+  }
+  xfail openssl "accepts a second ClientHello offering a PSK identity the first did not"
+  expect alert fatal/illegal_parameter
+}
+
+# Removing every PSK removes the extension, which leaves a full handshake.
+plzn tls "server/tls13-hrr-client-hello2-changes/psk-removed" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+  }
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello { -ext pre_shared_key }
+    recv ServerHello { lacks_ext: pre_shared_key }
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

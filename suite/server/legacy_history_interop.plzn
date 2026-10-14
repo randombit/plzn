@@ -1,0 +1,122 @@
+# Historical review: OpenSSL 1.0.1a, Go pre-1.3, and NSS 2016 suite/version
+# filtering. A TLS 1.2-capable client may offer all of these suites; the older
+# negotiated version must select the compatible CBC/SHA-1 suite.
+plzn tls "server/legacy-cipher-selection-from-tls12-offer" {
+  rfc 5246 section 7.4.1.2
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      legacy_version: tls12
+      cipher_suites: [ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    }
+    recv ServerHello { legacy_version: $version, cipher_suite: ECDHE_RSA_WITH_AES_128_CBC_SHA }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Botan 2012-06-09 and Mbed TLS 2013-08-27: use the negotiated version's
+# ServerKeyExchange signature rules even when the client offers TLS 1.2 hashes.
+plzn tls "server/legacy-rsa-signature-after-tls12-offer" {
+  rfc 5246 section 7.4.1.4.1
+  rfc 4492 section 5.4
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      legacy_version: tls12
+      +ext signature_algorithms = [rsa_pkcs1_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello { legacy_version: $version }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-ecdsa-signature-after-tls12-offer" {
+  rfc 5246 section 7.4.1.4.1
+  rfc 4492 section 5.4
+  chain: [ecdsa_p256]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [ecdhe_ecdsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      legacy_version: tls12
+      +ext signature_algorithms = [rsa_pkcs1_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv ServerHello { legacy_version: $version }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Mbed TLS 2013-01-03: CertificateRequest uses the negotiated version,
+# rather than the server's configured TLS 1.2 maximum.
+plzn tls "server/legacy-client-auth-with-tls12-enabled" {
+  rfc 4346 section 7.4.4
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version, tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    require_client_cert: true
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv ServerHello { legacy_version: $version }
+    recv CertificateRequest { certificate_types: [rsa_sign] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Botan 2017-09-04 and early GnuTLS version selection: disabling TLS 1.2
+# must leave the highest enabled legacy version usable.
+plzn tls "server/legacy-selects-highest-enabled-version" {
+  rfc 4346 section 7.4.1.2
+  chain: [rsa_2048]
+  uut server { versions: [tls11, tls10] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv ServerHello { legacy_version: tls11 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Botan's empty-record interop and the Go/Mbed TLS record-read histories:
+# legal empty records between successive fragmented writes must not signal EOF
+# or lose CBC chaining state. This tests delivery, not a timing/BEAST oracle.
+plzn tls "server/legacy-repeated-fragmented-application-data" {
+  rfc 2246 section 6.2.1
+  rfc 4346 section 6.2.1
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    repeat 3 {
+      send AppData { size: 0 }
+      send AppData { size: 33 } @ fragment 1
+      recv AppData { size: 33 }
+    }
+    send AppData { size: 16384 }
+    recv AppData { size: 16384 }
+  }
+  expect ok
+}

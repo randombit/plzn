@@ -1,0 +1,50 @@
+plzn tls "server/tls12-invalid-server-name-extension-resumption/valid-sni" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send ClientHello { +ext server_name = "localhost" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-invalid-server-name-extension-resumption/bad-sni" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send ClientHello { +ext server_name = raw "000a0000096c6f63616c686f" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-invalid-server-name-extension-resumption/resume-with-malformed-sni" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = raw "000a0000096c6f63616c686f" }
+    }
+    expect alert fatal/decode_error
+  }
+}

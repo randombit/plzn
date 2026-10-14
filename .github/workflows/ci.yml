@@ -1,0 +1,266 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_BUILD_JOBS: "2"
+
+jobs:
+  # Minimum supported Rust version: only proves the Rust code still compiles.
+  # Everything else (lints, tests, shims) runs on stable.
+  msrv:
+    name: rust-1.87
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      RUSTUP_TOOLCHAIN: "1.87.0"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo dependencies and build outputs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: plzn-ubuntu-26.04-1.87.0-${{ hashFiles('Cargo.lock') }}
+
+      - name: Build all plzn targets
+        run: cargo build --locked --all-targets
+
+  # Stable Rust without any real-library shim: formatting, Clippy, unit and
+  # CLI tests (shim-backed tests skip themselves when the binary is absent),
+  # the DSL corpus lint, and the release binary.
+  stable:
+    name: stable
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    env:
+      RUSTUP_TOOLCHAIN: stable
+      RUST_TEST_THREADS: "4"
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal --component rustfmt,clippy
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo dependencies and build outputs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: plzn-ubuntu-26.04-stable-${{ hashFiles('Cargo.lock') }}
+
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+
+      - name: Build all plzn targets
+        run: cargo build --locked --all-targets
+
+      - name: Run Clippy
+        run: cargo clippy --locked --all-targets -- -D warnings
+
+      - name: Run Rust tests without shims
+        run: cargo test --locked --no-fail-fast
+
+      - name: Check DSL formatting and lint corpus
+        run: |
+          target/debug/plzn fmt --check suite tests/cases
+          target/debug/plzn lint --errors-only suite tests/cases/negative tests/cases/dtls_reassembly tests/cases/local_rejections
+
+      - name: Build release binary
+        run: cargo build --locked --release --bin plzn
+
+  # One job per shim. Each installs its library and builds its shim, then runs
+  # `cargo test` (unit, CLI, and targeted shim interop tests; tests for the
+  # other shims skip themselves) as the gate, followed by the whole conformance
+  # corpus as an informational run. A shim that fails to build fails only its
+  # own job.
+  shim:
+    name: stable-${{ matrix.shim }}
+    runs-on: ubuntu-26.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        shim: [botan, openssl, gnutls, wolfssl, go, rustls]
+        include:
+          - shim: go
+            binary: go_tls_shim
+    env:
+      RUSTUP_TOOLCHAIN: stable
+      RUST_TEST_THREADS: "4"
+      PLZN_SHIM_LIMIT: "4"
+      PLZN_JOBS: "8"
+      SHIM_BINARY: shims/build/${{ matrix.binary || format('{0}_shim', matrix.shim) }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install "$RUSTUP_TOOLCHAIN" --profile minimal
+          rustc --version
+          cargo --version
+
+      - name: Cache Cargo dependencies and build outputs
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: plzn-ubuntu-26.04-stable-${{ hashFiles('Cargo.lock') }}
+
+      - name: Build all plzn targets
+        run: cargo build --locked --all-targets
+
+      # --- Botan: current upstream master from a shallow clone, not the Ubuntu
+      # package (26.04 ships 3.10.0, older than the TLS callbacks the shim
+      # enables from 3.12/3.13 on and than the library the corpus expectations
+      # are triaged against). The clone's HEAD commit keys a cache of the built
+      # library and generated public headers, so the ~10-minute build only
+      # recurs when master has moved. `make configure` persists the checkout
+      # root so the generic shim build step below links it (with an rpath).
+      - name: Clone Botan master
+        if: matrix.shim == 'botan'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends build-essential pkg-config python3
+          git clone --depth=1 https://github.com/randombit/botan.git "$HOME/botan"
+          git -C "$HOME/botan" log -1 --format='Botan master at %H (%cs) %s'
+          echo "BOTAN_REV=$(git -C "$HOME/botan" rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Cache the Botan master build
+        if: matrix.shim == 'botan'
+        id: botan-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/botan/libbotan-3.so*
+            ~/botan/build/include/public
+          key: botan-master-${{ env.BOTAN_REV }}
+
+      # Shared library only: no static library, CLI, tests, or docs. Headers are
+      # copied rather than symlinked so the cached include tree stands alone.
+      - name: Build Botan master
+        if: matrix.shim == 'botan' && steps.botan-cache.outputs.cache-hit != 'true'
+        run: |
+          cd "$HOME/botan"
+          ./configure.py --without-documentation --build-targets=shared --link-method=copy
+          make -j"$(nproc)"
+
+      - name: Point the shim build at Botan master
+        if: matrix.shim == 'botan'
+        run: make -C shims configure PLZN_BOTAN_ROOT="$HOME/botan"
+
+      # --- Other C/C++ libraries: Ubuntu development packages.
+      - name: Install OpenSSL
+        if: matrix.shim == 'openssl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends build-essential pkg-config libssl-dev
+          pkg-config --modversion libssl
+
+      - name: Install GnuTLS
+        if: matrix.shim == 'gnutls'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends build-essential pkg-config libgnutls28-dev
+          pkg-config --modversion gnutls
+
+      - name: Install wolfSSL
+        if: matrix.shim == 'wolfssl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends build-essential pkg-config libwolfssl-dev
+          pkg-config --modversion wolfssl
+
+      # --- Go: standard-library crypto/tls.
+      - name: Install Go toolchain
+        if: matrix.shim == 'go'
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: "1.27.x"
+          # The shim uses only the standard library and has no go.sum.
+          cache: false
+
+      # Explicit target and executable check prevent a missing-shim skip from
+      # passing silently. Do not cache shims/build.
+      - name: Build and verify the ${{ matrix.shim }} shim
+        run: |
+          make -C shims -j2 "${{ matrix.shim }}"
+          test -x "$SHIM_BINARY"
+          "$SHIM_BINARY" --plzn-shim-info
+
+      # A Botan shim that silently resolved some other libbotan-3 would test
+      # the wrong library; the rpath must point into the master checkout.
+      - name: Verify the Botan shim links the master checkout
+        if: matrix.shim == 'botan'
+        run: ldd "$SHIM_BINARY" | grep -F "$HOME/botan/libbotan-3.so"
+
+      # The shared C++ helper tests and the Go unit tests; run once, in the job
+      # that already has both a C++ compiler and a Go toolchain.
+      - name: Run shared C++ and Go tests
+        if: matrix.shim == 'go'
+        run: make -C shims check
+
+      - name: Run Rust tests and shim interop
+        run: cargo test --locked --no-fail-fast
+
+      # Informational: the whole conformance corpus (suite/server, suite/client,
+      # suite/dtls) against this shim, one `plzn run` per directory. The
+      # expectations are triaged against current upstream libraries, and the
+      # Ubuntu packages lag behind (OpenSSL today; Botan before it moved to a
+      # master clone), so mismatches are listed in the log and in the job
+      # summary but do not fail the job. The gating local equivalent is
+      # `cargo test --test shim_corpus -- --ignored`.
+      - name: Run the conformance corpus (informational)
+        continue-on-error: true
+        run: |
+          status=0
+          {
+            echo "### Conformance corpus against ${{ matrix.shim }}"
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          for dir in suite/server suite/client suite/dtls; do
+            echo "::group::$dir"
+            target/debug/plzn run --shim "$SHIM_BINARY" "$dir" | tee corpus.log || status=1
+            echo "::endgroup::"
+            printf '%-13s %s\n' "$dir" "$(grep -E '^--- .*tests,' corpus.log | head -1)" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          exit "$status"

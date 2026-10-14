@@ -1,0 +1,125 @@
+plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha1" {
+  rfc 5246 section 7.4.3
+  matrix {
+    suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
+  }
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha1] }
+  }
+  expect alert fatal/handshake_failure
+  xfail libressl "signs ServerKeyExchange with rsa_pkcs1_sha1 when that is all the client offers"
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha224" {
+  rfc 5246 section 7.4.3
+  matrix {
+    suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
+  }
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha224] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha224 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha256" {
+  rfc 5246 section 7.4.3
+  matrix {
+    suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
+  }
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha384" {
+  rfc 5246 section 7.4.3
+  matrix {
+    suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
+  }
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha384] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha384 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha512" {
+  rfc 5246 section 7.4.3
+  matrix {
+    suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
+  }
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha512 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

@@ -1,0 +1,9 @@
+plzn tls "server/record-aead-tag-xor" {
+  rfc 5246 section 6.2.3.3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send Finished @ xor[record.aead_tag, 0] = 0xff
+  }
+  expect alert fatal/bad_record_mac
+}

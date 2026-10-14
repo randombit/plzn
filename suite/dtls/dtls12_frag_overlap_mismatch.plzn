@@ -1,0 +1,14 @@
+plzn tls "dtls12/frag-overlap-mismatch" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  # Without the extended master secret a diverging transcript surfaces at
+  # the Finished check, rather than as undecryptable records
+  flow handshake { send ClientHello { -ext extended_master_secret } @ overlap_mismatch 16 }
+  expect alert fatal/decode_error
+  expect alert fatal/decrypt_error if boringssl
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/protocol_version if libressl
+}

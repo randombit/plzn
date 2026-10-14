@@ -1,0 +1,68 @@
+plzn tls "server/tls12-record-size-limit/renegotiation-changes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 16385 }
+    recv ServerHello { has_ext: record_size_limit }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    renegotiate { +ext record_size_limit = 512 }
+    send AppData { size: 744 }
+    recv AppData { size: 512 }
+    recv AppData { size: 232 }
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/renegotiation-removes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 512 }
+    recv ServerHello { has_ext: record_size_limit }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    begin_renegotiation
+    send ClientHello { -ext record_size_limit }
+    recv ServerHello { lacks_ext: record_size_limit }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData { size: 125 }
+    recv AppData { size: 125 }
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}

@@ -1,0 +1,71 @@
+plzn tls "server/tls13-finished/empty" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  flow handshake {
+    send Finished @ pad -32
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+}
+
+plzn tls "server/tls13-finished/single-bit-error" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  matrix {
+    pos in [-32, -17, -1]
+    bit in [0x01, 0x10, 0x80]
+  }
+  flow handshake {
+    send Finished @ xor[$pos] = $bit
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-finished/truncation" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  matrix { n in [1, 2, 16, 31] }
+  flow handshake {
+    send Finished @ pad -$n
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+}
+
+plzn tls "server/tls13-finished/padding" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  matrix { n in [1, 2, 16, 32] }
+  flow handshake {
+    send Finished @ pad +$n 0xff
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+}
+
+plzn tls "server/tls13-finished/sha384-single-bit-error" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  matrix { pos in [-48, -1] }
+  flow handshake {
+    send Finished @ xor[$pos] = 0x01
+  }
+  expect alert fatal/decrypt_error
+}

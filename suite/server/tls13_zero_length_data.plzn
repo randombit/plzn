@@ -1,0 +1,92 @@
+plzn tls "server/tls13-zero-length-data/zero-length-app-data" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send empty_record application_data
+    send AppData { reply: none }
+    send empty_record application_data
+    send AppData { reply: none }
+    send empty_record application_data
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding" {
+  rfc 8446 section 5.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send empty_record application_data @ record_pad 30
+    send AppData { reply: none } @ record_pad 30
+    send empty_record application_data @ record_pad 30
+    send AppData { reply: none } @ record_pad 30
+    send empty_record application_data @ record_pad 30
+    send AppData @ record_pad 30
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-large-padding" {
+  rfc 8446 section 5.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send empty_record application_data @ record_pad fill
+    send AppData { reply: none } @ record_pad fill
+    send empty_record application_data @ record_pad fill
+    send AppData { reply: none } @ record_pad fill
+    send empty_record application_data @ record_pad fill
+    send AppData @ record_pad fill
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-zero-length-data/zero-length-app-data-during-handshake" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send empty_record application_data
+    send Finished
+    recv NewSessionTicket
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding-interleaved-in-handshake" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 2 hold
+    send empty_record application_data @ record_pad 30
+    flush_fragment
+    recv ServerHello
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect close if rustls
+}
+
+plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-large-padding-interleaved-in-handshake" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 2 hold
+    send empty_record application_data @ record_pad fill
+    flush_fragment
+    recv ServerHello
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect close if rustls
+}

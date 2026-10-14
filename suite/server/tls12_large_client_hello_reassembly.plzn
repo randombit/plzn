@@ -1,0 +1,28 @@
+plzn tls "server/tls12-large-client-hello-reassembly/large-client-hello-padding" {
+  rfc 7685 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext padding = 21798 } @ fragment 16384
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-client-hello-reassembly/large-incorrect-client-hello-length" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.length, 1] = 0x55, set[handshake.length, 2] = 0x55
+    wait 6000 ms
+    close
+  }
+  expect ok
+}

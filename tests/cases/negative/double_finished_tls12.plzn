@@ -1,0 +1,17 @@
+# Send Finished twice in TLS 1.2. The handshake preset
+# includes one Finished; `after recv Finished` completes it, then the body
+# sends another. The server should reject the duplicate Finished as an
+# unexpected message.
+plzn tls "negative/double-finished-tls12" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut server { versions: [tls12] }
+  # Complete the ordinary handshake before injecting the duplicate, otherwise
+  # the next inbound CCS/Finished is a local flow mismatch that hides the
+  # server's response.
+  flow handshake after recv Finished {
+    send Finished
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}

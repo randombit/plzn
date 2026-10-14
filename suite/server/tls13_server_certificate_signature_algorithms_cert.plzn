@@ -1,0 +1,42 @@
+plzn tls "server/tls13-server-certificate-signature-algorithms-cert/independent-lists" {
+  rfc 8446 section 4.2.3
+  chain: [rsa_2048_ecdsa_signed]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    recv CertificateVerify { algorithm: rsa_pss_rsae_sha384 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-server-certificate-signature-algorithms-cert/excludes-certificate" {
+  rfc 8446 section 4.2.3
+  chain: [rsa_2048_ecdsa_signed]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+      +ext signature_algorithms_cert = [rsa_pss_rsae_sha256]
+    }
+  }
+  expect reject fatal/bad_certificate
+  expect alert fatal/handshake_failure if openssl
+}
+
+plzn tls "server/tls13-server-certificate-signature-algorithms-cert/absent-falls-back" {
+  rfc 8446 section 4.2.3
+  chain: [rsa_2048_ecdsa_signed]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+    }
+  }
+  expect reject fatal/bad_certificate
+}

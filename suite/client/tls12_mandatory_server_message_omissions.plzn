@@ -1,0 +1,97 @@
+plzn tls "client/tls12-mandatory-server-message-omissions/server-hello" {
+  rfc 5246 section 7.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send Certificate
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-mandatory-server-message-omissions/certificate" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send ServerKeyExchange
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "client/tls12-mandatory-server-message-omissions/server-key-exchange" {
+  rfc 5246 section 7.4.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerHelloDone
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-mandatory-server-message-omissions/server-hello-done" {
+  rfc 5246 section 7.4.5
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ChangeCipherSpec
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-mandatory-server-message-omissions/change-cipher-spec" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "client/tls12-mandatory-server-message-omissions/finished" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send AppData
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

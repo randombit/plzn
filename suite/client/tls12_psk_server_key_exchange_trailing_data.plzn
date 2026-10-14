@@ -1,0 +1,17 @@
+plzn tls "client/tls12-psk-server-key-exchange-trailing-data" {
+  rfc 4279 section 2
+  chain: []
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [tls12]
+    cipher_suites: [PSK_WITH_AES_128_GCM_SHA256]
+  }
+  xfail gnutls "accepts trailing data in a plain-PSK ServerKeyExchange"
+  flow handshake {
+    send ServerKeyExchange @ pad +1
+  }
+  expect alert fatal/decode_error
+}

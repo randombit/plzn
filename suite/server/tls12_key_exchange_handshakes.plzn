@@ -1,0 +1,121 @@
+plzn tls "server/tls12-key-exchange-handshakes/valid-rsa" {
+  rfc 5246 section 7.3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-key-exchange-handshakes/valid-dhe" {
+  rfc 5246 section 7.3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-key-exchange-handshakes/valid-ems" {
+  rfc 7627 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientHello { +ext extended_master_secret }
+    recv ServerHello { has_ext: extended_master_secret }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  skip libressl "does not implement extended_master_secret"
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange/valid-handshake" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    recv ServerHello { has_ext: renegotiation_info }
+    recv ServerKeyExchange
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange/valid-handshake" {
+  rfc 8422 section 5.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    recv ServerHello { has_ext: renegotiation_info }
+    recv ServerKeyExchange
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange/ecdhe-without-extensions" {
+  rfc 8422 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      -ext supported_groups
+      -ext ec_point_formats
+    }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-unsupported-curve-fallback/secp160k1-only-falls-back-to-dhe" {
+  rfc 8422 section 5.1
+  uut server {
+    versions: [tls12]
+    cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  chain: [rsa_2048]
+  skip rustls "no DHE_RSA suite to fall back to"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, DHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = raw "0002000f"
+    }
+    recv ServerHello { cipher_suite: DHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

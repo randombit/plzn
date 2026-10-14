@@ -1,0 +1,46 @@
+plzn tls "server/tls13-ignores-ciphertext-legacy-record-version" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  xfail openssl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail boringssl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail gnutls "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail botan "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail rustls "uses a fixed record version in TLS 1.3 AEAD processing instead of the received ignored field"
+  xfail wolfssl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail go "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  flow handshake {
+    send Finished @ record_version 0x03ff
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls13-allows-loose-initial-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello @ record_version 0x03ff
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-rejects-garbage-initial-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello @ record_version 0xffff
+  }
+  xfail wolfssl "accepts a ClientHello with record version 0xffff"
+  expect any {
+    alert fatal/{protocol_version,decode_error,illegal_parameter},
+    close,
+    reset
+  }
+}

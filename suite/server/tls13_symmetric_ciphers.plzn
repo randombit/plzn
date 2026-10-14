@@ -1,0 +1,49 @@
+plzn tls "server/tls13-aead-tag-corruption/application-data" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    suite in [0x1301, 0x1302, 0x1303, 0x1304]
+    pos in [-16, -9, -8, -1]
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.aead_tag, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}
+
+plzn tls "server/tls13-aead-tag-corruption/application-data-ccm-8" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    suite in [0x1305]
+    pos in [-8, -1]
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.aead_tag, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls13-aead-tag-corruption/finished" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    suite in [0x1301, 0x1302, 0x1303, 0x1304, 0x1305]
+    pos in [-8, -1]
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send Finished @ xor[record.aead_tag, $pos] = $val
+    wait 300 ms
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}

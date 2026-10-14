@@ -1,0 +1,32 @@
+plzn tls "dtls12/client-retransmit-pacing" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 100
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 100ms
+    advance_clock 100ms
+    expect_retransmit
+    expect next_timeout 200ms
+    advance_clock 100ms
+    expect next_timeout 100ms
+    advance_clock 100ms
+    expect_retransmit
+    expect next_timeout 400ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

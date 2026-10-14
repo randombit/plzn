@@ -1,0 +1,57 @@
+# RFC 4279 PSK and ECDHE_PSK suites carry no Certificate or
+# CertificateRequest, so they cannot satisfy a server that requires client
+# certificate authentication. Negotiating one would silently drop the
+# certificate requirement.
+plzn tls "server/tls12-psk-suites-refused-when-client-cert-required" {
+  rfc 4279 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+  }
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  matrix {
+    suite in [PSK_WITH_AES_128_GCM_SHA256, ECDHE_PSK_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake {}
+  xfail openssl "negotiates the PSK suite, dropping its client certificate requirement"
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-certificate-suite-chosen-over-psk-when-client-cert-required" {
+  rfc 4279 section 2
+  chain: [default]
+  client_chain: [default]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    cipher_suites: [PSK_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  }
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  xfail openssl "negotiates the PSK suite, dropping its client certificate requirement"
+  # Spelled out: the PSK preset would expect a flight without Certificate.
+  flow {
+    send ClientHello { cipher_suites: [PSK_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_GCM_SHA256] }
+    recv ServerHello { cipher_suite: ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate
+    send ClientKeyExchange
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

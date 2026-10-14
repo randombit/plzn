@@ -1,0 +1,17 @@
+plzn tls "dtls12/grease-extension"{
+  rfc 8701 section 3.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      +ext $grease = zeros 25
+    }
+  }
+  expect ok
+}

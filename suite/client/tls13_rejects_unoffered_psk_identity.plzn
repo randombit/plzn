@@ -1,0 +1,14 @@
+plzn tls "client/tls13-rejects-unoffered-psk-identity-selection" {
+  rfc 8446 section 4.2.11
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+  }
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello { selected_psk_identity: 1 }
+  }
+  expect alert fatal/illegal_parameter
+  xfail gnutls "with psk_dhe_ke offered, ignores a selected_identity it did not offer and continues without the PSK instead of sending illegal_parameter"
+}

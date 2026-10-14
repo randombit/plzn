@@ -1,0 +1,13 @@
+plzn tls "dtls12/truncated-finished" {
+  rfc 6347 section 4.2.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send Finished @ truncate 8
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if openssl
+  expect alert fatal/decode_error if libressl
+}

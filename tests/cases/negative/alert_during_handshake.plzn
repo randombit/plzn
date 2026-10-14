@@ -1,0 +1,21 @@
+# Inspired by CVE-2020-24659 (GnuTLS): send a no_renegotiation
+# alert during the handshake, before the handshake completes.
+# A correct server should handle this gracefully (close or alert
+# back), not crash.
+#
+# The raw bytes are a TLS alert record:
+# content_type=0x15, version=0x0303, length=0x0002,
+# level=warning(1), description=no_renegotiation(100).
+plzn tls "negative/alert-during-handshake" {
+  rfc 5246 section 7.2.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientKeyExchange {
+    send raw "15 0303 0002 0164"
+    recv AppData
+  }
+  # RFC 5246 §7.2.2 doesn't mandate a specific response to a
+  # mid-handshake warning alert. openssl sends handshake_failure;
+  # rustls/botan silently drop the connection. All are acceptable.
+  expect handshake-fails
+}

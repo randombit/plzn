@@ -1,0 +1,49 @@
+plzn tls "dtls12/frag-client-hello-1" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment 1 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-client-hello-5" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment 5 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-client-hello-16" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment 16 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-client-hello-64" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment 64 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-client-hello-255" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ fragment 255 }
+  expect ok
+}

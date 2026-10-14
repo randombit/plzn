@@ -1,0 +1,173 @@
+plzn tls "dtls12/server-no-timeout-before-cookie-exchange" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail boringssl "arms a timer for HelloVerifyRequest although RFC 6347 says timeout and retransmission do not apply to that stateless exchange"
+  flow {
+    expect no_timeout
+    send ClientHello
+    recv HelloVerifyRequest
+    expect no_timeout
+    send ClientHello
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-no-timeout-after-handshake" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-timeout-cap-does-not-refire" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_timeout_ms: 4
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 1ms
+    advance_clock 1ms
+    expect_retransmit
+    expect next_timeout 2ms
+    advance_clock 2ms
+    expect_retransmit
+    expect next_timeout 4ms
+    advance_clock 4ms
+    expect_retransmit
+    expect next_timeout 4ms
+    advance_clock 4ms
+    expect_retransmit
+    expect next_timeout 4ms
+    advance_clock 0ms
+    expect next_timeout 4ms
+    advance_clock 0ms
+    expect next_timeout 4ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-forward-progress-resets-timeout-budget" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow {
+    recv ClientHello
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    send HelloVerifyRequest
+    recv ClientHello
+    expect next_timeout 1ms
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    expect next_timeout 4ms
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/handle-timeout-in-steps" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 100
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 100ms
+    advance_clock 0ms
+    expect next_timeout 100ms
+    advance_clock 10ms
+    expect next_timeout 90ms
+    advance_clock 90ms
+    expect_retransmit
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/timeout-fudge" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 100
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 100ms
+    advance_clock 90ms
+    expect_retransmit
+    expect next_timeout 200ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

@@ -1,0 +1,16 @@
+plzn tls "dtls12/recv-matchers-server-flight" {
+  rfc 5246 section 7.4.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv Certificate { entries: 1 }
+    recv ServerKeyExchange { named_group: secp256r1, signature_scheme: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

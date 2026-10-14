@@ -1,0 +1,23 @@
+plzn tls "server/tls13-unencrypted-alert/unencrypted-alert" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send alert fatal/unknown_ca @ plaintext
+    recv NewSessionTicket
+  }
+  expect close
+  expect alert fatal/bad_record_mac if boringssl
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-unencrypted-alert/encrypted-alert" {
+  rfc 8446 section 6
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send alert fatal/unknown_ca
+    recv NewSessionTicket
+  }
+  expect close
+}

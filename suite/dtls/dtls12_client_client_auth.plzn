@@ -1,0 +1,13 @@
+plzn tls "dtls12/client-client-auth" {
+  rfc 5246 section 7.4.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

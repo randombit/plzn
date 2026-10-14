@@ -1,0 +1,25 @@
+plzn tls "client/tls12-ocsp-stapling" {
+  rfc 6066 section 8
+  chain: [default]
+  skip openssl "does not offer status_request unless configured (no shim knob yet)"
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}

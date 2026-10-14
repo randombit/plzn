@@ -1,0 +1,25 @@
+plzn tls "client/tls12-ticket-renewal" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_ticket] }
+
+  session initial {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake after recv Finished {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

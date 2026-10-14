@@ -1,0 +1,249 @@
+plzn tls "server/tls13-mlkem/basic-connection-with-hrr" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr] }
+  matrix {
+    group in [X25519MLKEM768, X448MLKEM1024, SecP256r1MLKEM768, SecP384r1MLKEM1024, MLKEM512, MLKEM768, MLKEM1024]
+  }
+  flow handshake {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest { key_share_group: $group }
+    recv ServerHello { key_share_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-classical-part" {
+  rfc 7748 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519mlkem768] }
+  flow handshake {
+    # Bytes 1184..1215 are the X25519 half; zeroing them creates a low-order point.
+    send ClientHello @ set[handshake.key_share, 1184] = 0x00, @ set[handshake.key_share, 1185] = 0x00, @ set[handshake.key_share, 1186] = 0x00, @ set[handshake.key_share, 1187] = 0x00, @ set[handshake.key_share, 1188] = 0x00, @ set[handshake.key_share, 1189] = 0x00, @ set[handshake.key_share, 1190] = 0x00, @ set[handshake.key_share, 1191] = 0x00, @ set[handshake.key_share, 1192] = 0x00, @ set[handshake.key_share, 1193] = 0x00, @ set[handshake.key_share, 1194] = 0x00, @ set[handshake.key_share, 1195] = 0x00, @ set[handshake.key_share, 1196] = 0x00, @ set[handshake.key_share, 1197] = 0x00, @ set[handshake.key_share, 1198] = 0x00, @ set[handshake.key_share, 1199] = 0x00, @ set[handshake.key_share, 1200] = 0x00, @ set[handshake.key_share, 1201] = 0x00, @ set[handshake.key_share, 1202] = 0x00, @ set[handshake.key_share, 1203] = 0x00, @ set[handshake.key_share, 1204] = 0x00, @ set[handshake.key_share, 1205] = 0x00, @ set[handshake.key_share, 1206] = 0x00, @ set[handshake.key_share, 1207] = 0x00, @ set[handshake.key_share, 1208] = 0x00, @ set[handshake.key_share, 1209] = 0x00, @ set[handshake.key_share, 1210] = 0x00, @ set[handshake.key_share, 1211] = 0x00, @ set[handshake.key_share, 1212] = 0x00, @ set[handshake.key_share, 1213] = 0x00, @ set[handshake.key_share, 1214] = 0x00, @ set[handshake.key_share, 1215] = 0x00
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls13-mlkem/nist-hybrid-malformed-classical-part" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11eb, 0x11ed]
+  }
+  flow handshake {
+    # The NIST-curve point starts the hybrid share; offset 2 is inside its x coordinate.
+    send ClientHello @ xor[handshake.key_share, 2] = 0xff
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-0" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519mlkem768] }
+  flow handshake {
+    # Rewrites the first ML-KEM coefficient to q, which is outside the canonical range.
+    send ClientHello @ set[handshake.key_share, 0] = 0x01, @ set[handshake.key_share, 1] = 0x0d
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-1" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519mlkem768] }
+  flow handshake {
+    send ClientHello @ set[handshake.key_share, 1] = 0x10, @ set[handshake.key_share, 2] = 0xd0
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-0" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1mlkem768] }
+  flow handshake {
+    # The ML-KEM half starts at 65; this rewrites its first coefficient to q.
+    send ClientHello @ set[handshake.key_share, 65] = 0x01, @ set[handshake.key_share, 66] = 0x0d
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-1" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1mlkem768] }
+  flow handshake {
+    send ClientHello @ set[handshake.key_share, 66] = 0x10, @ set[handshake.key_share, 67] = 0xd0
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-0" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp384r1mlkem1024] }
+  flow handshake {
+    # The ML-KEM half starts at 97; this rewrites its first coefficient to q.
+    send ClientHello @ set[handshake.key_share, 97] = 0x01, @ set[handshake.key_share, 98] = 0x0d
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-1" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp384r1mlkem1024] }
+  flow handshake {
+    send ClientHello @ set[handshake.key_share, 98] = 0x10, @ set[handshake.key_share, 99] = 0xd0
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/truncated-key-share" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11ec, 0x11ee, 0x11eb, 0x11ed, 0x0200, 0x0201, 0x0202]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: truncated }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-mlkem/padded-key-share" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11ec, 0x11ee, 0x11eb, 0x11ed, 0x0200, 0x0201, 0x0202]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: padded }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-compressed" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11eb, 0x11ed]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: compressed }
+    recv ServerHello
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-hybrid" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11eb, 0x11ed]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: hybrid }
+    recv ServerHello
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+  xfail openssl "accepts a SEC1 hybrid-form point in the ECDHE half of a SecP*MLKEM share (RFC 10024 requires uncompressed); plain EC shares are checked"
+}
+
+plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-xy" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x11eb, 0x11ed]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: xy }
+    recv ServerHello
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-mlkem/share-from-other-group" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519mlkem768] }
+  flow handshake {
+    send ClientHello { key_share_point: mlkem768 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

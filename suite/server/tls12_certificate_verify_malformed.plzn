@@ -1,0 +1,295 @@
+# LibreSSL's TLS 1.2 server answers any failed CertificateVerify signature with
+# internal_error (its TLS 1.3 server and TLS 1.2 client send decrypt_error), so the
+# internal_error pins below are that alert choice, not an internal failure.
+
+plzn tls "server/tls12-certificate-verify-malformed/valid-handshake" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/pad" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { } @ pad +1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/truncate" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { } @ pad -1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/0-byte-sig" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/1-byte-sig" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [0xfa] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/2-byte-sig" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [0xfa, 0xbc] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/3-byte-sig" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [0xfa, 0xbc, 0x0f] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/truncated-to-3-bytes" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] } @ truncate 3
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/truncated-to-2-bytes" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] } @ truncate 2
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/truncated-to-1-bytes" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] } @ truncate 1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/truncated-to-0-bytes" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] } @ truncate 0
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-certificate-verify-malformed/fuzz-signature-length" {
+  rfc 5246 section 7.4.8
+  matrix {
+    v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]
+  }
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { } @ xor[3] = $v
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}

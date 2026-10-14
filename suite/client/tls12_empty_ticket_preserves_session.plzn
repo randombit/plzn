@@ -1,0 +1,34 @@
+plzn tls "client/tls12-empty-ticket-preserves-previous-session" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { capabilities: [session_ticket] }
+  skip wolfssl "TLS 1.2 ticket resumption is not functional in the current wolfSSL shim"
+
+  session initial {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session empty-renewal [resumes: initial] {
+    flow handshake {
+      send NewSessionTicket { ticket: "" }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session retry-previous [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

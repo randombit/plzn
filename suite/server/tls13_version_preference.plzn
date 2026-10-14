@@ -1,0 +1,15 @@
+plzn tls "server/tls13-prefers-highest-mutually-supported-version" {
+  rfc 9846 section 4.3.1
+  chain: [default]
+  uut server { versions: [tls13, tls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12] }
+    recv ServerHello {
+      legacy_version: 0x0303
+      selected_version: tls13
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

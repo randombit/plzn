@@ -1,0 +1,11 @@
+plzn tls "server/tls13-no-common-cipher-suite" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [0x0a0a]
+    }
+  }
+  expect alert fatal/{handshake_failure, insufficient_security}
+}

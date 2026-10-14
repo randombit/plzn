@@ -1,0 +1,96 @@
+plzn tls "server/legacy-signature-algorithms-extension-is-ignored" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls10]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls10-without-extended-master-secret" {
+  rfc 2246 section 8.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls10]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello { -ext extended_master_secret }
+    recv ServerHello { lacks_ext: extended_master_secret }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-exporter" {
+  rfc 5705 section 4
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv Exporter { label: "legacy exporter", context: "context", length: 64 }
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-tls-unique" {
+  rfc 5929 section 3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake { recv TLSUnique }
+  expect ok
+}
+
+plzn tls "server/legacy-encrypt-then-mac" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    recv ServerHello { has_ext: encrypt_then_mac }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-empty-and-one-byte-record-splits" {
+  rfc 2246 section 6.2.1
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 0 }
+    send AppData { size: 32 } @ fragment 1
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,16 @@
+# Inject a raw record with invalid content_type (0xFF) after
+# a TLS 1.2 handshake. The raw bytes form a complete TLS record:
+# content_type=0xFF, version=0x0303, length=5, body=deadbeefca.
+plzn tls "negative/send-raw-bad-record" {
+  rfc 5246 section 6.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send raw "ff 0303 0005 deadbeefca"
+    send AppData
+    recv AppData
+  }
+  # TLS 1.2 does not assign one alert to an unknown record content type; these
+  # are the concrete fatal alerts emitted by the supported stacks.
+  expect alert fatal/{decode_error, internal_error, unexpected_message}
+}

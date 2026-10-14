@@ -1,0 +1,212 @@
+# Floods of consecutive zero-length records over DTLS 1.2, both roles.
+#
+# RFC 6347 4.1 keeps RFC 5246 6.2.1's rules ("Implementations MUST NOT send
+# zero-length fragments of Handshake, Alert, or ChangeCipherSpec content
+# types. Zero-length fragments of Application data MAY be sent"), and the
+# flood caps pinned in suite/server/tls12_empty_record_flood.plzn mostly do
+# not exist in the datagram record layers:
+#   OpenSSL    dtls_get_more_records drops a zero-length record with
+#              "goto again" and no counter (ssl/record/methods/dtls_meth.c).
+#   BoringSSL  ssl/dtls_record.cc: "TODO(davidben): Limit the number of
+#              empty records as in TLS?"; none is enforced.
+#   Botan      the datagram handshake reader ignores a record too short for
+#              a fragment header ("while(record_len > 0)"); empty
+#              protected records count toward
+#              Policy::max_useless_records (32), the 33rd consecutive one
+#              fatal unexpected_message. Epoch-zero records are not counted.
+#   GnuTLS     the record layer is shared with TLS: an unprotected
+#              zero-length record is a bad record, which DTLS discards
+#              silently, and empty application data counts toward
+#              DEFAULT_MAX_EMPTY_RECORDS (200), the 201st answered with
+#              internal_error (GNUTLS_E_TOO_MANY_EMPTY_PACKETS has no alert
+#              mapping).
+#   LibreSSL   dtls1_get_record drops an unprotected zero-length record
+#              ("just read a 0 length packet"), but an empty protected
+#              application-data record is passed up as a 0-byte SSL_read
+#              (SSL_ERROR_SYSCALL with nothing queued), which an application,
+#              the shim included, can only read as the peer having gone away.
+#              One legal empty record ends the association: xfail.
+#   wolfSSL    the shim's build has no DTLS; the rows skip.
+# Datagrams are not paced; the sweep delivered 1,000 back to back on loopback
+# without loss (GnuTLS failing at exactly 201 shows nothing was dropped). The
+# unprotected-handshake rows stop at 201: in a probe, GnuTLS's handshake did
+# not complete behind 1,000 of them (a read timeout, left untriaged), while
+# the application-data rows run to 1,000 everywhere.
+
+plzn tls "dtls12/empty-record-flood/server-plaintext-handshake-before-client-key-exchange-one-to-two-hundred-and-one" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [1, 32, 33, 200, 201]
+  }
+  flow handshake until send ClientKeyExchange {
+    repeat $count { send empty_record handshake }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/empty-record-flood/server-application-data-two-to-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [2, 32]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+}
+
+plzn tls "dtls12/empty-record-flood/server-application-data-thirty-three-to-two-hundred" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [33, 200]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "dtls12/empty-record-flood/server-application-data-over-two-hundred" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [201, 1000]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/internal_error if gnutls
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "dtls12/empty-record-flood/client-plaintext-handshake-before-server-hello-one-to-two-hundred-and-one" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [1, 32, 33, 200, 201]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send empty_record handshake }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/empty-record-flood/client-application-data-two-to-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [2, 32]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+}
+
+plzn tls "dtls12/empty-record-flood/client-application-data-thirty-three-to-two-hundred" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [33, 200]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "dtls12/empty-record-flood/client-application-data-over-two-hundred" {
+  rfc 6347 section 4.1
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    count in [201, 1000]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/internal_error if gnutls
+  xfail libressl "passes an empty protected application-data record up as a 0-byte SSL_read (SSL_ERROR_SYSCALL, nothing queued), which the application reads as the peer closing"
+  expect alert fatal/unexpected_message if botan
+}

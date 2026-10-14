@@ -1,0 +1,148 @@
+plzn tls "server/tls12-signature-algorithms/implicit-sha1" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  skip botan "Botan TLS does not implement the TLS 1.2 implicit SHA-1 signature fallback"
+  skip rustls "rustls requires signature_algorithms and does not implement the TLS 1.2 implicit SHA-1 fallback"
+  uut server {
+    versions: [tls12]
+    signing_prefs: [ecdsa_sha1]
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { -ext signature_algorithms }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-signature-algorithms/explicit-sha1-rsa" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha1] }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-signature-algorithms/explicit-sha256-rsa" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-signature-algorithms/tolerance-one-unknown" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  matrix { junk in [0x0001, 0x0a01] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [$junk, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [0x0a00..$n + 0x09ff, rsa_pkcs1_sha256] } @ fragment 16384
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cert" {
+  rfc 8446 section 4.2.3
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  matrix { n in [215, 32000] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pkcs1_sha256]
+      +ext signature_algorithms_cert = [0x0a00..$n + 0x09ff, rsa_pkcs1_sha256]
+    } @ fragment 16384
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-signature-algorithms/empty-list" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [] }
+  }
+  expect alert fatal/decode_error
+  xfail libressl "treats an empty signature_algorithms extension as absent and signs with the SHA-1 default"
+}

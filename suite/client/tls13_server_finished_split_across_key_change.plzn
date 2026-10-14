@@ -1,0 +1,12 @@
+plzn tls "client/tls13-server-finished-split-across-key-change" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Finished {
+    send Finished @ fragment 6 hold
+    flush_fragment
+    wait 300 ms
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}

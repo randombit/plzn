@@ -1,0 +1,158 @@
+plzn tls "server/tls12-version-numbers/very-high-version-254-254" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0xfefe } @ record_version 0x0300
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  expect alert fatal/decode_error if botan
+}
+
+plzn tls "server/tls12-version-numbers/high-version-4-1" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0x0401 } @ record_version 0x0301
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-version-numbers/high-version-6-3" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0x0603 } @ record_version 0x0301
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-version-numbers/very-low-version-0-0" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0x0000 } @ record_version 0x0300
+    recv ServerHello
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "server/tls12-version-numbers/low-record-version-3-0-tls12" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ record_version 0x0300
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-version-numbers/high-record-version-3-254-tls12" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ record_version 0x03fe
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-version-numbers/high-record-version-3-254-very-high-version-254-254" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0xfefe } @ record_version 0x03fe
+    recv ServerHello { legacy_version: 0x0303 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  expect alert fatal/decode_error if botan
+}

@@ -1,0 +1,13 @@
+plzn tls "server/supported-groups" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [x25519]
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,10 @@
+plzn tls "server/tls13-ch-empty-cipher-suites" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { cipher_suites: [] }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/handshake_failure if libressl
+}

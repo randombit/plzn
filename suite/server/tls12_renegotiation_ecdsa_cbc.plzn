@@ -1,0 +1,16 @@
+plzn tls "server/renegotiation-cbc" {
+  rfc 5746 section 3.5
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

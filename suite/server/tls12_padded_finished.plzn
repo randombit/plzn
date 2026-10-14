@@ -1,0 +1,13 @@
+plzn tls "server/tls12-padded-finished" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send Finished @ pad +1
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if openssl
+  expect alert fatal/decode_error if libressl
+}

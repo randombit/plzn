@@ -1,0 +1,12 @@
+plzn tls "server/tls13-client-hello-legacy-version-0304" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { legacy_version: 0x0304 }
+    send AppData
+    recv AppData
+  }
+  expect any { ok, alert fatal/decode_error }
+  expect alert fatal/protocol_version if libressl
+}

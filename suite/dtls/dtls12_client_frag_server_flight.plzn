@@ -1,0 +1,68 @@
+plzn tls "dtls12/client-frag-certificate-1" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate @ fragment 1
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-frag-certificate-64" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate @ fragment 64
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-reorder-server-hello" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello @ reorder 16
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

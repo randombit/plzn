@@ -1,0 +1,13 @@
+plzn tls "client/tls13-encrypted-extensions-padding" {
+  rfc 8446 section 4.2
+  rfc 7685 section 3
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts padding in EncryptedExtensions"
+  xfail gnutls "accepts padding in EncryptedExtensions"
+  flow handshake {
+    send EncryptedExtensions { +ext padding = 1 }
+  }
+  expect alert fatal/{unsupported_extension,illegal_parameter}
+  xfail libressl "accepts padding in EncryptedExtensions"
+}

@@ -1,0 +1,11 @@
+plzn tls "server/tls13-key-share-trailing-data" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = raw "0024001d00204242424242424242424242424242424242424242424242424242424242424242ff"
+    }
+  }
+  expect alert fatal/decode_error
+}

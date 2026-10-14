@@ -1,0 +1,12 @@
+plzn tls "server/tls13-key-share-wrong-length" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = raw "0023001d001f00000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

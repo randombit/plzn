@@ -1,0 +1,44 @@
+plzn tls "dtls12/renegotiation" {
+  rfc 5746 section 3.5
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  # Diagnosed 2026-10-14: OpenSSL does run the cookie exchange on the
+  # renegotiation (it answers the reneg ClientHello with a HelloVerifyRequest,
+  # then the full flight), but its ServerKeyExchange signature does not verify
+  # under the renegotiation's client_random. plzn reuses one client_random
+  # across the reneg CH1/CH2 (RFC 6347 4.2.1) and verifies with it, so the
+  # mismatch is OpenSSL signing over the previous handshake's random state. The
+  # cookie-disabled flow below exchanges data before and after and succeeds.
+  xfail openssl "cookie-enabled DTLS server renegotiation signs the ServerKeyExchange over the previous handshake's client_random, so the signature does not verify under the renegotiation's; the cookie-disabled flow succeeds"
+  flow handshake {
+    # Botan PR #5783's DTLS_Renegotiation_Test checks traffic under both epochs.
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if libressl
+}
+
+# The cookie-disabled path lets the same before/after traffic assertion run
+# on implementations where the cookie-enabled renegotiation path fails.
+plzn tls "dtls12/renegotiation-without-cookie-exchange" {
+  rfc 5746 section 3.5
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_require_cookie: false
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

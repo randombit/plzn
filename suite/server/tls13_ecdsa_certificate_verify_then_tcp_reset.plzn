@@ -1,0 +1,15 @@
+plzn tls "server/tls13-ecdsa-certificate-verify-then-tcp-reset" {
+  rfc 8446 section 4.4.3
+  chain: [ecdsa_p256]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    close reset
+  }
+  expect ok
+}

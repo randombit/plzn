@@ -1,0 +1,69 @@
+plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x00" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ plaintext = 0x00 * 48
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x0f" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ plaintext = 0x0f * 48
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x2f" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ plaintext = 0x2f * 48
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0xff" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ plaintext = 0xff * 48
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-constant-plaintext-corruption/256-bytes-of-0x0f" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ plaintext = 0x0f * 256
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

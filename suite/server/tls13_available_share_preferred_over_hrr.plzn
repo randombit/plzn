@@ -1,0 +1,22 @@
+plzn tls "server/tls13-available-share-preferred-over-hrr" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  skip rustls "sends a HelloRetryRequest for its preferred group instead of using the offered share; see the _rustls sibling"
+  skip boringssl "sends a permitted HelloRetryRequest for its preferred group; the sibling case covers that policy"
+  uut server {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [secp256r1]
+    }
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  skip libressl "sends a permitted HelloRetryRequest for the client's most-preferred common group instead of using the offered share; the sibling case covers that policy"
+}

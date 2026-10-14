@@ -1,0 +1,18 @@
+plzn tls "server/tls12-dhe-key-share-random/tls12" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  skip rustls "no DHE_RSA suites"
+  repeat 8
+  flow handshake {
+    recv ServerHello { random: capture $r }
+    recv ServerKeyExchange { key_share: capture $ks }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $r, $ks
+}

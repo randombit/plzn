@@ -1,0 +1,27 @@
+plzn tls "dtls12/epoch-retention-survives-restart" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_epoch0_restart: true
+    renegotiation: client
+  }
+  flow handshake after recv Finished {
+    renegotiate
+    advance_clock 300s
+    restart
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

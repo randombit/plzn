@@ -1,0 +1,22 @@
+plzn tls "client/tls13-client-key-update" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  skip rustls "no automatic key-update policy (records_per_traffic_key)"
+  uut client {
+    versions: [tls13]
+    records_per_traffic_key: 2
+  }
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    # plzn's reciprocal KeyUpdate is emitted automatically before this record.
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

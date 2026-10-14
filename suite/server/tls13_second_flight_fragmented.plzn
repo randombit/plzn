@@ -1,0 +1,16 @@
+plzn tls "server/tls13-second-flight-fragmented" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  matrix {
+    size in [1, 5, 16, 64, 255]
+  }
+  flow handshake {
+    send Certificate @ fragment $size
+    send CertificateVerify @ fragment $size
+    send Finished @ fragment $size
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

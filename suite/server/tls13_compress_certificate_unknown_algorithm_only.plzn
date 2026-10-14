@@ -1,0 +1,14 @@
+plzn tls "server/tls13-compress-certificate-unknown-algorithm-only" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext compress_certificate = raw "0200ff"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

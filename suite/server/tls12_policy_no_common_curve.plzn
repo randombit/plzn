@@ -1,0 +1,10 @@
+plzn tls "server/no-common-curve-tls12" {
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    curves: [secp384r1]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

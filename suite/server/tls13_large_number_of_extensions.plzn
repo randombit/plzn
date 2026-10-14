@@ -1,0 +1,64 @@
+plzn tls "server/tls13-large-number-of-extensions/valid-handshake" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-first-4096" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext each 59..4154
+    } @ fragment 16384
+    recv ServerHello { has_ext: key_share, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-window" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { base in 4155..57403 step 4096 }
+  flow handshake {
+    send ClientHello {
+      +ext each $base..$base + 4095
+    } @ fragment 16384
+    recv ServerHello { has_ext: key_share, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-last-window" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext each [61499..64767, 64769..65036, 65038..65280, 65282..65535]
+    } @ fragment 16384
+    recv ServerHello { has_ext: key_share, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

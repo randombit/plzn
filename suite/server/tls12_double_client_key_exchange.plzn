@@ -1,0 +1,12 @@
+plzn tls "server/tls12-double-client-key-exchange" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send raw "16030300051000000100"
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

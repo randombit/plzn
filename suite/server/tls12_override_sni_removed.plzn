@@ -1,0 +1,13 @@
+plzn tls "server/sni-removed" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello {
+      -ext server_name
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

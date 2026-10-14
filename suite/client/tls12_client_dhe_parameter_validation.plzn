@@ -1,0 +1,257 @@
+plzn tls "client/tls12-dhe-ffdhe8192" {
+  rfc 7919 section A.5
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p_bits: 8192 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  # wolfSSL caps finite-field DH at 4096 bits (MAX_DHKEY_SZ), a local limit.
+  expect alert fatal/handshake_failure if wolfssl
+}
+
+plzn tls "client/tls12-dhe-modulus-below-three" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  matrix { value in [0, 1, 2] }
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: [$value], dh_g: two, dh_Ys: two }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+}
+
+plzn tls "client/tls12-dhe-one-byte-prime" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: [0x17], dh_g: [0x05] }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+}
+
+plzn tls "client/tls12-dhe-composite-modulus" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail gnutls "accepts the composite DH modulus"
+  xfail openssl "accepts the composite DH modulus"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: 0xff * 256, dh_g: two }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+  xfail libressl "accepts the composite DH modulus"
+}
+
+plzn tls "client/tls12-dhe-even-modulus" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail gnutls "accepts the even composite DH modulus"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: [0xff * 255, 0xfe], dh_g: two }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "client/tls12-dhe-empty-modulus" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: [], dh_g: two, dh_Ys: two }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+}
+
+# The generator cases send RFC 5114's 2048-bit prime with an order-2549 Ys. A
+# client that accepts the degenerate generator derives one of Ys's 2549 powers
+# as its shared secret, which plzn finds by trial-opening the client's
+# Finished, so acceptance is a completed handshake rather than a harness
+# error. With a sound generator every backend accepts these parameters
+# (ServerDHParams carries no q to test Ys against), so a rejection there is a
+# rejection of g. The secret is 1 whenever 2549 divides the client's random
+# exponent, which OpenSSL rightly refuses: one run in 2549 (order 7 failed one
+# in seven).
+plzn tls "client/tls12-dhe-small-order-public-value" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_Ys: small_order }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-dhe-generator-zero" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail wolfssl "accepts a zero DH generator"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_g: zero, dh_Ys: small_order }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if libressl
+}
+
+plzn tls "client/tls12-dhe-generator-one" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail wolfssl "accepts a DH generator of one"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_g: one, dh_Ys: small_order }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  # GnuTLS never validates g: it aborts only because g = 1 makes every public
+  # value 1, and its keygen gives up (GNUTLS_E_RANDOM_FAILED).
+  expect alert fatal/internal_error if gnutls
+  xfail libressl "accepts a DH generator of one"
+}
+
+plzn tls "client/tls12-dhe-generator-p-minus-one" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail gnutls "accepts g = p - 1 and answers Yc = p - 1; when both of its two keygen draws give 1 it fails instead with GNUTLS_E_RANDOM_FAILED"
+  xfail wolfssl "accepts a DH generator equal to p minus one"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_g: p_minus_1, dh_Ys: small_order }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  xfail libressl "accepts a DH generator equal to p minus one"
+}
+
+plzn tls "client/tls12-dhe-generator-equal-p" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail gnutls "accepts a DH generator equal to p"
+  xfail wolfssl "accepts a DH generator equal to p"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_g: p, dh_Ys: small_order }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if libressl
+}
+
+plzn tls "client/tls12-dhe-generator-greater-than-p" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  xfail wolfssl "accepts a DH generator greater than p"
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_p: rfc5114_2048_256, dh_g: p_plus_1, dh_Ys: small_order }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  # GnuTLS never validates g: it aborts only because g = p + 1 makes every public
+  # value 1, and its keygen gives up (GNUTLS_E_RANDOM_FAILED).
+  expect alert fatal/internal_error if gnutls
+  xfail libressl "accepts a DH generator greater than p"
+}
+
+plzn tls "client/tls12-dhe-empty-generator" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_g: [], dh_Ys: two }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "client/tls12-dhe-public-zero" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: zero }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-dhe-public-one" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: one }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-dhe-public-p-minus-one" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: p_minus_1 }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-dhe-public-equal-p" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: p }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-dhe-public-greater-than-p" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: p_plus_1 }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-dhe-empty-public-value" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ServerKeyExchange { dh_Ys: [] }
+  }
+  expect alert fatal/{decode_error, handshake_failure, illegal_parameter, insufficient_security}
+  expect close if wolfssl
+}

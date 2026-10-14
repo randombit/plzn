@@ -1,0 +1,15 @@
+plzn tls "client/tls13-certreq-missing-sigalgs" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      -ext signature_algorithms
+    }
+  }
+  expect alert fatal/{handshake_failure, missing_extension}
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/unsupported_extension if gnutls
+  xfail libressl "accepts a CertificateRequest without signature_algorithms"
+}

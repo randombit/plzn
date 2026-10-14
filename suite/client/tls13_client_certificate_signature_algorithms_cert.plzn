@@ -1,0 +1,87 @@
+plzn tls "client/tls13-client-certificate-signature-algorithms-cert/independent-lists" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    recv CertificateVerify { algorithm: rsa_pss_rsae_sha384 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-signature-algorithms-cert/excludes-certificate" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  xfail botan "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+  xfail boringssl "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+  xfail gnutls "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+  xfail rustls "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+  xfail wolfssl "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+      +ext signature_algorithms_cert = [rsa_pss_rsae_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 0 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "sends its ECDSA-signed RSA credential despite signature_algorithms_cert excluding ECDSA"
+}
+
+plzn tls "client/tls13-client-certificate-signature-algorithms-cert/absent-falls-back" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  xfail botan "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  xfail boringssl "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  xfail gnutls "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  xfail openssl "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  xfail rustls "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  xfail wolfssl "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [rsa_pss_rsae_sha384]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 0 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+}

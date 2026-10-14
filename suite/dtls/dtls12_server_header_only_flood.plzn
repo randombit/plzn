@@ -1,0 +1,33 @@
+# The server-role counterpart of dtls12_client_header_only_flood.plzn: plzn
+# (the client) floods the shim SERVER with header-only handshake records at
+# far-future message_seqs (base + 1000...) during the handshake, right after
+# the cookie-bearing ClientHello. The server's reassembler must bound these
+# pending future-sequence claims (RFC 6347 4.2.3) so the real flight still
+# completes and application data flows. Botan's DTLS reassembly was
+# memory-exhaustible by exactly this shape before 3.13.0.
+plzn tls "dtls12/server-header-only-flood" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail gnutls "sends internal_error when its server handshake is flooded with far-future-message_seq handshake records instead of bounding and discarding them (RFC 6347 4.2.3); its server reassembler mishandles far-future fragments, as the fragment-window cases also show"
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    header_only_flood 8
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,19 @@
+plzn tls "dtls12/client-tampered-record-discarded" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  matrix {
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CCM]
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [$suite]
+  }
+  flow handshake {
+    send AppData { reply: none } @ xor[record.aead_tag, 0] = 0x01
+    wait 50ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "a silently discarded bad-MAC record leaves an error queued, so SSL_read reports SSL_ERROR_SSL"
+}

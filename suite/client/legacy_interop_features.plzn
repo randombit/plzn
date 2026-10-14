@@ -1,0 +1,38 @@
+plzn tls "client/legacy-exporter" {
+  rfc 5705 section 4
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv Exporter { label: "legacy exporter", context: "context", length: 64 }
+  }
+  expect ok
+}
+
+plzn tls "client/legacy-tls-unique" {
+  rfc 5929 section 3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake { recv TLSUnique }
+  expect ok
+}
+
+plzn tls "client/legacy-encrypt-then-mac" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client {
+    versions: [$version]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ServerHello { +ext encrypt_then_mac }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

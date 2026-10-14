@@ -1,0 +1,52 @@
+plzn tls "server/tls12-clienthello-md5/valid-handshake" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256, rsa_pkcs1_sha384, rsa_pkcs1_sha512, rsa_pss_rsae_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-clienthello-md5/only-md5-rsa" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_md5] }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-clienthello-md5/unknown-signature-algorithm-numbers" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "00021545" }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}

@@ -1,0 +1,25 @@
+plzn tls "client/tls12-offers-extended-master-secret" {
+  rfc 9325 section 3.5
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv ClientHello { has_ext: extended_master_secret }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "does not implement extended_master_secret"
+}
+
+plzn tls "client/tls12-signals-secure-renegotiation" {
+  rfc 5746 section 3.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  xfail wolfssl "sends neither renegotiation_info nor TLS_EMPTY_RENEGOTIATION_INFO_SCSV: this CMake build lacks HAVE_SERVER_RENEGOTIATION_INFO"
+  flow handshake {
+    recv ClientHello { secure_renegotiation_signal: true }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,76 @@
+plzn tls "server/tls12-alpn-selection" {
+  rfc 7301 section 3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    alpn_select: "foo"
+    expect_alpn: "foo"
+  }
+  flow handshake {
+    send ClientHello { +ext alpn = ["foo", "bar", "baz"] }
+    recv ServerHello { ext alpn == "foo" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-alpn-declined" {
+  rfc 7301 section 3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    alpn_decline: true
+  }
+  flow handshake {
+    send ClientHello { +ext alpn = ["foo", "bar"] }
+    recv ServerHello { lacks_ext: alpn }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-alpn-empty-protocol-name" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    alpn_select: "foo"
+  }
+  flow handshake {
+    send ClientHello { +ext alpn = raw "000903666f6f000362617a" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-alpn-resumption" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    alpn_select: "foo"
+    expect_alpn: "foo"
+  }
+
+  session initial {
+    flow handshake {
+      send ClientHello { +ext alpn = ["foo", "bar"] }
+      recv ServerHello { ext alpn == "foo" }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext alpn = ["foo", "bar"] }
+      recv ServerHello { ext alpn == "foo" }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

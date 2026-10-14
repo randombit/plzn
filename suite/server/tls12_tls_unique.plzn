@@ -1,0 +1,56 @@
+plzn tls "server/tls12-tls-unique-full-handshake" {
+  rfc 5929 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    recv TLSUnique
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-tls-unique-resumption-with-ems" {
+  rfc 7627 section 5.4
+  chain: [default]
+  uut server { versions: [tls12] }
+
+  session initial {
+    flow handshake {
+      recv TLSUnique
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv TLSUnique
+    }
+    expect ok
+  }
+  skip libressl "does not implement extended_master_secret"
+}
+
+plzn tls "server/tls12-tls-unique-unavailable-on-resumption-without-ems" {
+  rfc 7627 section 5.4
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail gnutls "exposes tls-unique on a resumed session that did not negotiate EMS"
+
+  session initial {
+    flow handshake {
+      send ClientHello { -ext extended_master_secret }
+      recv ServerHello { lacks_ext: extended_master_secret }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { -ext extended_master_secret }
+      recv ServerHello { resumed: true, lacks_ext: extended_master_secret }
+      recv TLSUnique { unavailable: true }
+    }
+    expect ok
+  }
+}

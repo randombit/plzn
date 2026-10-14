@@ -1,0 +1,14 @@
+plzn tls "server/tls13-malformed-supported-versions" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_versions = raw "00"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/{decode_error,protocol_version}
+}

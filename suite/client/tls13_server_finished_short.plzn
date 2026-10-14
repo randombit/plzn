@@ -1,0 +1,9 @@
+plzn tls "client/tls13-server-finished-short" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send Finished @ truncate 16
+  }
+  expect alert fatal/{decode_error, decrypt_error}
+}

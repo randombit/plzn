@@ -1,0 +1,15 @@
+plzn tls "client/tls12-serverhello-unsolicited-extension" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake {
+    recv ClientHello { lacks_ext: max_fragment_length }
+    send ServerHello {
+      +ext max_fragment_length = 512
+    }
+  }
+  expect alert fatal/unsupported_extension
+  xfail libressl "accepts an unsolicited ServerHello extension"
+}

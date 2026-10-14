@@ -1,0 +1,11 @@
+plzn tls "server/tls13-certificate-single-entry" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    recv Certificate { entries: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

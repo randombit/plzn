@@ -1,0 +1,16 @@
+plzn tls "server/tls13-server-hello-version-and-key-share" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    recv ServerHello {
+      legacy_version: 0x0303
+      has_ext: supported_versions
+      has_ext: key_share
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

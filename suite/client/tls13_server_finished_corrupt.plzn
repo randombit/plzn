@@ -1,0 +1,17 @@
+plzn tls "client/tls13-server-finished-corrupt" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send Finished @ xor[handshake.verify_data, 0] = 0xff
+  }
+  expect alert fatal/decrypt_error
+}

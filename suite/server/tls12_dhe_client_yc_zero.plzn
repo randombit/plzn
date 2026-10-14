@@ -1,0 +1,14 @@
+plzn tls "server/tls12-dhe-client-yc-zero" {
+  rfc 8446 section 4.2.8.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange {
+      key_share_point: zero
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

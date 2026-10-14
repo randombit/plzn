@@ -1,0 +1,14 @@
+plzn tls "server/tls13-client-finished-fragmented" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    size in [1, 5, 16, 35]
+  }
+  flow handshake {
+    send Finished @ fragment $size
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

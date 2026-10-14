@@ -1,0 +1,53 @@
+plzn tls "client/tls12-certificate-request-length/message" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "client/tls12-certificate-request-length/certificate-types" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ add[handshake.certificate_types_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-certificate-request-length/signature-algorithms" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ add[handshake.signature_algorithms_length] = 2
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "client/tls12-certificate-request-length/certificate-authorities" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ add[handshake.certificate_authorities_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}

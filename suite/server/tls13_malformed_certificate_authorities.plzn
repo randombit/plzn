@@ -1,0 +1,14 @@
+plzn tls "server/tls13-malformed-certificate-authorities" {
+  rfc 8446 section 4.2.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext certificate_authorities = raw "0005"
+    }
+  }
+  expect alert fatal/decode_error
+  # LibreSSL does not implement certificate_authorities, and RFC 8446 4.2
+  # requires ignoring an extension it does not recognize.
+  expect ok if libressl
+}

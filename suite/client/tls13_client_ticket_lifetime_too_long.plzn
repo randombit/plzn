@@ -1,0 +1,34 @@
+plzn tls "client/tls13-ticket-lifetime-too-long" {
+  rfc 9846 section 4.7.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail openssl "caps a ticket_lifetime over seven days and offers the ticket; RFC 9846 4.7.1 allows use within seven days of issuance, this test asserts discard"
+  xfail gnutls "keeps a ticket whose ticket_lifetime exceeds seven days and offers it (no seven-day cap)"
+  xfail rustls "offers a ticket_lifetime greater than seven days on the next connection"
+  xfail boringssl "offers a ticket_lifetime greater than seven days on the next connection"
+  skip botan "rejects the overlong ticket immediately; the shim cannot continue this multi-session flow after the alert"
+  skip go "rejects the overlong ticket immediately; the shim cannot continue this multi-session flow after the alert"
+  skip wolfssl "built without HAVE_SESSION_TICKET: DoTls13NewSessionTicket discards every ticket unparsed"
+  skip libressl "rejects the overlong ticket immediately; the shim cannot continue this multi-session flow after the alert"
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket { ticket_lifetime_days: 8 }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    expect alert fatal/illegal_parameter if botan
+    expect alert fatal/illegal_parameter if go
+  }
+
+  session second {
+    flow handshake {
+      recv ClientHello { lacks_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

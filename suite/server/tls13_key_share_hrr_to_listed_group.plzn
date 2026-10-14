@@ -1,0 +1,15 @@
+plzn tls "server/tls13-key-share-hrr-to-listed-group" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [x25519]
+  }
+  peer { capabilities: [secp256r1, x25519, hrr] }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

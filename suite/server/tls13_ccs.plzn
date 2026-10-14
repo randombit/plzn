@@ -1,0 +1,27 @@
+plzn tls "server/tls13-ccs/ccs-after-finished" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ChangeCipherSpec
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ccs/two-byte-long-ccs" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake after send ClientHello {
+    send record 20 raw "0101"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+  }
+  expect alert fatal
+}

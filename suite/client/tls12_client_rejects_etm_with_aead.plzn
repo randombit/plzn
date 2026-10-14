@@ -1,0 +1,20 @@
+plzn tls "client/tls12-client-rejects-etm-with-aead" {
+  rfc 7366 section 3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [gcm] }
+  flow handshake {
+    send ServerHello {
+      +ext encrypt_then_mac
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/unsupported_extension if rustls
+  expect ok if openssl
+  xfail libressl "accepts an unsolicited encrypt_then_mac extension (it implements no EtM)"
+}

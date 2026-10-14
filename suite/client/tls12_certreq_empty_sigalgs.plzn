@@ -1,0 +1,13 @@
+plzn tls "client/tls12-certreq-empty-sigalgs" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest { signature_algorithms: [] }
+  }
+  expect alert fatal/decode_error
+  # OpenSSL maps its own empty-list length check to internal_error.
+  expect alert fatal/internal_error if openssl
+  xfail libressl "accepts a CertificateRequest with an empty signature_algorithms list and signs CertificateVerify with SHA-1"
+}

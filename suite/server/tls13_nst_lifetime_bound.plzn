@@ -1,0 +1,21 @@
+plzn tls "server/tls13-nst-lifetime-bound" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut server { versions: [tls13] }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { max_ticket_lifetime_hours: 168 }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

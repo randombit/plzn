@@ -1,0 +1,28 @@
+plzn tls "client/tls10-rejects-tls12-server-key-exchange-format" {
+  rfc 2246 section 7.4.3
+  chain: [rsa_2048]
+  uut client { versions: [tls10] }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ServerKeyExchange {
+      format: tls12
+      signature_scheme: rsa_pkcs1_sha256
+    }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "client/tls10-rejects-tls12-certificate-request-format" {
+  rfc 2246 section 7.4.4
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls10] }
+  peer { capabilities: [rsa, aes128_cbc_sha], request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      format: tls12
+      signature_algorithms: [rsa_pkcs1_sha256]
+    }
+  }
+  expect alert fatal/decode_error
+}

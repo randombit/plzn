@@ -1,0 +1,15 @@
+plzn tls "server/tls13-key-share-p521" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp521r1] }
+  flow handshake {
+    recv ServerHello { key_share_group: secp521r1 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

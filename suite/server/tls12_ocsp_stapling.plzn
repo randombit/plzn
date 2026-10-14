@@ -1,0 +1,125 @@
+plzn tls "server/tls12-ocsp-stapling" {
+  rfc 6066 section 8
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    ocsp_stapling: true
+  }
+  skip openssl "OpenSSL 3.6 does not staple for a self-signed server certificate (its own s_server -status sends nothing for one)"
+  flow {
+    send ClientHello { +ext status_request = ocsp }
+    recv ServerHello { has_ext: status_request }
+    recv Certificate
+    recv CertificateStatus { status_type: ocsp }
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ocsp-not-requested" {
+  rfc 6066 section 8
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    ocsp_stapling: true
+  }
+  flow {
+    send ClientHello
+    recv ServerHello { lacks_ext: status_request }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ocsp-stapling" {
+  rfc 8446 section 4.4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    ocsp_stapling: true
+  }
+  skip openssl "OpenSSL 3.6 does not staple for a self-signed server certificate (its own s_server -status sends nothing for one)"
+  flow handshake {
+    send ClientHello { +ext status_request = ocsp }
+    recv Certificate { leaf_has_ext: status_request }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ocsp-not-requested" {
+  rfc 8446 section 4.4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    ocsp_stapling: true
+  }
+  flow handshake {
+    recv Certificate { leaf_lacks_ext: status_request }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# RFC 6066 defines only the ocsp status_type. A request with any other type
+# cannot be answered and must not be treated as an OCSP request.
+plzn tls "server/tls12-ocsp-unknown-status-type-ignored" {
+  rfc 6066 section 8
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    ocsp_stapling: true
+  }
+  xfail rustls "answers a status_request of an unknown status_type"
+  flow {
+    send ClientHello { +ext status_request = raw "0200000000" }
+    recv ServerHello { lacks_ext: status_request }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ocsp-unknown-status-type-ignored" {
+  rfc 8446 section 4.4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    ocsp_stapling: true
+  }
+  xfail rustls "answers a status_request of an unknown status_type"
+  flow handshake {
+    send ClientHello { +ext status_request = raw "0200000000" }
+    recv Certificate { leaf_lacks_ext: status_request }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

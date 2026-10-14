@@ -1,0 +1,12 @@
+plzn tls "client/tls13-server-wrong-server-hello-type" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    mtype in [0x01, 0x0b, 0x14, 0xff]
+  }
+  flow handshake {
+    send ServerHello @ set[handshake.msg_type, 0] = $mtype
+  }
+  expect alert fatal/{decode_error, illegal_parameter, unexpected_message}
+}

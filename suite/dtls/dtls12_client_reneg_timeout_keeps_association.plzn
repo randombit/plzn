@@ -1,0 +1,27 @@
+plzn tls "dtls12/client-reneg-timeout-keeps-association" {
+  rfc 5746 section 3.5
+  chain: [ecdsa_p256]
+  skip openssl "a timed-out DTLS renegotiation is fatal to the whole connection (SSL_R_READ_TIMEOUT_EXPIRED closes it); OpenSSL has no 'abandon the renegotiation but keep the established association' path the way Botan's retransmission budget does"
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+    renegotiation: server
+  }
+  flow handshake after send Finished {
+    send HelloRequest
+    recv ClientHello
+    advance_clock 1ms
+    expect_retransmit
+    advance_clock 2ms
+    expect_retransmit
+    advance_clock 4ms
+    wait 100ms
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

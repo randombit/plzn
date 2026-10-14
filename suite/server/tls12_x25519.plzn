@@ -1,0 +1,147 @@
+plzn tls "server/tls12-x25519/too-small-Yc" {
+  rfc 7748 section 6.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange @ pad -1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+  expect close if rustls
+}
+
+plzn tls "server/tls12-x25519/too-big-Yc" {
+  rfc 7748 section 6.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange @ pad +1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+}
+
+plzn tls "server/tls12-x25519/empty-Yc" {
+  rfc 7748 section 6.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange { ecdh_Yc: [] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+  expect close if rustls
+}
+
+plzn tls "server/tls12-x25519/all-zero-Yc" {
+  rfc 7748 section 6.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls12-x25519/Yc-of-1" {
+  rfc 7748 section 6.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange { key_share_point: one }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls12-x25519/Yc-with-high-bit-set" {
+  rfc 7748 section 5
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange @ xor[handshake.ecdh_point, -1] = 0x80
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-x25519/no-supported-groups-extension" {
+  rfc 8422 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { -ext supported_groups }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-x25519/unknown-group-only-falls-back-to-dhe" {
+  rfc 8422 section 5.1
+  uut server {
+    versions: [tls12]
+    cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  chain: [rsa_2048]
+  skip rustls "no DHE_RSA suite to fall back to"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, DHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = raw "00022bc0"
+    }
+    recv ServerHello { cipher_suite: DHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-x25519/unknown-group-only-no-fallback" {
+  rfc 8422 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext supported_groups = raw "00022bc0" }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+}

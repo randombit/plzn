@@ -1,0 +1,14 @@
+plzn tls "client/tls13-client-pq-and-brainpool-group-sweep" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    group in [X25519MLKEM768, X448MLKEM1024, SecP256r1MLKEM768, SecP384r1MLKEM1024, MLKEM512, MLKEM768, MLKEM1024, brainpoolP256r1tls13, brainpoolP384r1tls13, secp521r1]
+  }
+  flow handshake {
+    recv ClientHello { supported_groups: [$group] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

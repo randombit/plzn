@@ -1,0 +1,23 @@
+plzn tls "dtls12/lost-hvr-retransmit" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail boringssl "ignores the duplicate ClientHello instead of using it to drive retransmission of the HelloVerifyRequest"
+  flow handshake until recv HelloVerifyRequest {
+    discard_flight
+    retransmit_flight
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+  xfail libressl "ignores the duplicate ClientHello instead of using it to drive retransmission of the HelloVerifyRequest"
+}

@@ -1,0 +1,13 @@
+plzn tls "client/tls12-server-renegotiation" {
+  rfc 5746 section 3.7
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

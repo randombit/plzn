@@ -1,0 +1,9 @@
+plzn tls "client/tls13-server-encrypted-extensions-trailing-data" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions @ pad +4
+  }
+  expect alert fatal/decode_error
+}

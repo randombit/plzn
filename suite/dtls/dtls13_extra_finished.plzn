@@ -1,0 +1,86 @@
+plzn tls "dtls13/server-rejects-extra-finished" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake after send Finished {
+    send Finished
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/illegal_parameter if boringssl
+}
+
+plzn tls "dtls13/client-rejects-extra-finished" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake after send Finished {
+    send Finished
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/server-rejects-extra-finished-packed" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake until send Finished {
+    # `old_keys` seals both Finished fragments at epoch 2 before advancing to epoch 3.
+    coalesce old_keys {
+      send Finished
+      send Finished
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/client-rejects-extra-finished-packed" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake until send Finished {
+    # `old_keys` seals both Finished fragments at epoch 2 before advancing to epoch 3.
+    coalesce old_keys {
+      send Finished
+      send Finished
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/server-rejects-extra-finished-reordered" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send Finished @ future_sequence 1 }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/client-rejects-extra-finished-reordered" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send Finished @ future_sequence 1 }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/server-rejects-new-finished-at-previous-epoch-after-appdata" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    session_tickets: 0
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send_previous_epoch Finished
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}

@@ -1,0 +1,27 @@
+plzn tls "dtls12/reneg-delayed-finished" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_require_cookie: false
+    renegotiation: client
+  }
+  flow handshake after send Finished {
+    hold_retransmit
+    recv ChangeCipherSpec
+    recv Finished
+    begin_renegotiation
+    send ClientHello
+    release_flight
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

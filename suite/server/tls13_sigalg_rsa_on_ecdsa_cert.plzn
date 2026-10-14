@@ -1,0 +1,11 @@
+plzn tls "server/tls13-sigalg-rsa-on-ecdsa-cert" {
+  rfc 8446 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pss_rsae_sha256]
+    }
+  }
+  expect alert fatal/handshake_failure
+}

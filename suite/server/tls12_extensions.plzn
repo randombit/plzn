@@ -1,0 +1,89 @@
+plzn tls "server/tls12-extensions/n-extensions" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [31, 32, 33, 63, 64, 65, 100, 127, 128, 129, 256, 1024, 4085, 4086, 4096, 8192] }
+  flow handshake {
+    send ClientHello {
+      +ext each 90..$n + 88
+      +ext renegotiation_info = raw "00"
+    } @ fragment 16384
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-extensions/16300-extensions" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext each [90..13171, 13173..16389]
+      +ext renegotiation_info = raw "00"
+    } @ fragment 16384
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-extensions/n-extensions-last-empty" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [31, 32, 33, 63, 64, 65, 100, 127, 128, 129, 256, 1024, 4085, 4086, 4096, 8192] }
+  flow handshake {
+    send ClientHello {
+      +ext each 91..$n + 88
+      +ext renegotiation_info = raw "00"
+      +ext 90
+    } @ fragment 16384
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-extensions/16300-extensions-last-empty" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext each [91..13171, 13173..16389]
+      +ext renegotiation_info = raw "00"
+      +ext 90
+    } @ fragment 16384
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-extensions/valid-handshake" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    recv ServerHello { has_ext: renegotiation_info }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

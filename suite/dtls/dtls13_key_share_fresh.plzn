@@ -1,0 +1,33 @@
+plzn tls "dtls13/client-key-share-fresh-across-connections" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    curves: [x25519]
+  }
+  repeat 8
+  flow handshake {
+    recv ClientHello { key_share: capture $ks }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $ks
+}
+
+plzn tls "dtls13/server-key-share-fresh-across-connections" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    curves: [x25519]
+  }
+  repeat 8
+  flow handshake {
+    recv ServerHello { key_share: capture $ks }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $ks
+}

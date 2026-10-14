@@ -1,0 +1,18 @@
+plzn tls "server/tls13-server-preference-suites" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [AES_128_GCM_SHA256, CHACHA20_POLY1305_SHA256]
+    server_preference: true
+  }
+  flow handshake {
+    send ClientHello { cipher_suites: [CHACHA20_POLY1305_SHA256, AES_128_GCM_SHA256] }
+    recv ServerHello { cipher_suite: AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  assert negotiated.cipher == AES_128_GCM_SHA256
+}

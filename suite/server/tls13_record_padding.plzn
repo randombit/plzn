@@ -1,0 +1,39 @@
+plzn tls "server/tls13-record-padding/set-fixed-length-padding" {
+  rfc 8446 section 5.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send AppData { size: 18 } @ record_pad 30
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-record-padding/large-padding" {
+  rfc 8446 section 5.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send AppData { size: 18 } @ record_pad fill
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

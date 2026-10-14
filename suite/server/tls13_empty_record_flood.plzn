@@ -1,0 +1,291 @@
+# Floods of consecutive zero-length records at a TLS 1.3 server.
+#
+# RFC 8446 5.1: "Implementations MUST NOT send zero-length fragments of
+# Handshake types, even if those fragments contain padding", while
+# "Zero-length fragments of Application Data MAY be sent". RFC 9846 5.4 adds
+# the receiver's duty: "if such a message is received, the receiving
+# implementation MUST terminate the connection with an unexpected_message
+# alert". No limit is placed on empty application data, so the caps on it are
+# each library's own flood defence and are pinned per backend; a zero-length
+# protected handshake fragment that is tolerated violates 9846 5.4 and is an
+# xfail. suite/client/tls13_empty_record_flood.plzn pins the same behaviour
+# from the other side, where every library reacts identically.
+#
+# Per library (the counters themselves are described in
+# tls12_empty_record_flood.plzn; this is what differs under TLS 1.3):
+#   OpenSSL    the 32-record counter covers unprotected empty records and
+#              empty application data; a protected handshake record with
+#              zero-length content is unexpected_message at once
+#              (tls13_common_post_process_record, SSL_R_BAD_LENGTH).
+#   BoringSSL  the 32-record counter covers everything, zero-length protected
+#              handshake fragments included ("empty records are returned up
+#              to the caller", and the handshake reader appends nothing); the
+#              33rd gets the alert 9846 5.4 asks for at the first.
+#   LibreSSL   an unprotected zero-length record and a protected handshake or
+#              alert record with empty content are unexpected_message
+#              (tls13_record_layer.c, citing 9846 5.4); empty application data
+#              is answered with TLS13_IO_WANT_POLLIN each time, with no bound.
+#   rustls     a zero-length wire record is decode_error; zero-length
+#              protected fragments of any type are counted (32) and the 33rd
+#              closes without an alert, so a zero-length handshake fragment is
+#              never answered with unexpected_message.
+#   Go         an empty handshake record is unexpected_message; empty
+#              application data trips maxUselessRecords at the 17th.
+#   GnuTLS     an unprotected zero-length record is unexpected_message; a
+#              protected handshake record with empty content is
+#              GNUTLS_E_UNEXPECTED_PACKET (record_add_to_buffers), also
+#              unexpected_message; empty application data is returned to the
+#              application as GNUTLS_E_AGAIN each time, with no bound.
+#   wolfSSL    an unprotected zero-length record is record_overflow; a
+#              protected handshake record with empty content reaches
+#              DoTls13HandShakeMsg, whose header parse fails (PARSE_ERROR, no
+#              alert); empty application data fails at the 32nd with no alert.
+#   Botan      an unprotected zero-length record is "empty record received"
+#              (decode_error, tls_record_13.cpp); a protected handshake record
+#              with empty content is unexpected_message, citing 9846 5.4
+#              (tls_cipher_state.cpp); empty application data counts toward
+#              Policy::max_useless_records (32), and the 33rd consecutive
+#              one is fatal unexpected_message.
+#
+# Positions: unprotected empty handshake records before the ClientHello and
+# between its 64-byte fragments; protected empty handshake records before the
+# client's Finished; empty application data after the handshake (a single one
+# is tls13_empty_app_data_record, and tls13_zero_length_data interleaves them
+# with data and padding).
+
+plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hello-one-to-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send ClientHello {
+    repeat $count { send empty_record handshake }
+    send ClientHello
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hello-over-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake until send ClientHello {
+    repeat $count { send empty_record handshake }
+    send ClientHello
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hello-fragments-one-to-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 64 hold
+    repeat $count { send empty_record handshake }
+    flush_fragment
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hello-fragments-over-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 64 hold
+    repeat $count { send empty_record handshake }
+    flush_fragment
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+# Zero-length TLSInnerPlaintext.content of handshake type under the client
+# handshake keys. RFC 9846 5.4 asks for unexpected_message at the first; above
+# 32 BoringSSL's empty-record counter produces that alert anyway.
+plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-finished-one-to-thirty-two" {
+  rfc 8446 section 5.1
+  rfc 9846 section 5.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake after recv Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  xfail boringssl "accepts zero-length protected handshake fragments up to kMaxEmptyRecords (32) where RFC 9846 5.4 requires unexpected_message at the first"
+  xfail rustls "counts a zero-length protected handshake fragment like any empty record (32 tolerated, the 33rd closed without an alert) where RFC 9846 5.4 requires unexpected_message"
+  xfail wolfssl "closes without the unexpected_message alert RFC 9846 5.4 requires: the zero-byte fragment reaches DoTls13HandShakeMsg, whose header parse fails with PARSE_ERROR and no alert"
+}
+
+plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-finished-over-thirty-two" {
+  rfc 8446 section 5.1
+  rfc 9846 section 5.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake after recv Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  xfail rustls "counts a zero-length protected handshake fragment like any empty record (32 tolerated, the 33rd closed without an alert) where RFC 9846 5.4 requires unexpected_message"
+  xfail wolfssl "closes without the unexpected_message alert RFC 9846 5.4 requires: the zero-byte fragment reaches DoTls13HandShakeMsg, whose header parse fails with PARSE_ERROR and no alert"
+}
+
+plzn tls "server/tls13-empty-record-flood/application-data-two-to-sixteen" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [2, 16]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [17, 31]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "server/tls13-empty-record-flood/application-data-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [32]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-empty-record-flood/application-data-over-thirty-two" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    count in [33, 100, 200, 1000]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/unexpected_message if botan
+}

@@ -1,0 +1,12 @@
+plzn tls "server/tls13-keyupdate-split-across-key-change" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send KeyUpdate { request_update: update_not_requested } @ fragment 3 hold
+    flush_fragment
+    wait 300 ms
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}

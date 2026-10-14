@@ -1,0 +1,11 @@
+plzn tls "server/tls13-user-canceled-warning" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send alert warning/user_canceled
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

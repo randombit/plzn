@@ -1,0 +1,24 @@
+plzn tls "client/tls12-server-warning-user-canceled"{
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send alert warning/user_canceled
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

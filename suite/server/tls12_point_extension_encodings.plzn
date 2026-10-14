@@ -1,0 +1,62 @@
+plzn tls "server/tls12-point-extension/client-point-compressed" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: compressed }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+  expect ok if botan
+  xfail openssl "accepts a compressed ECDH point although only uncompressed was negotiated (RFC 8422 5.1.2)"
+}
+
+plzn tls "server/tls12-point-extension/client-point-hybrid" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: hybrid }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+  xfail openssl "accepts a hybrid-encoded ECDH point although only uncompressed was negotiated (RFC 8422 5.1.2)"
+}
+
+plzn tls "server/tls12-point-extension/client-point-xy" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: xy }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+}

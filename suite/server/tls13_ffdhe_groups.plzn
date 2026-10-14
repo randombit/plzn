@@ -1,0 +1,217 @@
+plzn tls "server/tls13-ffdhe-groups/duplicated-key-share-entry" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [$group]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { +ext key_share = [$group, $group] }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  # RFC 8446 4.2.8: servers MAY check for this violation.
+  expect ok if openssl
+  expect ok if gnutls
+}
+
+plzn tls "server/tls13-ffdhe-groups/right-0-padded" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: padded }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/right-truncated" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: truncated }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/zero-as-one-byte" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: [0x00] }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/zero-share" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: zero }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/one" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: one }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/all-bits-set" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: all_ones }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/p-minus-1" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: p_minus_1 }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/p" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: p }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/empty-entry" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: empty }
+    recv ServerHello
+  }
+  expect alert fatal/{illegal_parameter,decode_error,handshake_failure}
+}
+
+plzn tls "server/tls13-ffdhe-groups/share-from-other-group-2048" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe2048] }
+  flow handshake {
+    send ClientHello { key_share_point: ffdhe3072 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect close if wolfssl
+}
+
+plzn tls "server/tls13-ffdhe-groups/share-from-other-group-3072" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe3072] }
+  flow handshake {
+    send ClientHello { key_share_point: ffdhe2048 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls13-ffdhe-groups/share-from-other-group-large" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [$group]
+  }
+  matrix {
+    group in [ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: ffdhe2048 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+}

@@ -1,0 +1,17 @@
+plzn tls "server/clienthello-legacy-version-tls13" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { legacy_version: 0xfefe }
+    recv ServerHello { legacy_version: 0x0303 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  # 0xfefe has DTLS's 0xfe major (DTLS 1.2 itself is 0xfefd), so Botan parses
+  # the ClientHello in the DTLS format and fails on the missing cookie field.
+  expect alert fatal/decode_error if botan
+  expect alert fatal/protocol_version if libressl
+}

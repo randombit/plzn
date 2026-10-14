@@ -1,0 +1,15 @@
+plzn tls "server/tls12-ems-off-server" {
+  rfc 7627 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    extended_master_secret: off
+  }
+  flow handshake {
+    recv ServerHello { lacks_ext: extended_master_secret }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

@@ -1,0 +1,11 @@
+plzn tls "server/tls12-client-untrusted-cert" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send Certificate { credential: untrusted }
+  }
+  expect alert fatal/{bad_certificate, certificate_unknown, unknown_ca}
+}

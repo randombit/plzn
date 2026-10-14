@@ -1,0 +1,17 @@
+plzn tls "server/tls13-ticket-age-add-fresh-across-connections" {
+  rfc 9846 section 4.7.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+  }
+  repeat 8
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [psk_dhe_ke] }
+    recv NewSessionTicket { ticket_age_add: capture $age_add }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $age_add
+}

@@ -1,0 +1,14 @@
+plzn tls "server/tls13-only-client-vs-tls12-only-server" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello {
+      cipher_suites: [AES_128_GCM_SHA256]
+      +ext supported_versions = raw "02 0304"
+    }
+  }
+  expect alert fatal/protocol_version
+}

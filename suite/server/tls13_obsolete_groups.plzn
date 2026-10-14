@@ -1,0 +1,111 @@
+plzn tls "server/tls13-obsolete-groups/only-obsolete-share" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  matrix {
+    group in [0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
+              0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e,
+              0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+              0x0016, brainpoolP256r1, brainpoolP384r1, brainpoolP512r1,
+              0xff01, 0xff02]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [$group]
+      +ext key_share = [$group : 0xab * 32]
+    }
+  }
+  expect alert fatal/{handshake_failure,illegal_parameter}
+}
+
+plzn tls "server/tls13-obsolete-groups/only-obsolete-group-empty-key-share" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  matrix {
+    group in [0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
+              0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e,
+              0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+              0x0016, brainpoolP256r1, brainpoolP384r1, brainpoolP512r1,
+              0xff01, 0xff02]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [$group]
+      +ext key_share = []
+    }
+  }
+  expect alert fatal/{handshake_failure,illegal_parameter}
+}
+
+plzn tls "server/tls13-obsolete-groups/valid-share-after-obsolete-group" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  peer { capabilities: [secp256r1] }
+  matrix {
+    group in [0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
+              0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e,
+              0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+              0x0016, brainpoolP256r1, brainpoolP384r1, brainpoolP512r1,
+              0xff01, 0xff02]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [$group, secp256r1]
+      +ext key_share = [secp256r1]
+    }
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-obsolete-groups/obsolete-share-before-valid-share" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  peer { capabilities: [secp256r1] }
+  matrix {
+    group in [0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
+              0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e,
+              0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+              0x0016, brainpoolP256r1, brainpoolP384r1, brainpoolP512r1,
+              0xff01, 0xff02]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [$group, secp256r1]
+      +ext key_share = [$group : 0xab * 32, secp256r1]
+    }
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-obsolete-groups/obsolete-share-after-valid-share" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server { versions: [tls13], curves: [secp256r1] }
+  peer { capabilities: [secp256r1] }
+  matrix {
+    group in [0x0001, 0x0002, 0x0003, 0x0004, 0x0005, 0x0006, 0x0007,
+              0x0008, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d, 0x000e,
+              0x000f, 0x0010, 0x0011, 0x0012, 0x0013, 0x0014, 0x0015,
+              0x0016, brainpoolP256r1, brainpoolP384r1, brainpoolP512r1,
+              0xff01, 0xff02]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [secp256r1, $group]
+      +ext key_share = [secp256r1, $group : 0xab * 32]
+    }
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

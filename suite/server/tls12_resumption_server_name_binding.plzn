@@ -1,0 +1,291 @@
+# RFC 6066 3 binds a TLS 1.2 session to the server_name it was established
+# under: a server "MUST NOT accept the request to resume the session if the
+# server_name extension contains a different name" and instead runs a full
+# handshake, and "MUST NOT include a server_name extension in the server hello"
+# when it does resume. The rows below resume a session (by ticket, then by
+# session_id) under the same name, a different name, no name at all, a name the
+# session never had, and a case-only variant of the same name (RFC 6066 3: DNS
+# hostnames are case-insensitive, so that is the same name). Resuming without a
+# name, or declining to, are both within the RFC; the backends that decline are
+# skipped with their reason rather than marked as failing.
+
+plzn tls "server/tls12-resumption-server-name-binding/ticket-same-name-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: true, lacks_ext: server_name }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/ticket-different-name-full-handshake" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "other.invalid" }
+      recv ServerHello { resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail go "resumes a TLS 1.2 ticket under a different server_name (RFC 6066 3 MUST NOT); its session state carries no server name to compare"
+  xfail boringssl "resumes a TLS 1.2 session under a different server_name (RFC 6066 3 MUST NOT); it never compares the hello's name with the session's"
+  xfail wolfssl "resumes under a different server_name: this build has no HAVE_SESSION_TICKET, which also compiles out the session/server_name binding check"
+  xfail libressl "aborts a resumption under a different server_name with unrecognized_name instead of falling back to a full handshake"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/ticket-name-omitted-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip rustls "declines a resumption whose ClientHello omits server_name (it compares the session's recorded name exactly); RFC 6066 3 only forbids resuming under a different name"
+  skip gnutls "declines a resumption whose ClientHello omits server_name (it compares the session's recorded name byte for byte); RFC 6066 3 only forbids resuming under a different name"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/ticket-name-added-full-handshake" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail go "resumes a TLS 1.2 ticket under a different server_name (RFC 6066 3 MUST NOT); its session state carries no server name to compare"
+  xfail boringssl "resumes a TLS 1.2 session under a different server_name (RFC 6066 3 MUST NOT); it never compares the hello's name with the session's"
+  xfail wolfssl "resumes under a different server_name: this build has no HAVE_SESSION_TICKET, which also compiles out the session/server_name binding check"
+  xfail libressl "aborts with unrecognized_name when the resumption request names a server and the session had none, instead of falling back to a full handshake"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/ticket-case-only-difference-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "LOCALHOST" }
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail libressl "aborts with unrecognized_name on a case-only server_name difference (RFC 6066 3: DNS hostnames are case-insensitive)"
+  skip gnutls "compares server_name byte for byte, so a case-only difference starts a full handshake; RFC 6066 3 calls DNS hostnames case-insensitive"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/session-id-same-name-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: true, lacks_ext: server_name }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/session-id-different-name-full-handshake" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "other.invalid" }
+      recv ServerHello { resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail go "resumes a TLS 1.2 ticket under a different server_name (RFC 6066 3 MUST NOT); its session state carries no server name to compare"
+  xfail boringssl "resumes a TLS 1.2 session under a different server_name (RFC 6066 3 MUST NOT); it never compares the hello's name with the session's"
+  xfail wolfssl "resumes under a different server_name: this build has no HAVE_SESSION_TICKET, which also compiles out the session/server_name binding check"
+  xfail libressl "aborts a resumption under a different server_name with unrecognized_name instead of falling back to a full handshake"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/session-id-name-omitted-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip rustls "declines a resumption whose ClientHello omits server_name (it compares the session's recorded name exactly); RFC 6066 3 only forbids resuming under a different name"
+  skip gnutls "declines a resumption whose ClientHello omits server_name (it compares the session's recorded name byte for byte); RFC 6066 3 only forbids resuming under a different name"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/session-id-name-added-full-handshake" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail go "resumes a TLS 1.2 ticket under a different server_name (RFC 6066 3 MUST NOT); its session state carries no server name to compare"
+  xfail boringssl "resumes a TLS 1.2 session under a different server_name (RFC 6066 3 MUST NOT); it never compares the hello's name with the session's"
+  xfail wolfssl "resumes under a different server_name: this build has no HAVE_SESSION_TICKET, which also compiles out the session/server_name binding check"
+  xfail libressl "aborts with unrecognized_name when the resumption request names a server and the session had none, instead of falling back to a full handshake"
+}
+
+plzn tls "server/tls12-resumption-server-name-binding/session-id-case-only-difference-resumes" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_id] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "LOCALHOST" }
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail libressl "aborts with unrecognized_name on a case-only server_name difference (RFC 6066 3: DNS hostnames are case-insensitive)"
+  skip gnutls "compares server_name byte for byte, so a case-only difference starts a full handshake; RFC 6066 3 calls DNS hostnames case-insensitive"
+}

@@ -1,0 +1,17 @@
+plzn tls "server/tls13-keyupdate-rate-limited" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    min_key_update_interval_ms: 60000
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: update_not_requested }
+    send KeyUpdate { request_update: update_not_requested }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}

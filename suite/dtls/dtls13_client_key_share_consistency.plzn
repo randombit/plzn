@@ -1,0 +1,14 @@
+plzn tls "dtls13/client-key-shares-match-supported-groups" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    recv ClientHello {
+      supported_groups_unique: true
+      key_shares_consistent: true
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

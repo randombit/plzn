@@ -1,0 +1,33 @@
+plzn tls "client/tls13-signature-algorithms-offer-excludes-md5-sha224-and-dsa" {
+  rfc 9846 section 4.3.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    scheme in [rsa_pkcs1_md5, ecdsa_md5, ecdsa_sha224, dsa_sha1, dsa_sha256, 0x0502, 0x0602]
+  }
+  flow handshake {
+    recv ClientHello {
+      has_ext: signature_algorithms
+      lacks_signature_algorithm: $scheme
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-signature-algorithms-offer-excludes-rsa-pkcs1-sha224" {
+  rfc 9846 section 4.3.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail wolfssl "advertises rsa_pkcs1_sha224 in TLS 1.3"
+  flow handshake {
+    recv ClientHello {
+      has_ext: signature_algorithms
+      lacks_signature_algorithm: rsa_pkcs1_sha224
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

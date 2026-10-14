@@ -1,0 +1,45 @@
+plzn tls "client/tls12-server-ccs-invalid-byte" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ChangeCipherSpec {
+    send ChangeCipherSpec { type: 0x02 }
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if libressl
+  expect close if wolfssl
+}
+
+plzn tls "client/tls13-server-ccs-invalid-byte" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  # RFC 8446 5: "An implementation which receives any other change_cipher_spec
+  # value ... MUST abort the handshake with an unexpected_message alert."
+  xfail gnutls "accepts a ChangeCipherSpec whose single byte is not 1"
+  flow handshake until send EncryptedExtensions {
+    send ChangeCipherSpec { type: 0x02 }
+    send EncryptedExtensions
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if go
+  expect alert fatal/bad_record_mac if boringssl
+  expect alert fatal/illegal_parameter if libressl
+}
+
+# The ChangeCipherSpec is its own record type; a handshake record cannot
+# stand in for it, even one using the library's internal CCS type value.
+plzn tls "client/tls12-server-ccs-as-handshake-message" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ChangeCipherSpec {
+    send record 22 raw "fc000000"
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

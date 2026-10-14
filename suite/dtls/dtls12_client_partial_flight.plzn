@@ -1,0 +1,23 @@
+plzn tls "dtls12/client-partial-flight-waits" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    wait 200ms
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

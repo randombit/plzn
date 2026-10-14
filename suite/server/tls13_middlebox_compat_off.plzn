@@ -1,0 +1,36 @@
+plzn tls "server/tls13-middlebox-compat-off" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    middlebox_compat: false
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-middlebox-compat-off-still-accepts-peer-ccs" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    middlebox_compat: false
+  }
+  flow handshake after send ClientHello {
+    send ChangeCipherSpec
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

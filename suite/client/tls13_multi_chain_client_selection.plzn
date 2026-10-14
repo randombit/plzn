@@ -1,0 +1,132 @@
+plzn tls "client/tls13-multi-chain-picks-p384" {
+  rfc 8446 section 4.4.2.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  client_chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    recv CertificateVerify
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-multi-chain-picks-p256" {
+  rfc 8446 section 4.4.2.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  client_chain: [rsa_2048, ecdsa_p384, ecdsa_p256]
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv CertificateVerify
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-multi-chain-picks-rsa" {
+  rfc 8446 section 4.4.2.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  client_chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest { +ext signature_algorithms = [rsa_pss_rsae_sha256] }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    recv CertificateVerify
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-multi-chain-none-fits" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  client_chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest { +ext signature_algorithms = [ed25519] }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 0 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-single-credential-wrong-curve" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  client_chain: [ecdsa_p256]
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 0 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if boringssl
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/illegal_parameter if wolfssl
+}
+
+plzn tls "client/tls13-multi-chain-preserves-credential-preference" {
+  rfc 8446 section 4.4.2.2
+  chain: [default]
+  client_chain: [ecdsa_p384, ecdsa_p256]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

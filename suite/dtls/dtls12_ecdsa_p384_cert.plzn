@@ -1,0 +1,63 @@
+plzn tls "dtls12/p384-cert-suite-sweep" {
+  rfc 5246 section 7.4.3
+  chain: [ecdsa_p384]
+  uut server {
+    versions: [dtls12],
+  }
+  peer { capabilities: [secp256r1, secp384r1] }
+  matrix { suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM] }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    recv ServerKeyExchange { named_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/p384-cert-sha384-signature" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p384]
+  uut server {
+    versions: [dtls12],
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp384r1] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp384r1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/p384-cert-ecdhe-p384" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p384]
+  uut server {
+    versions: [dtls12],
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp384r1] }
+  flow handshake {
+    recv ServerKeyExchange { named_group: secp384r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/p384-cert-client-auth" {
+  rfc 5246 section 7.4.4
+  chain: [ecdsa_p384]
+  client_chain: [ecdsa_p384]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp384r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

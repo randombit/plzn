@@ -1,0 +1,142 @@
+# Recognized extensions in a message they are not defined for must be
+# rejected with illegal_parameter, also when the extension carries no
+# meaning such as padding.
+plzn tls "client/tls13-certificate-request-padding" {
+  rfc 8446 section 4.2
+  rfc 7685 section 3
+  chain: [default]
+  client_chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  xfail libressl "accepts padding in CertificateRequest"
+  xfail rustls "accepts padding in CertificateRequest"
+  xfail go "accepts padding in CertificateRequest"
+  flow handshake {
+    send CertificateRequest { +ext padding = 1 }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}
+
+plzn tls "client/tls13-new-session-ticket-padding" {
+  rfc 8446 section 4.2
+  rfc 7685 section 3
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail libressl "accepts padding in NewSessionTicket"
+  xfail rustls "accepts padding in NewSessionTicket"
+  xfail go "accepts padding in NewSessionTicket"
+  flow handshake after recv Finished {
+    send NewSessionTicket { +ext padding = 1 }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}
+
+plzn tls "client/tls13-new-session-ticket-without-extensions-field" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail libressl "accepts a NewSessionTicket without the extensions field"
+  flow handshake after recv Finished {
+    send NewSessionTicket @ pad -2
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls13-hrr-recognized-extension-not-allowed" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  xfail go "accepts supported_groups in a HelloRetryRequest"
+  flow handshake {
+    send HelloRetryRequest { +ext supported_groups = raw "00020017" }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}
+
+# A ServerHello carrying the HelloRetryRequest random is processed as an HRR
+# whatever its version fields say, and an HRR must carry supported_versions.
+plzn tls "client/tls12-serverhello-with-hrr-random" {
+  rfc 8446 section 4.1.3
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls12, tls13]
+  }
+  xfail libressl "processes it as a TLS 1.2 ServerHello"
+  xfail rustls "rejects it with unsupported_extension"
+  flow handshake {
+    send ServerHello {
+      random: [
+        0xcf, 0x21, 0xad, 0x74, 0xe5, 0x9a, 0x61, 0x11,
+        0xbe, 0x1d, 0x8c, 0x02, 0x1e, 0x65, 0xb8, 0x91,
+        0xc2, 0xa2, 0x11, 0x16, 0x7a, 0xbb, 0x8c, 0x5e,
+        0x07, 0x9e, 0x09, 0xe2, 0xc8, 0xa8, 0x33, 0x9c
+      ]
+    }
+  }
+  expect alert fatal/{missing_extension, protocol_version, illegal_parameter}
+}
+
+# Extensions of the client's TLS 1.3 offer that have no meaning in a
+# TLS 1.2 ServerHello.
+plzn tls "client/tls12-serverhello-with-key-share" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client {
+    versions: [tls12, tls13]
+  }
+  xfail libressl "rejects it with internal_error"
+  xfail rustls "accepts key_share in a TLS 1.2 ServerHello"
+  xfail go "accepts key_share in a TLS 1.2 ServerHello"
+  flow handshake {
+    send ServerHello {
+      +ext key_share = raw "001d00200909090909090909090909090909090909090909090909090909090909090909"
+    }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}
+
+plzn tls "client/tls12-serverhello-with-psk-key-exchange-modes" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client {
+    versions: [tls12, tls13]
+  }
+  xfail libressl "rejects it with decode_error"
+  xfail rustls "accepts psk_key_exchange_modes in a TLS 1.2 ServerHello"
+  xfail go "accepts psk_key_exchange_modes in a TLS 1.2 ServerHello"
+  flow handshake {
+    send ServerHello { +ext psk_key_exchange_modes = raw "0101" }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}
+
+plzn tls "client/tls13-client-certificate-type-without-certificate-request" {
+  rfc 7250 section 4.2
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut client {
+    versions: [tls13]
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  xfail openssl "accepts client_certificate_type without a CertificateRequest"
+  flow handshake {
+    send EncryptedExtensions { +ext client_certificate_type = raw_public_key }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}

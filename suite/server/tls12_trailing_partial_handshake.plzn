@@ -1,0 +1,113 @@
+plzn tls "server/tls12-rejects-client-key-exchange-prefix-after-client-hello" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ trailing "10"
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange @ omit_prefix 1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if gnutls
+  expect ok if go
+  expect ok if libressl
+}
+
+plzn tls "server/tls12-rejects-trailing-partial-message-after-finished" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send Finished {
+    send Finished @ trailing "00"
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+  expect close if go
+  # RFC 5246 6.2.1 lets TLS 1.2 interleave record types with a fragmented
+  # handshake message (RFC 9846 5.1 notes the TLS 1.3 rules are stricter), so
+  # buffering the partial header and carrying on with application data is permitted.
+  expect ok if openssl
+  # LibreSSL cannot complete a handshake header split across records here and
+  # fails the read without an alert.
+  expect close if libressl
+}
+
+plzn tls "server/tls12-rejects-trailing-partial-message-body-after-finished" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail wolfssl "accepts application data interleaved with a buffered ClientHello body"
+  flow handshake until send Finished {
+    send Finished @ trailing "01000020"
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect close if go
+}
+
+plzn tls "server/tls12-rejects-trailing-partial-message-after-resumed-finished" {
+  rfc 5246 section 6.2.1
+  rfc 5077
+  chain: [default]
+  uut server { versions: [tls12] }
+
+  session initial {
+    flow handshake { close }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send Finished {
+      send Finished @ trailing "00"
+      send AppData
+      recv AppData
+    }
+    expect alert fatal/unexpected_message
+    expect close if wolfssl
+    expect close if go
+    expect close if libressl
+    # RFC 5246 6.2.1 lets TLS 1.2 interleave record types with a fragmented
+    # handshake message (RFC 9846 5.1 notes the TLS 1.3 rules are stricter), so
+    # buffering the partial header and carrying on with application data is permitted.
+    expect ok if openssl
+  }
+}
+
+plzn tls "server/tls12-rejects-finished-prefix-after-resumption-client-hello" {
+  rfc 5246 section 6.2.1
+  rfc 5246 section 7.4.9
+  rfc 5077
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail libressl "carries a partial Finished across the ChangeCipherSpec"
+
+  session initial {
+    flow handshake { close }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send ClientHello {
+      send ClientHello @ trailing "14"
+      recv ServerHello
+      recv ChangeCipherSpec
+      recv Finished
+      send ChangeCipherSpec
+      send Finished @ omit_prefix 1
+    }
+    expect alert fatal/unexpected_message
+  }
+}

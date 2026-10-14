@@ -1,0 +1,83 @@
+plzn tls "server/tls12-resumption-with-wrong-ciphers/session-id-resume" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes256_cbc_sha, session_id] }
+  chain: [rsa_2048]
+
+  session initial {
+    flow handshake {
+      recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_256_CBC_SHA }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: true, cipher_suite: ECDHE_RSA_WITH_AES_256_CBC_SHA }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls12-resumption-with-wrong-ciphers/cipher-from-old-hello-not-selected" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, cbc, session_id] }
+  chain: [rsa_2048]
+
+  session initial {
+    flow handshake {
+      send ClientHello { cipher_suites: [ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA] }
+      recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_256_CBC_SHA }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA] }
+      recv ServerHello { resumed: false, cipher_suite: ECDHE_RSA_WITH_AES_128_CBC_SHA }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    expect alert fatal/illegal_parameter if openssl
+  }
+  xfail libressl "resumes a session whose cipher suite the new ClientHello no longer offers (its required-cipher check is dead code)"
+  xfail gnutls "resumes a TLS 1.2 session whose cipher suite the new ClientHello does not offer"
+}
+
+plzn tls "server/tls12-resumption-with-wrong-ciphers/null-cipher" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, cbc, session_id] }
+  chain: [rsa_2048]
+
+  session initial {
+    flow handshake {
+      send ClientHello { cipher_suites: [ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA] }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { cipher_suites: [ECDHE_RSA_WITH_NULL_SHA] }
+    }
+    expect alert fatal/handshake_failure
+    expect alert fatal/illegal_parameter if openssl
+  }
+  xfail libressl "resumes a session whose cipher suite the new ClientHello no longer offers (its required-cipher check is dead code)"
+  xfail gnutls "resumes a TLS 1.2 session whose cipher suite the new ClientHello does not offer"
+}

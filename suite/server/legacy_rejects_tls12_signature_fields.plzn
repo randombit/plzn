@@ -1,0 +1,18 @@
+plzn tls "server/tls10-rejects-tls12-certificate-verify-format" {
+  rfc 2246 section 7.4.8
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  uut server {
+    versions: [tls10]
+    require_client_cert: true
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send CertificateVerify {
+      format: tls12
+      sign_with: rsa_pkcs1_sha256
+      algorithm: rsa_pkcs1_sha256
+    }
+  }
+  expect alert fatal/decode_error
+}

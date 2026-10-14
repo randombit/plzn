@@ -1,0 +1,14 @@
+plzn tls "client/tls13-key-shares-match-supported-groups" {
+  rfc 9846 section 4.3.8
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello {
+      supported_groups_unique: true
+      key_shares_consistent: true
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

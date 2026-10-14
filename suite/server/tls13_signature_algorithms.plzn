@@ -1,0 +1,193 @@
+plzn tls "server/tls13-signature-algorithms/legacy-pkcs1-tolerance" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pkcs1_sha1, rsa_pkcs1_sha256, rsa_pkcs1_sha384, rsa_pkcs1_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    }
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-signature-algorithms/unallocated-first" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [0x0a01, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    }
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-signature-algorithms/duplicated-n-non-rsa" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [dsa_sha1 * $n, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-signature-algorithms/n-invalid-pkcs1" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pkcs1_sha1 * $n, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [0x0a00..$n + 0x09ff, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+      +ext signature_algorithms_cert = [0x0a00..0x86ff, rsa_pss_rsae_sha256, rsa_pkcs1_sha256]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-signature-algorithms/well-known-rsa-last" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [ecdsa_md5, ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, 0x0102, dsa_sha1, 0x0302, dsa_sha256, 0x0502, 0x0602, rsa_pkcs1_md5, rsa_pkcs1_sha1, rsa_pkcs1_sha224, rsa_pkcs1_sha256, rsa_pkcs1_sha384, rsa_pkcs1_sha512, ed25519, ed448, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    }
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-signature-algorithms/only-undefined" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [0x0a00..0x0a63] }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-signature-algorithms/only-legacy" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha1, rsa_pkcs1_sha256, rsa_pkcs1_sha384, rsa_pkcs1_sha512] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-signature-algorithms/empty-list" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [] }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/handshake_failure if libressl
+}
+
+plzn tls "server/tls13-signature-algorithms/one-byte-body" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "00" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-signature-algorithms/three-byte-body" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "000108" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-signature-algorithms/padded-list" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "0004080400" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-signature-algorithms/inner-length-short" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "000208040804" }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-signature-algorithms/inner-length-long" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "00060804" }
+  }
+  expect alert fatal/decode_error
+}

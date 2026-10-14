@@ -1,0 +1,23 @@
+plzn tls "dtls12/epoch0-window-tamper" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until recv HelloVerifyRequest {
+    send raw "16 fefd 0000 ffffffffffff 0001 aa"
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  xfail boringssl "a malformed epoch-zero record at the right edge of the replay window poisons the later valid flight"
+  expect alert fatal/unexpected_message if libressl
+}

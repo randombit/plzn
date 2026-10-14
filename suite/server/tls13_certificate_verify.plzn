@@ -1,0 +1,722 @@
+plzn tls "server/tls13-certificate-verify/valid-handshake" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/check-sigalgs-in-cert-request" {
+  rfc 8446 section 4.3.2
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest { signature_algorithms: [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384] }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/certificate_required
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_rsae_sha256-works" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_rsae_sha384-works" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha384 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_rsae_sha512-works" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha512 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_pss_sha256-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha256 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_pss_sha384-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha384 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pss_pss_sha512-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha512 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_md5-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_md5 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_sha1-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha1 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_sha224-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha224 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_sha256-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha256 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_sha384-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha384 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/rsa_pkcs1_sha512-is-refused" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha512 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/salt-length-0" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256, salt_length: 0 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/salt-length-31" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256, salt_length: 31 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/salt-length-33" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256, salt_length: 33 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/pkcs1-signature-with-rsa-pss-envelope" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha256, algorithm: rsa_pss_rsae_sha256 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/rsa-pss-mismatched-hash" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha384, algorithm: rsa_pss_rsae_sha256 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/rsa-pss-mismatched-mgf1" {
+  rfc 8446 section 4.4.3
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256, mgf1_hash: sha384 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/corrupted-rsa-encoded-message" {
+  rfc 8446 section 4.4.3
+  matrix {
+    pos in [0, 1, 100, 223, 224, 254, 255]
+    v in [0x01, 0x80]
+  }
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256 } @ xor[signature.em, $pos] = $v
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-certificate-verify/id-rsassa-pss-client-key" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_pss_sha256-works" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [rsa_pss_pss_sha256]
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha256 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_pss_sha384-works" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [rsa_pss_pss_sha384]
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha384 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_pss_sha512-works" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [rsa_pss_pss_sha512]
+  }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, rsa_pss_pss_sha512] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha512 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_rsae_sha256-is-refused" {
+  rfc 8446 section 4.4.3
+  xfail botan "accepts rsa_pss_rsae with an id-RSASSA-PSS client key"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha256 }
+    send Finished
+  }
+  expect alert fatal/{illegal_parameter, decrypt_error}
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_rsae_sha384-is-refused" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha384 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pss_rsae_sha512-is-refused" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_rsae_sha512 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-rsa_pkcs1_sha256-is-refused" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pkcs1_sha256 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-salt-length-0" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha256, salt_length: 0 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if boringssl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-salt-length-31" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha256, salt_length: 31 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if boringssl
+}
+
+plzn tls "server/tls13-certificate-verify/pss-key-salt-length-33" {
+  rfc 8446 section 4.4.3
+  skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
+  skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
+  uut server { versions: [tls13], require_client_cert: true }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa_pss }
+    send CertificateVerify { sign_with: rsa_pss_pss_sha256, salt_length: 33 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if boringssl
+}

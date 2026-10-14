@@ -1,0 +1,13 @@
+plzn tls "server/tls12-no-common-cipher-suite" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [0x0a0a]
+    }
+  }
+  expect alert fatal/handshake_failure
+}

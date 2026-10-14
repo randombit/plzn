@@ -1,0 +1,13 @@
+plzn tls "client/tls13-double-encrypted-extensions" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send EncryptedExtensions
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

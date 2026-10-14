@@ -1,0 +1,13 @@
+plzn tls "dtls12/server-chooses-unoffered-group" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ServerKeyExchange { named_group: secp521r1 }
+  }
+  expect alert fatal/illegal_parameter
+}

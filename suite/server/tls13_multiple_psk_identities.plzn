@@ -1,0 +1,128 @@
+plzn tls "server/tls13-selects-later-valid-psk-identity" {
+  rfc 8446 section 4.2.11
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+    offer {
+      identity: "unknown-identity"
+      secret: "101112131415161718191a1b1c1d1e1f"
+    }
+    offer {
+      identity: "known-identity"
+      secret: "000102030405060708090a0b0c0d0e0f"
+    }
+  }
+  uut server { versions: [tls13] }
+  xfail gnutls "stops at the first unknown PSK identity instead of considering the later known identity"
+  flow handshake {
+    recv ServerHello { selected_psk_identity: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-rejects-bad-binder-for-first-selected-psk" {
+  rfc 8446 section 4.2.11.2
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+    offer {
+      identity: "known-identity"
+      secret: "101112131415161718191a1b1c1d1e1f"
+    }
+    offer {
+      identity: "known-identity"
+      secret: "000102030405060708090a0b0c0d0e0f"
+    }
+  }
+  uut server { versions: [tls13] }
+  flow handshake {}
+  expect alert fatal/{decrypt_error, illegal_parameter}
+}
+
+plzn tls "server/tls13-selects-first-of-duplicate-valid-psk-identities" {
+  rfc 8446 section 4.2.11
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+    offer {
+      identity: "known-identity"
+      secret: "000102030405060708090a0b0c0d0e0f"
+    }
+    offer {
+      identity: "known-identity"
+      secret: "000102030405060708090a0b0c0d0e0f"
+    }
+  }
+  uut server { versions: [tls13] }
+  flow handshake {
+    recv ServerHello { selected_psk_identity: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-rejects-bad-binder-for-later-selected-psk" {
+  rfc 8446 section 4.2.11.2
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+    offer {
+      identity: "unknown-identity"
+      secret: "202122232425262728292a2b2c2d2e2f"
+    }
+    offer {
+      identity: "known-identity"
+      secret: "101112131415161718191a1b1c1d1e1f"
+    }
+  }
+  uut server { versions: [tls13] }
+  xfail gnutls "stops at the first unknown PSK identity instead of reaching the later selected identity"
+  flow handshake {}
+  expect alert fatal/{decrypt_error, illegal_parameter}
+}
+
+plzn tls "server/tls13-selects-later-psk-identity-after-hrr" {
+  rfc 8446 section 4.1.4
+  rfc 8446 section 4.2.11
+  chain: []
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+    offer {
+      identity: "unknown-identity"
+      secret: "101112131415161718191a1b1c1d1e1f"
+    }
+    offer {
+      identity: "known-identity"
+      secret: "000102030405060708090a0b0c0d0e0f"
+    }
+  }
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  xfail gnutls "stops at the first unknown PSK identity instead of considering the later known identity"
+  flow {
+    send ClientHello {
+      +ext key_share = [x25519]
+      +ext psk_key_exchange_modes = [psk_dhe_ke]
+    }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello
+    recv ServerHello { selected_psk_identity: 1 }
+    recv EncryptedExtensions
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

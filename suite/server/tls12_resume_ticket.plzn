@@ -1,0 +1,20 @@
+plzn tls "server/tls12-resume-ticket" {
+  rfc 5077
+  chain: [default]
+  uut server { versions: [tls12] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

@@ -1,0 +1,18 @@
+plzn tls "server/tls12-etm-sweep-cbc" {
+  rfc 7366 section 3
+  uut server { versions: [tls12], encrypt_then_mac: true }
+  chain: [rsa_2048]
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_256_CBC_SHA384, ECDHE_RSA_WITH_3DES_EDE_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA256, DHE_RSA_WITH_AES_256_CBC_SHA, DHE_RSA_WITH_AES_256_CBC_SHA256, DHE_RSA_WITH_3DES_EDE_CBC_SHA, RSA_WITH_AES_128_CBC_SHA, RSA_WITH_AES_128_CBC_SHA256, RSA_WITH_AES_256_CBC_SHA, RSA_WITH_AES_256_CBC_SHA256, RSA_WITH_3DES_EDE_CBC_SHA]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext encrypt_then_mac
+    }
+    recv ServerHello { cipher_suite: $suite, has_ext: encrypt_then_mac }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

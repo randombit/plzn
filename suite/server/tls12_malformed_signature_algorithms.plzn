@@ -1,0 +1,14 @@
+plzn tls "server/tls12-malformed-signature-algorithms" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = raw "00"
+    }
+  }
+  expect alert fatal/decode_error
+}

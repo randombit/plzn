@@ -1,0 +1,165 @@
+plzn tls "client/tls13-client-certificate-verify-scheme/rsa-pss-rsae" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  matrix {
+    scheme in [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+  }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [$scheme]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    recv CertificateVerify { algorithm: $scheme }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-verify-scheme/rsa-pss-pss" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [rsa_pss]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  skip botan "no rsa_pss_pss_* TLS signature schemes for an id-RSASSA-PSS client key"
+  skip rustls "cannot load an id-RSASSA-PSS client private key"
+  skip wolfssl "this build cannot use an id-RSASSA-PSS client credential"
+  matrix {
+    scheme in [rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+  }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [$scheme]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: rsa_pss }
+    recv CertificateVerify { algorithm: $scheme }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-verify-scheme/ecdsa-p256" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv CertificateVerify { algorithm: ecdsa_secp256r1_sha256 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-verify-scheme/ecdsa-p384" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ecdsa_p384]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [ecdsa_secp384r1_sha384]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    recv CertificateVerify { algorithm: ecdsa_secp384r1_sha384 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-verify-scheme/ecdsa-p521" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ecdsa_p521]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [ecdsa_secp521r1_sha512]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ecdsa_p521 }
+    recv CertificateVerify { algorithm: ecdsa_secp521r1_sha512 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-client-certificate-verify-scheme/ed25519" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ed25519]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  peer { request_client_cert: true }
+  skip botan "no Ed25519 TLS signature scheme"
+  flow handshake {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateRequest {
+      +ext signature_algorithms = [ed25519]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Certificate { entries: 1, leaf_key: ed25519 }
+    recv CertificateVerify { algorithm: ed25519 }
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

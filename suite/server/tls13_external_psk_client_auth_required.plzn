@@ -1,0 +1,35 @@
+# A server that requires client certificate authentication cannot get it on a
+# PSK handshake: RFC 8446 4.3.2 forbids CertificateRequest when authenticating
+# with a PSK. Selecting an offered external PSK would silently drop the
+# certificate requirement, so the server must decline the PSK and run a full
+# handshake that requests a certificate.
+plzn tls "server/tls13-external-psk-not-selected-when-client-cert-required" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  client_chain: [default]
+  psk {
+    identity: "known-identity"
+    secret: "000102030405060708090a0b0c0d0e0f"
+  }
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  xfail openssl "selects the external PSK, dropping its client certificate requirement"
+  # Spelled out: the PSK preset would expect the abbreviated flight.
+  flow {
+    send ClientHello
+    recv ServerHello { lacks_ext: pre_shared_key }
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

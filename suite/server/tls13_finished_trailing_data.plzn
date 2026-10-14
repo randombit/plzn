@@ -1,0 +1,10 @@
+plzn tls "server/tls13-finished-trailing-data" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send Finished @ pad +5
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/decode_error if openssl
+}

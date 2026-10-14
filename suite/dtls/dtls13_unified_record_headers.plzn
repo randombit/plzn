@@ -1,0 +1,91 @@
+plzn tls "dtls13/server-accepts-lengthless-unified-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData @ dtls13_omit_length
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-accepts-lengthless-unified-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData @ dtls13_omit_length
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-accepts-short-record-number" {
+  rfc 9147 section 4.2.2
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData @ dtls13_short_sequence
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-accepts-short-record-number" {
+  rfc 9147 section 4.2.2
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData @ dtls13_short_sequence
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-discards-unnegotiated-cid-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData { reply: none } @ dtls13_set_cid_bit
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-discards-unnegotiated-cid-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData { reply: none } @ dtls13_set_cid_bit
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-discards-protected-record-with-legacy-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData { reply: none } @ dtls13_legacy_header
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-discards-protected-record-with-legacy-header" {
+  rfc 9147 section 4.2.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData { reply: none } @ dtls13_legacy_header
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

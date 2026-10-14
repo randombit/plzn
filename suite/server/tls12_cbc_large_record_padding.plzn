@@ -1,0 +1,69 @@
+plzn tls "server/tls12-cbc-large-record-with-252-byte-padding" {
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  xfail wolfssl "caps TLSCiphertext.length at 2^14 + 102 (MAX_RECORD_SIZE + MAX_MSG_EXTRA), below RFC 5246's 2^14 + 2048, so a full record with large CBC padding draws record_overflow"
+  flow handshake {
+    send AppData { size: 16384 } @ cbc_pad 252
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha256" {
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA256]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  xfail wolfssl "caps TLSCiphertext.length at 2^14 + 102 (MAX_RECORD_SIZE + MAX_MSG_EXTRA), below RFC 5246's 2^14 + 2048, so a full record with large CBC padding draws record_overflow"
+  flow handshake {
+    send AppData { size: 16384 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha384" {
+  rfc 5246 section 6.2.3.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_256_CBC_SHA384]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  xfail wolfssl "caps TLSCiphertext.length at 2^14 + 102 (MAX_RECORD_SIZE + MAX_MSG_EXTRA), below RFC 5246's 2^14 + 2048, so a full record with large CBC padding draws record_overflow"
+  flow handshake {
+    send AppData { size: 16384 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cbc-large-record-with-maximum-padding-etm" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [ecdhe_rsa, cbc] }
+  xfail wolfssl "caps TLSCiphertext.length at 2^14 + 102 (MAX_RECORD_SIZE + MAX_MSG_EXTRA), below RFC 5246's 2^14 + 2048, so a full record with large CBC padding draws record_overflow"
+  flow handshake {
+    send ClientHello { +ext encrypt_then_mac }
+    recv ServerHello { has_ext: encrypt_then_mac }
+    send AppData { size: 16384 } @ cbc_pad 256
+    recv AppData
+  }
+  expect ok
+}

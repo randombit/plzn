@@ -1,0 +1,9 @@
+plzn tls "server/no-common-curve-tls13" {
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp521r1]
+  }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

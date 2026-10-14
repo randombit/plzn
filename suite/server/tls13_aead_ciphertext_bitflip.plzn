@@ -1,0 +1,15 @@
+plzn tls "server/tls13-aead-ciphertext-bitflip" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    pos in 0..18
+    bit in [0x01, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 19 } @ xor[record.encrypted_record, $pos] = $bit
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}

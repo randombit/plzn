@@ -1,0 +1,84 @@
+plzn tls "server/tls12-truncating-of-client-hello/extension-past-extensions" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { extensions: [] } @ pad "ff01000100"
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-truncating-of-client-hello/small-pad-zero" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [1, 2, 3] }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad +$n 0x00
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-truncating-of-client-hello/small-pad-ff" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [1, 2, 3] }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad +$n 0xff
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-truncating-of-client-hello/medium-and-large-pad" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [256, 4096] }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad +$n
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-truncating-of-client-hello/big-pad" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [65536, 131584] }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad +$n, fragment 16384
+    recv ServerHello
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+  expect alert fatal/handshake_failure if botan
+  expect close if rustls
+}
+
+plzn tls "server/tls12-truncating-of-client-hello/truncate" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { n in [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 25, 32, 40, 48, 64] }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad -$n
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}

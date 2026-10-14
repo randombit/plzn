@@ -1,0 +1,62 @@
+# OpenSSL 1.0.1a and NSS 2013/2016: TLS 1.2-only CBC, GCM, and ChaCha
+# suites must be filtered out of a legacy-only ClientHello. Inspect the actual
+# offer so a successful handshake alone cannot hide an invalid advertised suite.
+plzn tls "client/legacy-offer-excludes-tls12-cipher-suites" {
+  rfc 5246 section 7.4.1.2
+  chain: [rsa_2048]
+  matrix {
+    version in [tls10, tls11]
+    newer_suite in [ECDHE_RSA_WITH_AES_128_CBC_SHA256, ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256]
+  }
+  uut client {
+    versions: [$version]
+    cipher_suites: [$newer_suite, ECDHE_RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv ClientHello {
+      legacy_version: $version
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+      lacks_cipher_suite: $newer_suite
+      lacks_ext: signature_algorithms
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Botan's legacy-only policy fallback and the JDK TLSv1.1 context history.
+plzn tls "client/legacy-offers-highest-enabled-version" {
+  rfc 4346 section 7.4.1.2
+  chain: [rsa_2048]
+  uut client { versions: [tls11, tls10] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    recv ClientHello { legacy_version: tls11, lacks_ext: signature_algorithms }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Complement the server receiver coverage with client-side CBC read continuity.
+# Empty records and one-byte fragments remain legal throughout the connection.
+plzn tls "client/legacy-repeated-fragmented-application-data" {
+  rfc 2246 section 6.2.1
+  rfc 4346 section 6.2.1
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    repeat 3 {
+      send AppData { size: 0 }
+      send AppData { size: 33 } @ fragment 1
+      recv AppData { size: 33 }
+    }
+    send AppData { size: 16384 }
+    recv AppData { size: 16384 }
+  }
+  expect ok
+}

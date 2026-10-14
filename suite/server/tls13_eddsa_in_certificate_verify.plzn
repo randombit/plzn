@@ -1,0 +1,268 @@
+plzn tls "server/tls13-eddsa-in-certificate-verify/valid-handshake" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [ed25519]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha1" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_sha1 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha224" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_sha224 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp521r1_sha512" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_secp521r1_sha512 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ed448" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ed448 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp256r1_sha256" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_secp256r1_sha256 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp384r1_sha384" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_secp384r1_sha384 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/corrupted-signature" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  matrix {
+    pos in [2, 3, 33, 34, 65]
+    v in [0x01, 0x80]
+  }
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { } @ xor[handshake.signature, $pos] = $v
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-signature" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { signature: [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-r-component" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { } @ set[handshake.signature, 2..33] = 0
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-s-component" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { } @ set[handshake.signature, 34..65] = 0
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  skip libressl "no Ed25519 TLS signature scheme"
+}
+
+plzn tls "server/tls13-eddsa-in-certificate-verify/empty-signature" {
+  rfc 8446 section 4.4.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384, ed25519, ed448] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ed25519 }
+    send CertificateVerify { signature: [] }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  skip libressl "no Ed25519 TLS signature scheme"
+}

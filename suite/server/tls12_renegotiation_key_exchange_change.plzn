@@ -1,0 +1,46 @@
+plzn tls "server/tls12-renegotiation-changes-ecdhe-rsa-to-static-rsa" {
+  rfc 5246 section 7.4.1.1
+  chain: [rsa_2048]
+  uut server { versions: [tls12] }
+  flow {
+    send ClientHello { cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    renegotiate { cipher_suites: [RSA_WITH_AES_128_GCM_SHA256] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-changes-static-rsa-to-ecdhe-rsa" {
+  rfc 5246 section 7.4.1.1
+  chain: [rsa_2048]
+  uut server { versions: [tls12] }
+  flow {
+    send ClientHello { cipher_suites: [RSA_WITH_AES_128_GCM_SHA256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    renegotiate { cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

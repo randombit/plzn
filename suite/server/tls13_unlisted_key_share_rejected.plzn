@@ -1,0 +1,16 @@
+plzn tls "server/tls13-unlisted-key-share-rejected" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  skip rustls "RFC 8446 permits ignoring the unlisted share; the sibling HRR case covers that policy"
+  skip boringssl "RFC 8446 permits ignoring the unlisted share; the sibling HRR case covers that policy"
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [secp256r1]
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

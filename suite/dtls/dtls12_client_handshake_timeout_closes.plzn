@@ -1,0 +1,21 @@
+plzn tls "dtls12/client-handshake-timeout-closes" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    dtls_max_retransmissions: 2
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 1ms
+    advance_clock 1ms
+    expect_retransmit
+    expect next_timeout 2ms
+    advance_clock 2ms
+    expect_retransmit
+    expect next_timeout 4ms
+    advance_clock 4ms
+  }
+  expect timeout
+}

@@ -1,0 +1,10 @@
+plzn tls "server/tls13-record-overflow" {
+  rfc 8446 section 5.1
+  chain: [default]
+  xfail rustls "does not enforce the 2^14-byte plaintext record limit"
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello @ pad +16400
+  }
+  expect alert fatal/record_overflow
+}

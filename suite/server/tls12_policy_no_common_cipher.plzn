@@ -1,0 +1,10 @@
+plzn tls "server/no-common-cipher-tls12" {
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_256_GCM_SHA384]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

@@ -1,0 +1,15 @@
+plzn tls "dtls12/repeated-finished" {
+  rfc 6347 section 4.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after recv Finished {
+    send Finished
+  }
+  expect alert fatal/unexpected_message
+  skip libressl "silently drops a repeated Finished (RFC 6347 4.1.2 permits) instead of alerting"
+  # OpenSSL treats the repeated Finished as a retransmission and resends its
+  # final flight.
+  expect ok if openssl
+}

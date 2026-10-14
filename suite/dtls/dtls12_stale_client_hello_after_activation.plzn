@@ -1,0 +1,16 @@
+plzn tls "dtls12/stale-client-hello-after-activation" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after send Finished {
+    discard_flight
+    replay_flight 2
+    wait 200ms
+    retransmit_flight
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

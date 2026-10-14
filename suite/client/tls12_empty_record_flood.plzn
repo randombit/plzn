@@ -1,0 +1,334 @@
+# Floods of consecutive zero-length records at a TLS 1.2 client: the mirror of
+# suite/server/tls12_empty_record_flood.plzn, whose header lists what each
+# library does with a zero-length record and why. Every library reacts the
+# same way in this role at the matching position.
+#
+# Positions: unprotected empty handshake records before the ServerHello and
+# after the ServerKeyExchange; protected empty handshake records after the
+# server's ChangeCipherSpec; and empty application data after the handshake,
+# under an AEAD and a CBC suite (a single one is
+# tls12_server_empty_app_data_record).
+
+plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hello-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send empty_record handshake }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hello-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send empty_record handshake }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-exchange-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake after send ServerKeyExchange {
+    repeat $count { send empty_record handshake }
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-exchange-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake after send ServerKeyExchange {
+    repeat $count { send empty_record handshake }
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-thirty-three-to-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 200]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-over-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  matrix {
+    count in [201, 1000]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-two-to-sixteen" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [2, 16]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [17, 31]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [32]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-thirty-three" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [33]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-thirty-four-to-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [34, 100, 200]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if libressl
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls12-empty-record-flood/application-data-over-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [201, 1000]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if libressl
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}

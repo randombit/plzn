@@ -1,0 +1,13 @@
+plzn tls "client/tls12-certreq-type-mismatch" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest { certificate_types: [rsa_sign] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if boringssl
+}

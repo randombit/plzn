@@ -1,0 +1,74 @@
+plzn tls "dtls12/client-group-x25519" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    curves: [x25519]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-group-x448" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    curves: [x448]
+  }
+  peer { capabilities: [ecdhe_rsa, x448] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-group-secp256r1" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [ecdhe_rsa, secp256r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-group-secp384r1" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    curves: [secp384r1]
+  }
+  peer { capabilities: [ecdhe_rsa, secp384r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-group-secp521r1" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    curves: [secp521r1]
+  }
+  peer { capabilities: [ecdhe_rsa, secp521r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

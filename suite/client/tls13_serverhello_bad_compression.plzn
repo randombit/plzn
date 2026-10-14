@@ -1,0 +1,14 @@
+plzn tls "client/tls13-serverhello-bad-compression" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      legacy_compression_method: 0x01
+    }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if openssl
+  expect alert fatal/illegal_parameter if rustls
+  expect alert fatal/illegal_parameter if libressl
+}

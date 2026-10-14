@@ -1,0 +1,66 @@
+plzn tls "server/tls12-no-mlkem-in-old-tls/normal-groups-with-mlkem" {
+  rfc 8422 section 5.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = raw "0014 0017 001d 0018 0100 11ec 11eb 11ed 0200 0201 0202" }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { named_group: [secp256r1, x25519, secp384r1] }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-no-mlkem-in-old-tls/only-x25519mlkem768" {
+  rfc 8422 section 5.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = raw "0002 11ec" }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-no-mlkem-in-old-tls/only-mlkem768" {
+  rfc 8422 section 5.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = raw "0002 0201" }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-no-mlkem-in-old-tls/only-mlkem-hybrids" {
+  rfc 8422 section 5.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = raw "000c 11ec 11eb 11ed 0200 0201 0202" }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}

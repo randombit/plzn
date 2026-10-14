@@ -1,0 +1,9 @@
+plzn tls "selftest/dtls-reassembly/shim-forges-offset-overflow" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {}
+  expect reject fatal/decode_error
+}

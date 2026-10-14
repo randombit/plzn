@@ -1,0 +1,13 @@
+plzn tls "server/tls12-static-rsa-wrong-premaster-version-fails-after-finished" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange @ set[1] = 0x04
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

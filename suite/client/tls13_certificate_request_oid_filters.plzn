@@ -1,0 +1,16 @@
+plzn tls "client/tls13-certificate-request-ignores-unknown-oid-filter" {
+  rfc 9846 section 4.3.5
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      +ext oid_filters = raw "0005022a030000"
+    }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

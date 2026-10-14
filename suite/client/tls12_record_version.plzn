@@ -1,0 +1,10 @@
+plzn tls "client/tls12-rejects-wrong-post-clienthello-record-version" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    send Finished @ record_version 0x03ff
+  }
+  xfail rustls "accepts a post-ClientHello record with the wrong version"
+  expect alert fatal/protocol_version
+}

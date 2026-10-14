@@ -1,0 +1,9 @@
+plzn tls "client/tls13-server-close-notify-warning" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after recv Finished {
+    send alert warning/close_notify
+  }
+  expect ok
+}

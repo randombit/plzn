@@ -1,0 +1,98 @@
+[package]
+name = "plzn"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+license = "Apache2"
+homepage = "https://plzn.io"
+repository = "https://github.com/randombit/plzn"
+documentation = "https://docs.rs/plzn"
+keywords = [ "crypto" ]
+readme = "README.md"
+categories = [ "cryptography" ]
+rust-version = "1.87"
+
+[[bin]]
+name = "plzn"
+path = "src/main.rs"
+
+[[bin]]
+name = "mock_shim"
+path = "src/bin/mock_shim.rs"
+
+[[bin]]
+name = "dtls_test_shim"
+path = "tests/shims/dtls_test_shim.rs"
+
+[lib]
+name = "plzn"
+path = "src/lib.rs"
+
+[dependencies]
+logos = "0.14"
+libc = "0.2"
+
+# Crypto goo
+aes = "0.8"
+aes-gcm = "0.10"
+aria = "0.1"
+bp256 = { version = "0.14.0-rc.15", features = ["arithmetic"] }
+bp384 = { version = "0.14.0-rc.15", features = ["arithmetic"] }
+camellia = "0.1"
+cbc = "0.1"
+ccm = "0.5"
+chacha20 = "0.9"
+chacha20poly1305 = "0.10"
+des = "0.8"
+ec14 = { package = "elliptic-curve", version = "0.14.1", features = ["ecdh", "sec1", "arithmetic"] }
+ed25519-dalek = { version = "2", features = ["pkcs8"] }
+hkdf = "0.12"
+hmac = "0.12"
+md-5 = "0.10"
+ml-kem = "0.3.2"
+num-bigint = "0.4"
+p256 = { version = "0.13", features = ["ecdsa", "ecdh"] }
+p384 = { version = "0.13", features = ["ecdsa", "ecdh"] }
+p521 = { version = "0.13", features = ["ecdsa", "ecdh"] }
+rand_chacha = "0.3"
+rand_core = "0.6"
+rsa = { version = "0.9", features = ["sha2", "hazmat"] }
+sha1 = "0.10"
+sha2 = "0.10"
+x25519-dalek = { version = "2", features = ["static_secrets"] }
+x509-cert = "0.2"
+
+# For TLS 1.3 certificate compression (RFC 8879)
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+
+# Runtime credential generation and PEM decoding for external shims.
+rcgen = "0.13"
+rustls-pemfile = "2"
+rustls-pki-types = "1"
+
+# PCAP capture
+pcap-file = "2"
+etherparse = "0.16"
+
+# Shim config emission: the runner writes a JSON config file the C/C++
+# shims parse via the shared helper lib (shims/common).
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tempfile = "3"
+
+# Optimise every dependency even in dev/test builds. Line tables only: full
+# debuginfo at opt-level 3 sends rustc 1.99 past 16 GB compiling `aria`.
+[profile.dev.package."*"]
+opt-level = 3
+debug = "line-tables-only"
+
+[profile.release]
+lto = "thin"
+
+# Keep cargo from scanning vendored third-party sources.
+[workspace]
+members = ["shims/rustls"]
+default-members = ["."]
+exclude = ["3rd_party"]
+resolver = "3"

@@ -1,0 +1,10 @@
+# Negative: the peer is expected to close the TCP connection
+# without sending a TLS alert. The integration test points this at
+# a ClosingOracle that accepts and immediately closes.
+plzn tls "negative/close-without-alert" {
+  rfc 5246
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {}
+  expect close
+}

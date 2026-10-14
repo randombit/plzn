@@ -1,0 +1,88 @@
+plzn tls "server/legacy-session-id-resumption" {
+  rfc 2246 section 7.4.1.2
+  rfc 4346 section 7.4.1.2
+  chain: [rsa_2048]
+  skip gnutls "the shim does not install the server-side session-ID cache needed for resumption"
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha, session_id] }
+
+  session initial {
+    flow handshake {
+      recv ServerHello { resumed: false }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { resumed: true }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/legacy-secure-renegotiation" {
+  rfc 5746 section 3.5
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-insecure-renegotiation" {
+  rfc 5746 section 4.2
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [RSA_WITH_AES_128_CBC_SHA]
+  }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello { -ext renegotiation_info }
+    send AppData
+    recv AppData
+    renegotiate insecure
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert warning/no_renegotiation if openssl
+  expect close if gnutls
+}
+
+plzn tls "server/legacy-ecdsa-client-certificate" {
+  rfc 4492 section 5.5
+  chain: [rsa_2048]
+  client_chain: [ecdsa_p256]
+  matrix { version in [tls10, tls11] }
+  uut server {
+    versions: [$version]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    require_client_cert: true
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

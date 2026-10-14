@@ -1,0 +1,73 @@
+plzn tls "server/tls13-eddsa/ed25519-only" {
+  rfc 8446 section 4.2.3
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ed25519] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-eddsa/ed448-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ed448] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-eddsa/ecdsa_sha1-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-eddsa/ecdsa_sha224-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha224] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-eddsa/ecdsa_secp256r1_sha256-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-eddsa/ecdsa_secp384r1_sha384-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-eddsa/ecdsa_secp521r1_sha512-only" {
+  rfc 8446 section 4.2.3
+  chain: [ed25519]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512] }
+  }
+  expect alert fatal/handshake_failure
+}

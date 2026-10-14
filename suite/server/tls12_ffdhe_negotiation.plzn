@@ -1,0 +1,223 @@
+plzn tls "server/tls12-ffdhe-negotiation/dhe-preferred" {
+  xfail openssl "selects DHE but serves the RFC 3526 2048-bit MODP group instead of the offered ffdhe2048 (its automatic DH parameters ignore supported_groups in TLS 1.2)"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [DHE_RSA_WITH_AES_128_CBC_SHA]
+  }
+  skip rustls "rustls implements neither static RSA nor DHE_RSA suites"
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA], +ext supported_groups = [ffdhe2048] }
+    recv ServerHello { cipher_suite: DHE_RSA_WITH_AES_128_CBC_SHA }
+    recv Certificate
+    recv ServerKeyExchange { dh_group: ffdhe2048 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-negotiation" {
+  xfail openssl "uses a legacy 2048-bit DH group instead of the offered ffdhe2048 group"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = [ffdhe2048] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { dh_group: ffdhe2048 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/ffdhe3072-negotiation" {
+  xfail openssl "uses a legacy 2048-bit DH group instead of the offered ffdhe3072 group"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = [ffdhe3072] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { dh_group: ffdhe3072 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/unassigned-tolerance" {
+  xfail openssl "uses a legacy DH group instead of the offered ffdhe2048 group"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = raw "0004 01ff 0100" }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { dh_group: ffdhe2048 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/ecc-curve-tolerated-without-ecc-cipher" {
+  xfail openssl "uses a legacy DH group instead of the offered ffdhe2048 group"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = [secp256r1, ffdhe2048] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { dh_group: ffdhe2048 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-or-ffdhe3072" {
+  xfail openssl "uses a legacy DH group instead of either offered FFDHE group"
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_groups = [ffdhe3072, ffdhe2048] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { dh_group: [ffdhe2048, ffdhe3072] }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  xfail libressl "uses the RFC 3526 MODP group sized to its RSA key instead of an offered RFC 7919 group"
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe" {
+  rfc 7919 section 3
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  skip rustls "rustls implements neither static RSA nor DHE_RSA suites"
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA], +ext supported_groups = raw "0002 01ff" }
+    recv ServerHello { cipher_suite: RSA_WITH_AES_128_CBC_SHA }
+    recv Certificate
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe-with-secp256r1-advertised" {
+  rfc 7919 section 3
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  skip rustls "rustls implements neither static RSA nor DHE_RSA suites"
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [RSA_WITH_AES_128_CBC_SHA, DHE_RSA_WITH_AES_128_CBC_SHA], +ext supported_groups = raw "0004 0017 01ff" }
+    recv ServerHello { cipher_suite: RSA_WITH_AES_128_CBC_SHA }
+    recv Certificate
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ffdhe-negotiation/no-overlap-between-groups" {
+  rfc 7919 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [0x0002, DHE_RSA_WITH_AES_128_CBC_SHA], +ext supported_groups = raw "0002 01ff" }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+}

@@ -1,0 +1,88 @@
+plzn tls "dtls12/certificate-selection-p256-curve-match-second" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p384, ecdsa_p256]
+  xfail botan "does not apply supported_groups to DTLS 1.2 ECDSA credential selection"
+  xfail gnutls "does not apply supported_groups to DTLS 1.2 ECDSA credential selection"
+  uut server {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+    curves: [x25519, secp256r1, secp384r1]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv ServerKeyExchange { named_group: x25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/certificate-selection-p384-curve-match-second" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p256, ecdsa_p384]
+  xfail botan "does not apply supported_groups to DTLS 1.2 ECDSA credential selection"
+  xfail gnutls "does not apply supported_groups to DTLS 1.2 ECDSA credential selection"
+  uut server {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+    curves: [x25519, secp256r1, secp384r1]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp384r1]
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    recv ServerKeyExchange { named_group: x25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/certificate-selection-curve-no-match" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p384]
+  xfail gnutls "accepts a DTLS 1.2 ECDSA certificate on a curve the client did not offer"
+  uut server {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+    curves: [x25519, secp256r1, secp384r1]
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [x25519, secp256r1]
+      +ext signature_algorithms = [ecdsa_secp384r1_sha384]
+    }
+    recv ServerHello
+  }
+  expect alert fatal/{handshake_failure, access_denied}
+}
+
+plzn tls "dtls13/certificate-curve-is-independent-of-supported-groups" {
+  rfc 9147 section 5.3
+  rfc 8446 section 4.2.7
+  chain: [ecdsa_p384]
+  uut server {
+    versions: [dtls13]
+    curves: [x25519]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [x25519]
+      +ext signature_algorithms = [ecdsa_secp384r1_sha384]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    recv CertificateVerify { algorithm: ecdsa_secp384r1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

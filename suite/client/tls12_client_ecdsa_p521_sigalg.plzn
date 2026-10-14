@@ -1,0 +1,19 @@
+plzn tls "client/tls12-client-ecdsa-p521" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p521]
+  uut client {
+    versions: [tls12]
+    verify_prefs: [ecdsa_secp521r1_sha512]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  matrix {
+    group in [x25519, secp256r1, secp384r1]
+  }
+  flow handshake {
+    recv ClientHello { supported_groups: [$group], signature_algorithms: [ecdsa_secp521r1_sha512] }
+    send ServerKeyExchange { signature_scheme: ecdsa_secp521r1_sha512 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

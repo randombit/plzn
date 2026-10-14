@@ -1,0 +1,103 @@
+plzn tls "client/cross-version-resumption/tls12-session-is-not-offered-in-tls13" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut client { versions: [tls12, tls13] }
+
+  session initial [version: tls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session tls13 [resumes: initial, version: tls13] {
+    flow handshake {
+      recv ClientHello { lacks_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "client/cross-version-resumption/tls13-session-is-not-offered-in-tls12" {
+  rfc 5246 section 7.4.1.2
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut client { versions: [tls13, tls12] }
+
+  session initial [version: tls13] {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session tls12 [resumes: initial, version: tls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "client/cross-version-resumption/reject-tls12-session-as-tls13-psk" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut client { versions: [tls12, tls13] }
+  skip wolfssl "TLS 1.2 ticket capture is not functional in the current wolfSSL shim"
+  xfail libressl "accepts a ServerHello pre_shared_key extension although it offered no PSK, then waits for the next flight"
+
+  session initial [version: tls12] {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session tls13 [resumes: initial, version: tls13, force_resume: true] {
+    flow {
+      recv ClientHello { lacks_ext: pre_shared_key }
+      send ServerHello
+    }
+    expect alert fatal/{unsupported_extension, illegal_parameter}
+  }
+}
+
+plzn tls "client/cross-version-resumption/reject-tls13-session-as-tls12" {
+  rfc 5246 section 7.4.1.2
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut client { versions: [tls13, tls12] }
+
+  session initial [version: tls13] {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session tls12 [resumes: initial, version: tls12, force_resume: true] {
+    flow {
+      recv ClientHello
+      send ServerHello
+      send ChangeCipherSpec
+      send Finished
+      recv Finished
+    }
+    expect alert fatal/{illegal_parameter, unexpected_message, decrypt_error, handshake_failure}
+    expect close if gnutls
+    expect close if wolfssl
+  }
+}

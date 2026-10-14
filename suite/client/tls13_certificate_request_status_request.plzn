@@ -1,0 +1,17 @@
+plzn tls "client/tls13-certificate-request-nonempty-status-request" {
+  rfc 8446 section 4.4.2.1
+  chain: [default]
+  client_chain: [default]
+  uut client { versions: [tls13] }
+  xfail openssl "accepts a nonempty status_request in TLS 1.3 CertificateRequest"
+  xfail boringssl "accepts a nonempty status_request in TLS 1.3 CertificateRequest"
+  xfail rustls "accepts a nonempty status_request in TLS 1.3 CertificateRequest"
+  skip wolfssl "built without HAVE_CERTIFICATE_STATUS_REQUEST: status_request in a CertificateRequest is an extension it does not recognize"
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      +ext status_request = raw "01"
+    }
+  }
+  expect alert fatal/{decode_error,illegal_parameter,unsupported_extension}
+}

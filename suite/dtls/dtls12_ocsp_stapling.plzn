@@ -1,0 +1,122 @@
+plzn tls "dtls12/ocsp-stapling-from-server" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    ocsp_stapling: true
+  }
+  skip openssl "OpenSSL 3.6 does not staple for the self-signed test certificate"
+  flow {
+    send ClientHello { +ext status_request = ocsp }
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello { has_ext: status_request }
+    recv Certificate
+    recv CertificateStatus { status_type: ocsp }
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/ocsp-stapling-to-client" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}
+
+plzn tls "dtls12/skip-certificate-status" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}
+
+plzn tls "dtls12/ocsp-stapling-empty-response" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus { response: [] }
+    wait 300ms
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}
+
+plzn tls "dtls12/ocsp-stapling-unknown-status-type" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus @ set[handshake.status_type, 0] = 2
+    wait 300ms
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}

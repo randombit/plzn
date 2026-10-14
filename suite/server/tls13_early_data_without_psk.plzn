@@ -1,0 +1,14 @@
+plzn tls "server/tls13-early-data-without-psk" {
+  rfc 8446 section 4.2.10
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext early_data
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

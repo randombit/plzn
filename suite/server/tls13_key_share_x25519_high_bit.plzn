@@ -1,0 +1,16 @@
+plzn tls "server/tls13-key-share-x25519-high-bit" {
+  rfc 7748 section 5
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    # RFC 7748 requires receivers to mask this bit, leaving the shared secret unchanged.
+    send ClientHello @ xor[handshake.key_share, -1] = 0x80
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

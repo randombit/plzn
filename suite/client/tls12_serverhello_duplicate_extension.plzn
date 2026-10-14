@@ -1,0 +1,13 @@
+plzn tls "client/tls12-serverhello-duplicate-extension" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ServerHello {
+      +ext dup renegotiation_info = raw "00"
+    }
+  }
+  expect alert fatal/{decode_error, illegal_parameter}
+}

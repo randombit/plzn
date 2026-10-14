@@ -1,0 +1,11 @@
+# Negative: the peer is expected to send a fatal alert with
+# description=handshake_failure (code 40) while we're attempting a
+# normal TLS 1.2 ECDHE-RSA handshake. The integration test points
+# this at a FakeAlertOracle that replies with exactly that alert.
+plzn tls "negative/alert-handshake-failure" {
+  rfc 5246 section 7.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

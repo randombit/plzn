@@ -1,0 +1,147 @@
+plzn tls "client/tls12-length/server-hello-message" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerHello {
+    send ServerHello @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,unexpected_message}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-hello-session-id" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerHello {
+    send ServerHello @ add[handshake.session_id_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-hello-extensions" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerHello {
+    send ServerHello { +ext extended_master_secret } @ sub[handshake.extensions_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-certificate-message" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,unexpected_message,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-certificate-list" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.certificate_list_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-certificate-entry" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.first_certificate_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-key-exchange-message" {
+  rfc 5246 section 7.4.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,unexpected_message,decrypt_error,illegal_parameter}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-key-exchange-signature" {
+  rfc 5246 section 7.4.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ sub[handshake.signature_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,decrypt_error,illegal_parameter}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-key-exchange-public-key" {
+  rfc 8422 section 5.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ sub[handshake.ecdh_point_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,illegal_parameter,decrypt_error,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-key-exchange-dh-modulus" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ sub[handshake.dh_p_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,illegal_parameter,decrypt_error}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-length/server-key-exchange-dh-generator" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ sub[handshake.dh_g_length] = 1
+  }
+  expect alert fatal/{decode_error,illegal_parameter,decrypt_error,handshake_failure}
+}
+
+plzn tls "client/tls12-length/server-finished-message" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake until send Finished {
+    send Finished @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,decrypt_error,bad_record_mac,unexpected_message,handshake_failure}
+  expect close if wolfssl
+}

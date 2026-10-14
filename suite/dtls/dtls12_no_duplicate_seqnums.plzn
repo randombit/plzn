@@ -1,0 +1,10 @@
+plzn tls "dtls12/no-duplicate-record-seqnums" {
+  rfc 6347 section 4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {}
+  expect ok
+  assert no_duplicate_record_seqnums
+}

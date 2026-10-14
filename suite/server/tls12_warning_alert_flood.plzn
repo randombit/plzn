@@ -1,0 +1,284 @@
+# Floods of consecutive warning alerts at a TLS 1.2 server.
+#
+# Per library, from source and a count sweep in both roles (the warning alert
+# used is user_canceled, RFC 8446 6.1 / RFC 5246 7.2.1):
+#   OpenSSL    (3.6.5) MAX_WARN_ALERT_COUNT is 5 (ssl/record/record_local.h);
+#              alert_count reaching 5 is fatal unexpected_message
+#              (SSL_R_TOO_MANY_WARN_ALERTS), so 4 are tolerated and the 5th
+#              aborts. The count is reset by any non-empty, non-alert record
+#              (rec_layer_s3.c), so it is a consecutive limit. Under TLS 1.3
+#              only user_canceled is counted.
+#   BoringSSL  kMaxWarningAlerts is 4 (ssl/tls_record.cc); warning_alert_count
+#              above 4 is fatal unexpected_message (TOO_MANY_WARNING_ALERTS),
+#              reset when a record is returned to the caller. Same consecutive
+#              limit of 4.
+#   rustls     (0.23.45) allowed_warning_alerts is 4 (common_state.rs), a
+#              TemperCounters budget that is decremented and never reset, so it
+#              is a lifetime limit: the 5th warning is
+#              PeerMisbehaved::TooManyWarningAlertsReceived, returned without an
+#              alert (the peer sees a close).
+#   Go         (1.27.2) a warning alert is dropped through retryReadRecord, so
+#              the 17th consecutive non-advancing record exceeds
+#              maxUselessRecords (16, common.go): unexpected_message "too many
+#              ignored records". A state-advancing record resets it.
+#   GnuTLS     (3.8.13) during the handshake IMED_RET tolerates
+#              GNUTLS_E_WARNING_ALERT_RECEIVED while handshake_suspicious_loops
+#              stays below 16 (lib/handshake.h), so the 17th becomes a
+#              non-fatal error with no code and is reported as internal_error.
+#              After the handshake there is no bound. Under TLS 1.3 a warning
+#              user_canceled is turned into GNUTLS_E_FATAL_ALERT_RECEIVED
+#              (lib/record.c, tls13_sem), so the connection closes at the
+#              first one, against RFC 8446 6.1's SHOULD to keep reading.
+#   wolfSSL    (5.9.4) WOLFSSL_ALERT_COUNT_MAX is 5 (settings.h); alertCount
+#              reaching 5 is ALERT_COUNT_E, and it counts every alert (the
+#              closing close_notify included) and is never reset, so it is a
+#              lifetime limit of 4 user_canceled. Without WOLFSSL_EXTRA_ALERTS
+#              the Arch build sends no alert, so the peer sees a close.
+#   LibreSSL   (4.3.3) no warning-alert counter; a warning other than
+#              close_notify or no_renegotiation is ignored without bound
+#              (ssl_pkt.c).
+#   Botan      (3.13.0 development HEAD) a warning alert other than
+#              close_notify counts toward Policy::max_useless_records
+#              (32), shared with empty records and TLS 1.3 compatibility
+#              CCS; the 33rd consecutive one is fatal unexpected_message. A
+#              non-empty handshake or application-data record resets it.
+#
+# So OpenSSL, BoringSSL and Go reset the counter on an intervening record (a
+# consecutive limit), while rustls and wolfSSL spend a lifetime budget that an
+# intervening record does not refill: the interleaved rows below separate the
+# two.
+#
+# Positions: warning alerts in the plaintext part of the handshake (after the
+# ClientHello), as encrypted application data after the handshake, and
+# interleaved four-at-a-time with application data to show whether the cap is
+# consecutive or a lifetime budget. A single user_canceled is
+# tls12_user_canceled_warning_during_handshake; close_notify and
+# no_renegotiation have their own files.
+
+plzn tls "server/tls12-warning-alert-flood/handshake-after-client-hello-one-to-four" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send alert warning/user_canceled }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-warning-alert-flood/handshake-after-client-hello-five-to-sixteen" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [5, 6, 16]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send alert warning/user_canceled }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-warning-alert-flood/handshake-after-client-hello-seventeen-to-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [17, 32]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send alert warning/user_canceled }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/internal_error if gnutls
+}
+
+plzn tls "server/tls12-warning-alert-flood/handshake-after-client-hello-over-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send alert warning/user_canceled }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "server/tls12-warning-alert-flood/application-data-one-to-four" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-warning-alert-flood/application-data-five-to-sixteen" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [5, 6, 16]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-warning-alert-flood/application-data-seventeen-to-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [17, 32]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "server/tls12-warning-alert-flood/application-data-over-thirty-two" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if botan
+}
+
+# Each burst is four warnings followed by an application-data exchange.
+# A consecutive counter (OpenSSL, BoringSSL, Go) is reset by the data and
+# tolerates every burst; a lifetime budget (rustls, wolfSSL) is not, so the
+# second burst's fifth warning trips it.
+plzn tls "server/tls12-warning-alert-flood/interleaved-with-application-data-one-burst" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [1]
+  }
+  flow handshake {
+    repeat $count {
+      repeat 4 { send alert warning/user_canceled }
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-warning-alert-flood/interleaved-with-application-data-two-or-more-bursts" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    count in [2, 3, 5]
+  }
+  flow handshake {
+    repeat $count {
+      repeat 4 { send alert warning/user_canceled }
+      send AppData
+      recv AppData
+    }
+  }
+  expect ok
+  expect close if rustls
+  expect close if wolfssl
+}

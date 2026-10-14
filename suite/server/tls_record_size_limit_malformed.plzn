@@ -1,0 +1,101 @@
+plzn tls "server/tls12-record-size-limit/value-below-minimum" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "003f" }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/value-below-minimum" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "003f" }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/empty-extension" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/empty-extension" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/trailing-byte" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "004000" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/trailing-byte" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow {
+    send ClientHello { +ext record_size_limit = raw "004000" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not implement record_size_limit"
+}

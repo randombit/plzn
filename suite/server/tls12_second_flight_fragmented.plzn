@@ -1,0 +1,17 @@
+plzn tls "server/tls12-second-flight-fragmented" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    size in [1, 5, 16, 64, 255]
+  }
+  flow handshake {
+    send ClientKeyExchange @ fragment $size
+    send Finished @ fragment $size
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

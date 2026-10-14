@@ -1,0 +1,26 @@
+plzn tls "client/tls13-rejects-unoffered-psk-ke" {
+  rfc 8446 section 4.2.9
+  chain: [default]
+  uut client { versions: [tls13] }
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello { has_ext: pre_shared_key }
+      send ServerHello { psk_mode: psk_ke }
+    }
+    expect alert fatal/illegal_parameter
+    expect alert fatal/missing_extension if boringssl
+    expect alert fatal/missing_extension if rustls
+  }
+  skip libressl "its client does not resume TLS 1.3 sessions"
+}

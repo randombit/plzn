@@ -1,0 +1,39 @@
+plzn tls "client/tls12-does-not-offer-obsolete-key-exchange" {
+  rfc 10015 section 2
+  rfc 10015 section 3
+  rfc 10015 section 4
+  chain: [default]
+  uut client { versions: [tls12] }
+  xfail openssl "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail botan "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail gnutls "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail wolfssl "still offers finite-field DHE suites by default"
+  xfail go "still offers RSA key-transport suites by default"
+  xfail boringssl "still offers RSA key-transport suites by default"
+  flow handshake {
+    recv ClientHello { lacks_obsolete_key_exchange: true }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "still offers finite-field DHE and RSA key-transport suites by default"
+}
+
+plzn tls "client/tls12-does-not-offer-rc4" {
+  rfc 7465 section 2
+  chain: [default]
+  uut client { versions: [tls12] }
+  xfail go "still offers RC4 cipher suites by default"
+  flow handshake {
+    recv ClientHello {
+      lacks_cipher_suite: 0x0004
+      lacks_cipher_suite: 0x0005
+      lacks_cipher_suite: 0xc007
+      lacks_cipher_suite: 0xc011
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "still offers RC4 cipher suites by default"
+}

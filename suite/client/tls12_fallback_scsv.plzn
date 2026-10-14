@@ -1,0 +1,11 @@
+plzn tls "client/tls12-initial-clienthello-omits-fallback-scsv" {
+  rfc 7507 section 3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv ClientHello { lacks_cipher_suite: FALLBACK_SCSV }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

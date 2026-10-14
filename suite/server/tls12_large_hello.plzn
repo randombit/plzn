@@ -1,0 +1,115 @@
+plzn tls "server/tls12-large-hello/padding-ext" {
+  rfc 7685 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0..4, 0x1ffc..0x2004, 0x3ffc..0x4004, 0x8ffc..0x9004, 0xfe00..0xfe04] }
+  flow handshake {
+    send ClientHello { +ext padding = $i } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/ext-80" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0..4, 0x1ffc..0x2004, 0x3ffc..0x4004, 0x8ffc..0x9004, 0xfe00..0xfe04] }
+  flow handshake {
+    send ClientHello { +ext 0x0050 = zeros $i } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/two-ext" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0..4, 0x1ffc..0x2004, 0x3ffc..0x4004, 0x8ffc..0x9004, 0xee00..0xee04] }
+  flow handshake {
+    send ClientHello {
+      +ext 0x0050 = zeros $i
+      +ext 0x0051 = zeros 4096
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/n-cipher-suites" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  matrix { i in [1..4, 0xffc..0x1004, 0x1ffc..0x2004, 0x47fc..0x4804] }
+  flow handshake {
+    send ClientHello { cipher_suites: [0x5701..$i + 0x5700, ECDHE_RSA_WITH_AES_128_GCM_SHA256] } @ fragment 16384
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/max-cipher-suites" {
+  rfc 5246 section 7.4.1.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { cipher_suites: [0x0100..0x12ff, 0x5701..0xbfff, ECDHE_RSA_WITH_AES_128_GCM_SHA256] } @ fragment 16384
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/fragmented-padding-ext" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { i in [0, 0x2000, 0x9000] }
+  flow handshake {
+    send ClientHello { +ext padding = $i } @ fragment 512
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-large-hello/fragmented-padding-ext-65k" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext padding = 0xfe00 } @ fragment 512
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect close if rustls
+}

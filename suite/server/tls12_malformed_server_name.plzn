@@ -1,0 +1,154 @@
+plzn tls "server/tls12-server-name/empty-extension" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello { +ext server_name = raw "" }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/empty-name-list" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello { +ext server_name = raw "0000" }
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/empty-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail openssl "accepts an empty host_name"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "0003000000" }
+  }
+  expect alert fatal/{decode_error,unrecognized_name}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/trailing-data" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello { +ext server_name = raw "000400000178ff" }
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/name-list-length-overruns-extension" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello { +ext server_name = raw "ffffffff" }
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/duplicate-host-name-type" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail gnutls "accepts two host_name entries in one ServerNameList"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "001c0000096c6f63616c686f737400000d7777772e6c6f63616c686f7374" }
+  }
+  expect alert fatal/{illegal_parameter,decode_error}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-server-name/unknown-type-after-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail boringssl "rejects an unknown ServerName type instead of ignoring it"
+  xfail openssl "rejects an unknown ServerName type instead of ignoring it"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "00270000096c6f63616c686f7374010018000102030405060708090a0b0c0d0e0f1011121314151617" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if libressl
+  xfail wolfssl "rejects a ServerName of unknown name_type instead of skipping it by its length (RFC 6066 3)"
+}
+
+plzn tls "server/tls12-server-name/unknown-type-before-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail boringssl "rejects an unknown ServerName type instead of ignoring it"
+  xfail openssl "rejects an unknown ServerName type instead of ignoring it"
+  xfail rustls "requires host_name to precede unknown ServerName types"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "0027010018000102030405060708090a0b0c0d0e0f10111213141516170000096c6f63616c686f7374" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if libressl
+  xfail wolfssl "rejects a ServerName of unknown name_type instead of skipping it by its length (RFC 6066 3)"
+}
+
+plzn tls "server/tls12-server-name/nul-in-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail go "accepts a NUL byte in host_name"
+  xfail wolfssl "accepts a NUL byte in host_name"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "000d00000a6c6f63616c686f730074" }
+  }
+  expect alert fatal/{illegal_parameter,unrecognized_name}
+}
+
+plzn tls "server/tls12-server-name/control-character-in-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail boringssl "accepts a control character in host_name"
+  xfail go "accepts a control character in host_name"
+  xfail openssl "accepts a control character in host_name"
+  xfail wolfssl "accepts a control character in host_name"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "000d00000a6c6f63616c686f730774" }
+  }
+  expect alert fatal/{illegal_parameter,unrecognized_name}
+}
+
+plzn tls "server/tls12-server-name/non-ascii-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail boringssl "accepts non-ASCII bytes in host_name"
+  xfail go "accepts non-ASCII bytes in host_name"
+  xfail openssl "accepts non-ASCII bytes in host_name"
+  xfail wolfssl "accepts non-ASCII bytes in host_name"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "000e00000b6c6f63616c686f73c48574" }
+  }
+  expect alert fatal/{illegal_parameter,unrecognized_name}
+}
+
+plzn tls "server/tls12-server-name/escape-sequence-in-host-name" {
+  rfc 6066 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  xfail boringssl "accepts terminal escape bytes in host_name"
+  xfail go "accepts terminal escape bytes in host_name"
+  xfail openssl "accepts terminal escape bytes in host_name"
+  xfail wolfssl "accepts terminal escape bytes in host_name"
+  flow handshake {
+    send ClientHello { +ext server_name = raw "001b0000186c6f63616c686f73741b5b33316d4241441b5b303b33376d" }
+  }
+  expect alert fatal/{illegal_parameter,unrecognized_name}
+}

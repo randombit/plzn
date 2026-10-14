@@ -1,0 +1,11 @@
+plzn tls "server/tls13-ffdhe-only-client-disabled-server" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [ffdhe2048] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

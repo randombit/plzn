@@ -1,0 +1,14 @@
+plzn tls "server/tls13-extension-reorder" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      reverse_extensions
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

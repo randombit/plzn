@@ -1,0 +1,16 @@
+plzn tls "server/tls12-finished-fragment-before-ccs" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    send Finished @ fragment 6 hold
+    send ChangeCipherSpec
+    flush_fragment
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if rustls
+  xfail libressl "carries a partial Finished across the ChangeCipherSpec"
+}

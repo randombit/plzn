@@ -1,0 +1,11 @@
+plzn tls "client/tls13-client-auth" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

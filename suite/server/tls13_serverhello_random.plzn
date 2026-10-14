@@ -1,0 +1,15 @@
+plzn tls "server/tls13-serverhello-random/random-unique" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  repeat 8
+  flow handshake {
+    recv ServerHello { random: capture $r }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $r
+}

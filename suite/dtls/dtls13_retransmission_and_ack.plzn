@@ -1,0 +1,686 @@
+plzn tls "dtls13/client-retransmits-initial-client-hello" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 400ms
+    expect_retransmit
+    expect next_timeout 800ms
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-initial-flight-retransmission-budget-exhausted" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 400ms
+    expect_retransmit
+    expect next_timeout 800ms
+    advance_clock 800ms
+    expect_retransmit
+    expect next_timeout 1600ms
+    advance_clock 1600ms
+    expect_retransmit
+    expect next_timeout 3200ms
+    advance_clock 3200ms
+    expect_retransmit
+    expect next_timeout 6400ms
+    advance_clock 6400ms
+    expect_retransmit
+    expect next_timeout 12800ms
+    advance_clock 12800ms
+    expect_retransmit
+    expect next_timeout 25600ms
+    advance_clock 25600ms
+    expect_retransmit
+    expect next_timeout 51200ms
+    advance_clock 51200ms
+    expect_retransmit
+    expect next_timeout 60s
+    advance_clock 60s
+    expect_retransmit
+    expect next_timeout 60s
+    advance_clock 60s
+    expect_retransmit
+    expect next_timeout 60s
+    advance_clock 60s
+    expect_retransmit
+    expect next_timeout 60s
+    advance_clock 60s
+    expect_retransmit
+    expect next_timeout 60s
+    advance_clock 60s
+  }
+  expect timeout
+}
+
+plzn tls "dtls13/client-live-timeout-decrease" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    set_timeout 200ms
+    expect next_timeout 200ms
+    advance_clock 200ms
+    expect_retransmit
+    expect next_timeout 400ms
+    set_timeout 400ms
+    expect next_timeout 800ms
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-live-timeout-fire" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 200ms
+    expect next_timeout 200ms
+    set_timeout 200ms
+    expect next_timeout 0ms
+    advance_clock 0ms
+    expect_retransmit
+    expect next_timeout 400ms
+    set_timeout 400ms
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-live-timeout-increase" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 200
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 200ms
+    set_timeout 400ms
+    expect next_timeout 400ms
+    advance_clock 200ms
+    expect next_timeout 200ms
+    advance_clock 200ms
+    expect_retransmit
+    expect next_timeout 800ms
+    set_timeout 200ms
+    expect next_timeout 400ms
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-timeout-fudge-fires-slightly-early" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 390ms
+    expect_retransmit
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-timeout-can-be-advanced-in-steps" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 0ms
+    expect next_timeout 400ms
+    advance_clock 133ms
+    expect next_timeout 267ms
+    advance_clock 267ms
+    expect_retransmit
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-partial-next-flight-implicitly-acks-previous-flight" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest
+    send ClientHello @ fragment 32 hold_all
+    expect next_timeout 100ms
+    advance_clock 100ms
+    expect_ack
+    expect no_timeout
+    flush_fragment
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-partial-flight-ack-timer-rescaled" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest
+    send ClientHello @ fragment 32 hold_all
+    set_timeout 200ms
+    expect next_timeout 50ms
+    advance_clock 50ms
+    expect_ack
+    set_timeout 400ms
+    flush_fragment
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-partial-server-flight-before-version-known" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send ServerHello @ fragment 80 hold_all
+    expect next_timeout 400ms
+    advance_clock 400ms
+    expect_retransmit
+    flush_fragment
+    expect next_timeout 800ms
+    advance_clock 800ms
+    expect_retransmit
+    send EncryptedExtensions
+    expect next_timeout 100ms
+    advance_clock 100ms
+    expect_ack
+    expect no_timeout
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-final-flight-retransmitted-until-acked" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+  }
+  flow handshake until recv Finished {
+    suppress_ack
+    recv Finished
+    expect next_timeout 400ms
+    advance_clock 400ms
+    expect_retransmit
+    expect next_timeout 800ms
+    send_ack all
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-appdata-does-not-implicitly-ack-final-flight" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake until recv Finished {
+    suppress_ack
+    recv Finished
+    send AppData
+    recv AppData
+    advance_clock 400ms
+    expect_retransmit
+    send_ack all
+    expect no_timeout
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-retransmits-final-flight-after-live-mtu-change" {
+  rfc 9147 section 5.8
+  chain: [default]
+  client_chain: [default]
+  uut client {
+    versions: [dtls13]
+    mtu: 300
+  }
+  peer { request_client_cert: true }
+  flow handshake until recv Certificate {
+    suppress_ack
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    set_mtu 301
+    advance_clock 400ms
+    expect_retransmit
+    set_mtu 302
+    advance_clock 800ms
+    expect_retransmit
+    send_ack all
+    expect no_timeout
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-final-flight-retransmission-budget-exhausted" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake until recv Finished {
+    suppress_ack
+    recv Finished
+    advance_clock 400ms
+    expect_retransmit
+    advance_clock 800ms
+    expect_retransmit
+    advance_clock 1600ms
+    expect_retransmit
+    advance_clock 3200ms
+    expect_retransmit
+    advance_clock 6400ms
+    expect_retransmit
+    advance_clock 12800ms
+    expect_retransmit
+    advance_clock 25600ms
+    expect_retransmit
+    advance_clock 51200ms
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+  }
+  expect timeout
+}
+
+plzn tls "dtls13/client-sends-delayed-ack-while-awaiting-flight" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    expect next_timeout 100ms
+    advance_clock 100ms
+    expect_ack
+    expect no_timeout
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-ticket-flight-retransmitted-until-acked" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    initial_timeout_ms: 400
+    session_tickets: 1
+  }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [psk_dhe_ke] }
+    suppress_ack
+    recv NewSessionTicket
+    expect next_timeout 400ms
+    advance_clock 400ms
+    expect_retransmit
+    send_ack all
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-ticket-flight-retransmission-budget-exhausted" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    session_tickets: 1
+  }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [psk_dhe_ke] }
+    suppress_ack
+    recv NewSessionTicket
+    advance_clock 400ms
+    expect_retransmit
+    advance_clock 800ms
+    expect_retransmit
+    advance_clock 1600ms
+    expect_retransmit
+    advance_clock 3200ms
+    expect_retransmit
+    advance_clock 6400ms
+    expect_retransmit
+    advance_clock 12800ms
+    expect_retransmit
+    advance_clock 25600ms
+    expect_retransmit
+    advance_clock 51200ms
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+  }
+  expect timeout
+}
+
+plzn tls "dtls13/server-flight-selective-ack" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    mtu: 256
+    initial_timeout_ms: 400
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    expect next_timeout 400ms
+    send_ack first
+    advance_clock 400ms
+    expect_retransmit
+    expect next_timeout 800ms
+    send_ack all
+    expect no_timeout
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-flight-progressive-selective-acks" {
+  rfc 9147 section 7
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    mtu: 256
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send_ack last
+    advance_clock 400ms
+    expect_retransmit
+    send_ack even
+    advance_clock 800ms
+    expect_retransmit
+    send_ack odd
+    expect no_timeout
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-ignores-ack-for-previous-flight" {
+  rfc 9147 section 7
+  chain: [default]
+  uut server { versions: [dtls13], session_tickets: 0 }
+  flow {
+    send ClientHello { +ext key_share = raw "0000" }
+    suppress_ack
+    recv HelloRetryRequest
+    send ClientHello
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send_ack first
+    advance_clock 400ms
+    expect_retransmit
+    send_ack all
+    expect no_timeout
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-ignores-ack-for-forgotten-record" {
+  rfc 9147 section 7
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    mtu: 256
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    advance_clock 400ms
+    expect_retransmit
+    advance_clock 800ms
+    expect_retransmit
+    advance_clock 1600ms
+    expect_retransmit
+    advance_clock 3200ms
+    expect_retransmit
+    advance_clock 6400ms
+    expect_retransmit
+    advance_clock 12800ms
+    expect_retransmit
+    advance_clock 25600ms
+    expect_retransmit
+    advance_clock 51200ms
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    advance_clock 60s
+    expect_retransmit
+    send_ack first
+    advance_clock 60s
+    expect_retransmit
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-acks-retransmitted-finished-after-appdata-until-epoch-expires" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13], session_tickets: 0 }
+  flow handshake until send Finished {
+    send Finished
+    expect_ack
+    send AppData
+    recv AppData
+    retransmit_previous_epoch Finished
+    advance_clock 100ms
+    expect_ack
+    # BoringSSL retains the prior read epoch for four minutes.
+    advance_clock 241s
+    retransmit_previous_epoch Finished
+    wait 300ms
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-flight-duplicate-ack-is-idempotent" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    mtu: 256
+    initial_timeout_ms: 400
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send_ack first
+    advance_clock 400ms
+    expect_retransmit
+    send_ack first
+    advance_clock 800ms
+    expect_retransmit
+    send_ack all
+    expect no_timeout
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-rejects-ack-at-lower-epoch" {
+  rfc 9147 section 7
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send_ack all outer_epoch 0
+    recv Finished
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+}
+
+plzn tls "dtls13/server-rejects-overflowing-ack-epoch" {
+  rfc 9147 section 7
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    session_tickets: 0
+  }
+  flow {
+    send ClientHello
+    suppress_ack
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send_ack first outer_epoch 0 overflow_epoch
+    recv Finished
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+}

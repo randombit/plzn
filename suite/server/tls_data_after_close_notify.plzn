@@ -1,0 +1,27 @@
+plzn tls "server/tls12-ignores-data-after-close-notify" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    atomic {
+      send alert warning/close_notify
+      send AppData { reply: 64 }
+    }
+    recv alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ignores-data-after-close-notify" {
+  rfc 9846 section 6.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    atomic {
+      send alert warning/close_notify
+      send AppData { reply: 64 }
+    }
+    recv alert warning/close_notify
+  }
+  expect ok
+}

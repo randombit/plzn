@@ -1,0 +1,13 @@
+plzn tls "client/tls13-ee-ec-point-formats" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext ec_point_formats = [uncompressed]
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/unsupported_extension if rustls
+}

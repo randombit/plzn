@@ -1,0 +1,11 @@
+plzn tls "server/tls12-client-hello-one-byte" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow {
+    send raw "16030300050100000100"
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}

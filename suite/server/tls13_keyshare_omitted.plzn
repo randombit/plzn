@@ -1,0 +1,24 @@
+plzn tls "server/tls13-keyshare-omitted/empty-key-share-body" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = raw "" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls13-keyshare-omitted/empty-key-share-body-with-psk-modes" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello {
+      +ext key_share = raw ""
+      +ext psk_key_exchange_modes = [psk_dhe_ke]
+    }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}

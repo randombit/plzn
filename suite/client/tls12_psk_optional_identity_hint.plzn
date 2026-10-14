@@ -1,0 +1,25 @@
+plzn tls "client/tls12-psk-server-omits-optional-identity-hint" {
+  rfc 4279 section 2
+  chain: []
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [tls12]
+    cipher_suites: [PSK_WITH_AES_128_GCM_SHA256]
+  }
+  flow {
+    recv ClientHello { cipher_suites: [PSK_WITH_AES_128_GCM_SHA256] }
+    send ServerHello { cipher_suite: PSK_WITH_AES_128_GCM_SHA256 }
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

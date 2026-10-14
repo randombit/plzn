@@ -1,0 +1,32 @@
+plzn tls "server/tls13-ecdsa-support-p521/ecdsa_secp521r1_sha512" {
+  rfc 8446 section 4.2.3
+  chain: [ecdsa_p521]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ecdsa-support-p521/ecdsa_secp256r1_sha256" {
+  rfc 8446 section 4.2.3
+  chain: [ecdsa_p521]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-ecdsa-support-p521/ecdsa_secp384r1_sha384" {
+  rfc 8446 section 4.2.3
+  chain: [ecdsa_p521]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+  }
+  expect alert fatal/handshake_failure
+}

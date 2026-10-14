@@ -1,0 +1,13 @@
+plzn tls "server/cbc-mac-xor" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.mac, 0] = 0xff
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

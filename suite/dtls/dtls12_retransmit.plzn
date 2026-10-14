@@ -1,0 +1,20 @@
+plzn tls "dtls12/retransmit" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    initial_timeout_ms: 1000
+  }
+  flow handshake after recv ServerHelloDone {
+    expect next_timeout 1s
+    advance_clock 1s
+    expect_retransmit
+    expect next_timeout 2s
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

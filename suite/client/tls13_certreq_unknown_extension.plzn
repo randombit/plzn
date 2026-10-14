@@ -1,0 +1,17 @@
+plzn tls "client/tls13-certreq-unknown-extension" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send CertificateRequest {
+      +ext $grease = zeros 25
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,12 @@
+plzn tls "client/tls13-hrr-reject-shared-group" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr] }
+  flow handshake {
+    send HelloRetryRequest { key_share_group: x25519 }
+  }
+  expect alert fatal/illegal_parameter
+}

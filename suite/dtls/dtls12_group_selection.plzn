@@ -1,0 +1,29 @@
+plzn tls "dtls12/group-x25519-preferred" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, x25519, secp256r1] }
+  flow handshake {
+    recv ServerKeyExchange { named_group: x25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/group-secp256r1-only" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    recv ServerKeyExchange { named_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

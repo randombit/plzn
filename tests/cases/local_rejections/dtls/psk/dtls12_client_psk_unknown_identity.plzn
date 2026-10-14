@@ -1,0 +1,15 @@
+plzn tls "selftest/local-rejection/dtls12-client-psk-unknown-identity" {
+  rfc 4279 section 2
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    psk_identity: "not-an-identity"
+  }
+  peer { capabilities: [psk] }
+  flow handshake {}
+  expect reject fatal/unknown_psk_identity
+}

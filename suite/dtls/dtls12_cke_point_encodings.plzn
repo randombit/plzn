@@ -1,0 +1,78 @@
+plzn tls "dtls12/cke-point-zero" {
+  rfc 8422 section 5.11
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/cke-point-truncated" {
+  rfc 8422 section 5.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: truncated }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/cke-point-padded" {
+  rfc 8422 section 5.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: padded }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/cke-point-not-on-curve" {
+  rfc 8422 section 5.11
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  flow handshake {
+    # P-256 generator x coordinate paired with a y that is not its square root.
+    send ClientKeyExchange {
+      ecdh_Yc: [0x04, 0x6b, 0x17, 0xd1, 0xf2, 0xe1, 0x2c, 0x42, 0x47, 0xf8, 0xbc, 0xe6, 0xe5, 0x63, 0xa4, 0x40,
+                0xf2, 0x77, 0x03, 0x7d, 0x81, 0x2d, 0xeb, 0x33, 0xa0, 0xf4, 0xa1, 0x39, 0x45, 0xd8, 0x98, 0xc2,
+                0x96, 0x4f, 0xe3, 0x42, 0xe2, 0xfe, 0x1a, 0x7f, 0x9b, 0x8e, 0xe7, 0xeb, 0x4a, 0x7c, 0x0f, 0x9e,
+                0x16, 0x2b, 0xce, 0x33, 0x57, 0x6b, 0x31, 0x5e, 0xce, 0xcb, 0xb6, 0x40, 0x68, 0x37, 0xbf, 0x51, 0xf6]
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/cke-point-compressed" {
+  rfc 8422 section 5.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  skip boringssl "supports only the mandatory uncompressed point format and does not negotiate compressed points"
+  skip libressl "advertises only the uncompressed point format and since 4.4.0 rejects a compressed point with decode_error"
+  flow handshake {
+    send ClientKeyExchange { key_share_point: compressed }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

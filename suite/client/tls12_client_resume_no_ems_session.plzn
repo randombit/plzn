@@ -1,0 +1,38 @@
+plzn tls "client/tls12-resume-no-ems-session" {
+  rfc 7627 section 5.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      send ServerHello {
+        -ext extended_master_secret
+      }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      recv ClientHello { has_ext: extended_master_secret, has_ext: session_ticket }
+      send ServerHello
+      send Certificate
+      send ServerKeyExchange
+      send ServerHelloDone
+      recv ClientKeyExchange
+      recv ChangeCipherSpec
+      recv Finished
+      send ChangeCipherSpec
+      send Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip libressl "does not implement extended_master_secret"
+}

@@ -1,0 +1,27 @@
+plzn tls "dtls12/close-alert" {
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-close-alert" {
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

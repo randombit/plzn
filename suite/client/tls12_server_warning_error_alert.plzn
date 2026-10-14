@@ -1,0 +1,23 @@
+plzn tls "client/tls12-server-warning-error-alert" {
+  rfc 5246 section 7.2.2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send alert warning/decrypt_error
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

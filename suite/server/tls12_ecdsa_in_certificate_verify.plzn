@@ -1,0 +1,764 @@
+# LibreSSL's TLS 1.2 server answers any failed CertificateVerify signature with
+# internal_error (its TLS 1.3 server and TLS 1.2 client send decrypt_error), so the
+# internal_error pins below are that alert choice, not an internal failure.
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/valid-handshake" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/md5-ecdsa-forced" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_md5 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  xfail libressl "accepts an ecdsa_sha1 CertificateVerify despite RFC 9155"
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha224 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect ok if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+    verify_prefs: [ecdsa_secp521r1_sha512]
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha224" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha1, algorithm: ecdsa_sha224 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha256" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha1, algorithm: ecdsa_secp256r1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha384" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha1, algorithm: ecdsa_secp384r1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha512" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha1, algorithm: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha1" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha224, algorithm: ecdsa_sha1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha256" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha224, algorithm: ecdsa_secp256r1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha384" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha224, algorithm: ecdsa_secp384r1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha512" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_sha224, algorithm: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha1" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256, algorithm: ecdsa_sha1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha224" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256, algorithm: ecdsa_sha224 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha384" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256, algorithm: ecdsa_secp384r1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha512" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256, algorithm: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha1" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_sha1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha224" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_sha224 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha256" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_secp256r1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha512" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha1" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512, algorithm: ecdsa_sha1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha224" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512, algorithm: ecdsa_sha224 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha256" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512, algorithm: ecdsa_secp256r1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha384" {
+  rfc 4492 section 5.10
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512, algorithm: ecdsa_secp384r1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/internal_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-advertised-as-brainpool-tls13" {
+  rfc 8734 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256, algorithm: ecdsa_brainpoolP256r1tls13_sha256 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-advertised-as-brainpool-tls13" {
+  rfc 8734 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_brainpoolP384r1tls13_sha384 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp521r1_sha512-advertised-as-brainpool-tls13" {
+  rfc 8734 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [ecdhe, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1, ecdsa_sha224, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ecdsa_p256 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512, algorithm: ecdsa_brainpoolP512r1tls13_sha512 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

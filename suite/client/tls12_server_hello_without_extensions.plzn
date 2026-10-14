@@ -1,0 +1,16 @@
+plzn tls "client/tls12-server-hello-without-extensions" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    send ServerHello { extensions: [] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  # OpenSSL refuses servers without RFC 5746 signaling unless
+  # SSL_OP_LEGACY_SERVER_CONNECT is set; RFC 5746 4.1 lets a client abort here.
+  expect alert fatal/handshake_failure if openssl
+  # LibreSSL 4.4.0 no longer sets SSL_OP_LEGACY_SERVER_CONNECT by default.
+  expect alert fatal/handshake_failure if libressl
+}

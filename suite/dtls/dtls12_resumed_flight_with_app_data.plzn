@@ -1,0 +1,26 @@
+plzn tls "dtls12/resumed-final-flight-and-app-data-in-one-receive" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake after recv Finished {
+      send ChangeCipherSpec
+      send Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

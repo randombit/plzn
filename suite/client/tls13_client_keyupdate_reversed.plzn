@@ -1,0 +1,24 @@
+plzn tls "client/tls13-client-keyupdate-reversed" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    records_per_traffic_key: 3
+  }
+  flow handshake {
+    send KeyUpdate { request_update: update_requested }
+    send AppData
+    recv KeyUpdate { request_update: update_not_requested }
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

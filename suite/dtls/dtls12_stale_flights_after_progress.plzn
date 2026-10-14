@@ -1,0 +1,161 @@
+plzn tls "dtls12/server-ignores-stale-initial-client-hello-after-cookie-exchange" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow {
+    send ClientHello
+    hold_retransmit
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    release_flight
+    wait 200ms
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-ignores-stale-hello-verify-request-after-server-flight" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    hold_retransmit
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    release_flight
+    wait 200ms
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/server-ignores-stale-cookie-client-hello-after-finished" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    hold_retransmit
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    release_flight
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-ignores-stale-server-handshake-after-server-finished" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    hold_retransmit
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    release_flight
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/server-ignores-stale-client-finished-after-application-data" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    hold_retransmit
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    release_flight
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-ignores-stale-server-finished-after-application-data" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    hold_retransmit
+    send AppData
+    recv AppData
+    release_flight
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

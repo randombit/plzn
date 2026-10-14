@@ -1,0 +1,54 @@
+plzn tls "dtls12/client-hello-dtls10-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ClientHello { legacy_version: 0xfeff }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls12/client-hello-no-null-compression" {
+  rfc 5246 section 7.4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ClientHello { compression_methods: [0x01] }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/client-hello-session-id" {
+  rfc 5246 section 7.4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { legacy_session_id: [0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08] }
+    recv ServerHello { cipher_suite: ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-hello-zero-random" {
+  rfc 5246 section 7.4.1.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ClientHello { random: 0x00 * 32 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,15 @@
+plzn tls "dtls12/client-initiated-renegotiation-unprompted" {
+  rfc 5246 section 7.4.1.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    renegotiate_after_handshake: true
+  }
+  flow handshake after send Finished {
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

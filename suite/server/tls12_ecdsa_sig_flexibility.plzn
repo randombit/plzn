@@ -1,0 +1,189 @@
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha1-ecdsa-only" {
+  rfc 4492 section 5.10
+  chain: [ecdsa_p256]
+  skip botan "Botan TLS does not implement the explicit ECDSA/SHA-1 SignatureScheme"
+  skip rustls "rustls does not implement ECDSA/SHA-1"
+  uut server {
+    versions: [tls12]
+    signing_prefs: [ecdsa_sha1]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha1]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: ecdsa_sha1 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha224-ecdsa-only" {
+  rfc 4492 section 5.10
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_sha224]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: ecdsa_sha224 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/handshake_failure
+  expect ok if openssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha256-ecdsa-only" {
+  rfc 4492 section 5.10
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp256r1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha384-ecdsa-only" {
+  rfc 4492 section 5.10
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp384r1_sha384 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect close if rustls
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha512-ecdsa-only" {
+  rfc 4492 section 5.10
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp521r1_sha512 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect close if rustls
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP256r1tls13_sha256-only" {
+  rfc 8734 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_brainpoolP256r1tls13_sha256]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP384r1tls13_sha384-only" {
+  rfc 8734 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_brainpoolP384r1tls13_sha384]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP512r1tls13_sha512-only" {
+  rfc 8734 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, aes128_gcm_sha256] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_brainpoolP512r1tls13_sha512]
+      +ext supported_groups = [secp256r1, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}

@@ -1,0 +1,104 @@
+plzn tls "server/tls12-grease-cipher-suite" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$grease, ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+    }
+    recv ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-grease-extension" {
+  rfc 8701
+  chain: [default]
+  uut server { versions: [tls12] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello { +ext $grease = zeros 25 }
+    recv ServerHello { lacks_ext: $grease }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-grease-supported-group" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+    curves: [secp256r1]
+  }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext supported_groups = [$grease, secp256r1]
+    }
+    recv ServerKeyExchange { named_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-grease-signature-algorithm" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+    signing_prefs: [rsa_pkcs1_sha256]
+  }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+      +ext signature_algorithms = [$grease, rsa_pkcs1_sha256]
+    }
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-grease-alpn-identifiers" {
+  rfc 8701
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    alpn_select: "h2"
+    expect_alpn: "h2"
+  }
+  flow handshake {
+    send ClientHello {
+      +ext alpn = ["GREASE_00", "GREASE_01", "GREASE_02", "GREASE_03",
+                   "GREASE_04", "GREASE_05", "GREASE_06", "GREASE_07",
+                   "GREASE_08", "GREASE_09", "GREASE_10", "GREASE_11",
+                   "GREASE_12", "GREASE_13", "GREASE_14", "GREASE_15", "h2"]
+    }
+    recv ServerHello { ext alpn == "h2" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

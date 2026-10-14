@@ -1,0 +1,24 @@
+plzn tls "server/tls12-application-data-before-client-hello" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow {
+    send AppData
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if botan
+  expect close if go
+}
+
+plzn tls "server/tls13-application-data-before-client-hello" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow {
+    send AppData
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if go
+}

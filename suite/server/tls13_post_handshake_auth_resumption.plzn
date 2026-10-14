@@ -1,0 +1,45 @@
+plzn tls "server/tls13-post-handshake-auth-after-resumption" {
+  rfc 8446 section 4.6.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    post_handshake_auth: request
+  }
+
+  session initial {
+    flow {
+      send ClientHello { +ext post_handshake_auth }
+      recv ServerHello
+      recv EncryptedExtensions
+      recv Certificate
+      recv CertificateVerify
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      recv CertificateRequest
+      send Certificate
+      send CertificateVerify
+      send Finished
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello { +ext post_handshake_auth }
+      recv ServerHello { has_ext: pre_shared_key }
+      recv EncryptedExtensions
+      recv Finished
+      send Finished
+      recv CertificateRequest
+      send Certificate @ fragment 1
+      send CertificateVerify @ fragment 1
+      send Finished @ fragment 1
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

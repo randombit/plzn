@@ -1,0 +1,13 @@
+# STRESS_TEST.md port 2.11 — KeyUpdate with unknown request mode.
+# RFC 8446 §4.6.3 defines only 0 (update_not_requested) and
+# 1 (update_requested). Value 0x03 should trigger illegal_parameter.
+plzn tls "server/tls13-keyupdate-unknown-mode" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send KeyUpdate { request_update: 0x03 }
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+}

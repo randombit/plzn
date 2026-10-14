@@ -1,0 +1,308 @@
+plzn tls "server/tls12-length/client-hello-message" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ sub[handshake.length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/{decode_error,unexpected_message}
+}
+
+plzn tls "server/tls12-length/client-hello-session-id" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ add[handshake.session_id_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-length/client-hello-cipher-suites" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ sub[handshake.cipher_suites_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-length/client-hello-compression-methods" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ sub[handshake.compression_methods_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-hello-extensions" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello @ sub[handshake.extensions_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-key-exchange-message" {
+  rfc 5246 section 7.4.7
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange @ sub[handshake.length] = 1
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{decode_error,unexpected_message,decrypt_error,illegal_parameter}
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-key-exchange-public-key" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange @ sub[handshake.ecdh_point_length] = 1
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{decode_error,illegal_parameter,handshake_failure,internal_error}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-certificate-message" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server { versions: [tls12], require_client_cert: true }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,unexpected_message,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-certificate-list" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server { versions: [tls12], require_client_cert: true }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.certificate_list_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-certificate-entry" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server { versions: [tls12], require_client_cert: true }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.first_certificate_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-length/client-certificate-verify-message" {
+  rfc 5246 section 7.4.8
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server { versions: [tls12], require_client_cert: true }
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ sub[handshake.length] = 1
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{decode_error,unexpected_message,decrypt_error}
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-length/client-certificate-verify-signature" {
+  rfc 5246 section 7.4.8
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server { versions: [tls12], require_client_cert: true }
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ sub[handshake.signature_length] = 1
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/client-finished-message" {
+  rfc 5246 section 7.4.9
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send Finished {
+    send Finished @ sub[handshake.length] = 1
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{decode_error,decrypt_error,bad_record_mac,unexpected_message,handshake_failure}
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/signature-algorithms-extension" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext signature_algorithms = raw "00020403" } @ sub[handshake.extension_signature_algorithms_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/signature-algorithms-list" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext signature_algorithms = raw "00020403" } @ sub[handshake.extension_signature_algorithms_list_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/renegotiation-info-extension" {
+  rfc 5746 section 3.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext renegotiation_info = raw "00" } @ sub[handshake.extension_renegotiation_info_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/renegotiation-info-vector" {
+  rfc 5746 section 3.2
+  xfail wolfssl "does not check that renegotiated_connection is empty in an initial ClientHello (this build never parses renegotiation_info; secure-renegotiation builds accept it too)"
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext renegotiation_info = raw "00" } @ add[handshake.extension_renegotiation_info_info_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/{decode_error,handshake_failure}
+}
+
+plzn tls "server/tls12-length/alpn-extension" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut server { versions: [tls12], alpn_select: "h2" }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext alpn = raw "0003026832" } @ sub[handshake.extension_alpn_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-length/alpn-protocol-list" {
+  rfc 7301 section 3.1
+  xfail gnutls "accepts an ALPN extension with a short ProtocolNameList length"
+  chain: [default]
+  uut server { versions: [tls12], alpn_select: "h2" }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext alpn = raw "0003026832" } @ sub[handshake.extension_alpn_list_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-length/ec-point-formats-extension" {
+  rfc 8422 section 5.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext ec_point_formats = raw "0100" } @ sub[handshake.extension_ec_point_formats_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/ec-point-formats-list" {
+  rfc 8422 section 5.1.2
+  xfail gnutls "accepts an EC point formats extension with a short list length"
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext ec_point_formats = raw "0100" } @ sub[handshake.extension_ec_point_formats_list_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/encrypt-then-mac-extension" {
+  rfc 7366 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext encrypt_then_mac } @ sub[handshake.extension_encrypt_then_mac_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/extended-master-secret-extension" {
+  rfc 7627 section 5.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext extended_master_secret } @ sub[handshake.extension_extended_master_secret_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/heartbeat-extension" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext heartbeat = raw "01" } @ sub[handshake.extension_heartbeat_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-length/padding-extension" {
+  rfc 7685 section 3
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = raw "00000000" } @ sub[handshake.extension_padding_length] = 1
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}

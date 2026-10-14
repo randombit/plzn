@@ -1,0 +1,64 @@
+plzn tls "client/tls13-server-certificate-compression" {
+  rfc 8879 section 4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  flow {
+    recv ClientHello { has_ext: compress_certificate }
+    send ServerHello
+    send EncryptedExtensions
+    send CompressedCertificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-server-certificate-compression-wrong-uncompressed-length" {
+  rfc 8879 section 4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  matrix { len in [0, 10, 16777215] }
+  flow handshake until send Certificate {
+    send CompressedCertificate { uncompressed_length: $len }
+    wait 300ms
+  }
+  expect alert fatal/bad_certificate
+}
+
+plzn tls "client/tls13-server-certificate-compression-unsupported-algorithm" {
+  rfc 8879 section 4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  flow handshake until send Certificate {
+    send CompressedCertificate { algorithm: 0x4000 }
+    wait 300ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/bad_certificate if rustls
+}
+
+plzn tls "client/tls13-server-certificate-compression-corrupt-stream" {
+  rfc 8879 section 4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  flow handshake until send Certificate {
+    send CompressedCertificate { payload: "not zlib", uncompressed_length: 4095 }
+    wait 300ms
+  }
+  expect alert fatal/bad_certificate
+}

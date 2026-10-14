@@ -1,0 +1,14 @@
+plzn tls "server/tls12-wrong-cke-type" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    msgtype in [0x01, 0x14, 0xff]
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[handshake.msg_type, 0] = $msgtype
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+}

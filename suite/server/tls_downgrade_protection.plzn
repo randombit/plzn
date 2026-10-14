@@ -1,0 +1,84 @@
+plzn tls "server/tls-downgrade-protection/tls12-sentinel" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut server {
+    versions: [tls12, tls13]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello
+    recv ServerHello { random_suffix: [0x44, 0x4f, 0x57, 0x4e, 0x47, 0x52, 0x44, 0x01] }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-non-support/draft-version-only" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = raw "04 7f1c 0303" }
+    recv ServerHello { legacy_version: 0x0303, lacks_ext: supported_versions }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-non-support/several-draft-versions-only" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = raw "08 7f1c 7f12 7e01 0303" }
+    recv ServerHello { legacy_version: 0x0303, lacks_ext: supported_versions }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-non-support/draft-versions-alone" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = raw "06 7f1c 7f12 7e01" }
+    recv ServerHello
+  }
+  expect alert fatal/protocol_version
+}

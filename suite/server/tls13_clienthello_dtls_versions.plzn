@@ -1,0 +1,182 @@
+# A TLS 1.3 server (stream transport) receiving a ClientHello whose version
+# fields claim DTLS (DTLS 1.0 = 0xfeff, DTLS 1.2 = 0xfefd, DTLS 1.3 = 0xfefc).
+# RFC 8446 4.2.1: a server MUST ignore unknown versions in supported_versions
+# and MUST NOT use legacy_version for negotiation when the extension is
+# present; RFC 8446 4.1.2 requires legacy_version 0x0303 in a TLS 1.3
+# ClientHello, which strict servers may enforce (LibreSSL does).
+#
+# Botan parses a ClientHello whose legacy_version has major 0xfe in the DTLS
+# format (a cookie field after the session id), so the TLS-format body fails
+# to decode and it answers decode_error.
+
+plzn tls "server/tls13-clienthello-dtls-legacy-version" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    legacy_version in [0xfeff, 0xfefd, 0xfefc]
+  }
+  flow handshake {
+    send ClientHello { legacy_version: $legacy_version }
+    recv ServerHello { legacy_version: 0x0303, selected_version: tls13 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/decode_error if botan
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls13-clienthello-supported-versions-dtls-only" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    version in [0xfeff, dtls12, dtls13]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = [$version] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "server/tls13-clienthello-supported-versions-dtls13-and-dtls12" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = [dtls13, dtls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+# DTLS 1.2 and TLS 1.2 offered to a TLS 1.3-only server: nothing in common.
+plzn tls "server/tls13-clienthello-supported-versions-dtls12-and-tls12" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext supported_versions = [dtls12, tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "server/tls13-clienthello-supported-versions-dtls-then-tls13" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [dtls13, dtls12, tls13] }
+    recv ServerHello { legacy_version: 0x0303, selected_version: tls13 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-clienthello-supported-versions-tls13-then-dtls" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, dtls13, dtls12] }
+    recv ServerHello { legacy_version: 0x0303, selected_version: tls13 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-clienthello-dtls-legacy-version-with-supported-versions-dtls13-and-tls13" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      legacy_version: 0xfefd
+      +ext supported_versions = [dtls13, tls13]
+    }
+    recv ServerHello { legacy_version: 0x0303, selected_version: tls13 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/decode_error if botan
+  expect alert fatal/protocol_version if libressl
+}
+
+# Every version field says DTLS 1.3; nothing offered is a TLS version.
+plzn tls "server/tls13-clienthello-dtls-legacy-version-with-supported-versions-dtls13" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello {
+      legacy_version: 0xfefc
+      +ext supported_versions = [dtls13]
+    }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/decode_error if botan
+}
+
+# The record header of the ClientHello claims DTLS 1.3. RFC 8446 5.1 says the
+# record version MUST be ignored for all purposes, yet every implementation
+# sanity-checks the first record's major byte (as the corpus's
+# rejects-garbage-initial-record-version rows also expect, see notes/TODO.md).
+# OpenSSL and Go treat {254, x} as "not TLS" and hang up without an alert;
+# Botan's TLS 1.3 record layer answers illegal_parameter.
+plzn tls "server/tls13-clienthello-dtls-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  # rustls 0.23's record reader intends to accept only 0x03XX, but its guard
+  # covers unknown code points only and the DTLS versions are known
+  # ProtocolVersion variants; the handshake completes. rustls main (commit
+  # 1509dfc8, 2026-03-08) checks the raw value and rejects it.
+  xfail rustls "accepts the DTLS 1.3 wire version in the record header of the ClientHello"
+  flow handshake {
+    send ClientHello @ record_version 0xfefc
+  }
+  expect close
+  expect alert fatal/illegal_parameter if botan
+  expect alert fatal/protocol_version if libressl
+}
+
+# Record header, legacy_version and supported_versions all claim DTLS 1.3:
+# a DTLS 1.3 ClientHello body under a 5-byte TLS record header on a stream.
+# rustls accepts the record (see above) and then refuses the version offer.
+plzn tls "server/tls13-clienthello-dtls-at-every-layer" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      legacy_version: 0xfefc
+      +ext supported_versions = [dtls13]
+    } @ record_version 0xfefc
+  }
+  expect close
+  expect alert fatal/illegal_parameter if botan
+  expect alert fatal/protocol_version if libressl
+  expect alert fatal/protocol_version if rustls
+}
+
+# A server with both versions enabled still selects TLS 1.3 past a DTLS entry.
+plzn tls "server/tls13-12-clienthello-supported-versions-dtls12-then-tls13" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13, tls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [dtls12, tls13, tls12] }
+    recv ServerHello { legacy_version: 0x0303, selected_version: tls13 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

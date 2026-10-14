@@ -1,0 +1,234 @@
+plzn tls "server/tls13-rejects-second-client-hello-prefix-after-first-client-hello" {
+  rfc 8446 section 4.1.4
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] } @ trailing "01"
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello @ omit_prefix 1
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if gnutls
+  expect ok if libressl
+}
+
+plzn tls "server/tls13-rejects-trailing-partial-message-after-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send Finished @ trailing "00"
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls13-rejects-trailing-partial-message-after-resumed-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+  }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send Finished {
+      send Finished @ trailing "00"
+      send AppData
+      recv AppData
+    }
+    expect alert fatal/unexpected_message
+  }
+}
+
+plzn tls "server/tls13-rejects-finished-prefix-after-client-hello" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  xfail gnutls "carries a partial Finished across the ClientHello key change"
+  flow handshake until send ClientHello {
+    send ClientHello @ trailing "14"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send ChangeCipherSpec
+    send Finished @ omit_prefix 1
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "carries a partial Finished across the ClientHello key change"
+}
+
+plzn tls "server/tls13-rejects-finished-prefix-after-client-hello-without-ccs" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  xfail gnutls "carries a partial Finished across the ClientHello key change"
+  flow handshake until send ClientHello {
+    send ClientHello @ trailing "14"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished @ omit_prefix 1
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "carries a partial Finished across the ClientHello key change"
+}
+
+plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello" {
+  rfc 8446 section 4.1.4
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  xfail gnutls "carries a partial Finished across the second ClientHello key change"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello @ trailing "14"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send ChangeCipherSpec
+    send Finished @ omit_prefix 1
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "carries a partial Finished across the second ClientHello key change"
+}
+
+plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello-without-ccs" {
+  rfc 8446 section 4.1.4
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  xfail gnutls "carries a partial Finished across the second ClientHello key change"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello @ trailing "14"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished @ omit_prefix 1
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "carries a partial Finished across the second ClientHello key change"
+}
+
+plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello" {
+  rfc 8446 section 2.3
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail gnutls "carries a partial EndOfEarlyData across the ClientHello key change"
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello @ trailing "05"
+      send ChangeCipherSpec
+      send EarlyData { size: 32 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: early_data }
+      recv Finished
+      send EndOfEarlyData @ omit_prefix 1
+      send Finished
+    }
+    expect alert fatal/unexpected_message
+  }
+}
+
+plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello-without-ccs" {
+  rfc 8446 section 2.3
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail gnutls "carries a partial EndOfEarlyData across the ClientHello key change"
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello @ trailing "05"
+      send EarlyData { size: 32 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: early_data }
+      recv Finished
+      send EndOfEarlyData @ omit_prefix 1
+      send Finished
+    }
+    expect alert fatal/unexpected_message
+  }
+}
+
+plzn tls "server/tls13-rejects-next-key-update-prefix-before-key-change" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  xfail gnutls "carries a partial second KeyUpdate across the first KeyUpdate key change"
+  flow handshake {
+    send KeyUpdate { request_update: update_not_requested } @ trailing "18"
+    send KeyUpdate { request_update: update_requested } @ omit_prefix 1
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect close if libressl
+}

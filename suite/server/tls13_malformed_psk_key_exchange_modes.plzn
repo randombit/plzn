@@ -1,0 +1,11 @@
+plzn tls "server/tls13-malformed-psk-key-exchange-modes" {
+  rfc 8446 section 4.2.9
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext psk_key_exchange_modes = raw "05"
+    }
+  }
+  expect alert fatal/decode_error
+}

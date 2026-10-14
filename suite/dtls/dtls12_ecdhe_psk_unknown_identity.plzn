@@ -1,0 +1,16 @@
+plzn tls "dtls12/ecdhe-psk-unknown-identity" {
+  rfc 5489 section 3.3
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_psk] }
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { psk_identity: "not-an-identity" }
+  }
+  expect alert fatal/unknown_psk_identity
+}

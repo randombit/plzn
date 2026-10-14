@@ -1,0 +1,155 @@
+plzn tls "dtls12/trailing-client-hello" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake { send ClientHello @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-hello-verify-request" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  xfail openssl "accepts and ignores trailing bytes after the HelloVerifyRequest cookie"
+  flow handshake { send HelloVerifyRequest @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-server-hello" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake { send ServerHello @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-server-certificate" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake { send Certificate @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-certificate-status" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus @ pad +1
+    wait 300ms
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}
+
+plzn tls "dtls12/trailing-server-key-exchange" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake { send ServerKeyExchange @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-certificate-request" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { request_client_cert: true }
+  flow handshake { send CertificateRequest @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-server-hello-done" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake { send ServerHelloDone @ pad +1 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls12/trailing-client-certificate" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake { send Certificate @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-certificate-verify" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake { send CertificateVerify @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-client-key-exchange" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake { send ClientKeyExchange @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-client-finished" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake { send Finished @ pad +1 }
+  expect alert fatal/{decode_error, decrypt_error}
+}
+
+plzn tls "dtls12/trailing-new-session-ticket" {
+  rfc 5077 section 3.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { capabilities: [session_ticket] }
+  flow handshake { send NewSessionTicket @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "dtls12/trailing-server-finished" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake { send Finished @ pad +1 }
+  expect alert fatal/{decode_error, decrypt_error}
+}

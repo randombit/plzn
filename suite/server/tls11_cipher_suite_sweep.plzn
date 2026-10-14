@@ -1,0 +1,22 @@
+# TLS 1.1 uses explicit CBC IVs; exercise every supported legacy suite
+# with both a small request and a maximum-size plaintext record.
+plzn tls "server/tls11-cipher-suite-sweep" {
+  rfc 4346 section 7.4.1.2
+  chain: [rsa_2048, ecdsa_p256]
+  matrix { suite in cipher_suites(tls11) }
+  uut server {
+    versions: [tls11]
+    cipher_suites: [$suite]
+  }
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send AppData { size: 16384 }
+    recv AppData { size: 16384 }
+  }
+  expect ok
+}

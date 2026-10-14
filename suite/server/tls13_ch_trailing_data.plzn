@@ -1,0 +1,9 @@
+plzn tls "server/tls13-ch-trailing-data" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello @ pad +5
+  }
+  expect alert fatal/decode_error
+}

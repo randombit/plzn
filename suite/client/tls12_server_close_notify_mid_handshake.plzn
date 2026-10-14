@@ -1,0 +1,21 @@
+plzn tls "client/tls12-server-close-notify-mid-handshake" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send alert warning/close_notify
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+  }
+  expect alert warning/close_notify
+  expect ok if rustls
+  expect close if boringssl
+  expect close if openssl
+  expect close if libressl
+}

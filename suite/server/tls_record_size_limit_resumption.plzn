@@ -1,0 +1,173 @@
+plzn tls "server/tls12-record-size-limit/resumption-changes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  skip gnutls "the shim does not enable TLS 1.2 session-ID resumption"
+  skip libressl "does not implement record_size_limit"
+
+  session initial {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 16384 }
+      recv ServerHello { has_ext: record_size_limit }
+      recv Certificate
+      recv ServerKeyExchange
+      recv ServerHelloDone
+      send ClientKeyExchange
+      send ChangeCipherSpec
+      send Finished
+      recv ChangeCipherSpec
+      recv Finished
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 512 }
+      recv ServerHello { resumed: true, has_ext: record_size_limit }
+      recv ChangeCipherSpec
+      recv Finished
+      send ChangeCipherSpec
+      send Finished
+      send AppData { size: 744 }
+      recv AppData { size: 512 }
+      recv AppData { size: 232 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls12-record-size-limit/resumption-removes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  skip gnutls "the shim does not enable TLS 1.2 session-ID resumption"
+  skip libressl "does not implement record_size_limit"
+
+  session initial {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 512 }
+      recv ServerHello { has_ext: record_size_limit }
+      recv Certificate
+      recv ServerKeyExchange
+      recv ServerHelloDone
+      send ClientKeyExchange
+      send ChangeCipherSpec
+      send Finished
+      recv ChangeCipherSpec
+      recv Finished
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send ClientHello {
+      send ClientHello { -ext record_size_limit }
+      recv ServerHello { resumed: true, lacks_ext: record_size_limit }
+      recv ChangeCipherSpec
+      recv Finished
+      send ChangeCipherSpec
+      send Finished
+      send AppData { size: 125 }
+      recv AppData { size: 125 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls13-record-size-limit/resumption-changes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13], session_tickets: 1 }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+
+  session initial {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 16384 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: record_size_limit }
+      recv Certificate
+      recv CertificateVerify
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 513 }
+      recv ServerHello { has_ext: pre_shared_key }
+      recv EncryptedExtensions { has_ext: record_size_limit }
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      send AppData { size: 744 }
+      recv AppData { size: 512 }
+      recv AppData { size: 232 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls13-record-size-limit/resumption-removes-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13], session_tickets: 1 }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+
+  session initial {
+    flow handshake until send ClientHello {
+      send ClientHello { +ext record_size_limit = 513 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: record_size_limit }
+      recv Certificate
+      recv CertificateVerify
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send ClientHello {
+      send ClientHello { -ext record_size_limit }
+      recv ServerHello { has_ext: pre_shared_key }
+      recv EncryptedExtensions { lacks_ext: record_size_limit }
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      send AppData { size: 125 }
+      recv AppData { size: 125 }
+    }
+    expect ok
+  }
+}

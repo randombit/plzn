@@ -1,0 +1,235 @@
+plzn tls "server/tls13-ecdsa-in-certificate-verify/valid-handshake" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-works" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_secp256r1_sha256 }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha1-is-refused" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_sha1 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha224-is-refused" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_sha224 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp521r1_sha512-is-refused" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_secp521r1_sha512 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-is-refused" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384 }
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/mismatched-hash" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_secp256r1_sha256 }
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/corrupted-signature" {
+  rfc 8446 section 4.4.3
+  # handshake.signature includes a two-byte length; offsets from 2 address the DER signature.
+  matrix {
+    pos in [2, 3, 5, 40, -1]
+    v in [0x01, 0x80]
+  }
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p256 }
+    send CertificateVerify { } @ xor[handshake.signature, $pos] = $v
+    send Finished
+  }
+  expect alert fatal/{decrypt_error,decode_error}
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/p384-credential" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p384 }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/p521-credential" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server {
+    versions: [tls13], require_client_cert: true
+    verify_prefs: [ecdsa_secp521r1_sha512]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p521 }
+    send CertificateVerify { }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-ecdsa-in-certificate-verify/p384-credential-labelled-p256" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512, ecdsa_secp384r1_sha384, ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, rsa_pss_pss_sha256, rsa_pss_rsae_sha384, rsa_pss_pss_sha384] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: ecdsa_p384 }
+    send CertificateVerify { sign_with: ecdsa_secp384r1_sha384, algorithm: ecdsa_secp256r1_sha256 }
+    send Finished
+  }
+  expect alert fatal/{illegal_parameter,decrypt_error}
+  expect alert fatal/decode_error if libressl
+}

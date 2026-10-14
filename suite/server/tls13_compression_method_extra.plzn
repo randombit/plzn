@@ -1,0 +1,11 @@
+plzn tls "server/tls13-compression-method-extra" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      compression_methods: [0x00, 0x01]
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

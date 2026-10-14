@@ -1,0 +1,18 @@
+plzn tls "client/tls12-client-ecdsa-group-sweep" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  matrix {
+    group in [x25519, x448, secp256r1, secp384r1, secp521r1]
+  }
+  flow handshake {
+    recv ClientHello { supported_groups: [$group], signature_algorithms: [ecdsa_secp256r1_sha256] }
+    send ServerKeyExchange { signature_scheme: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

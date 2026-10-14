@@ -1,0 +1,9 @@
+plzn tls "server/cipher-mismatch-tls13" {
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [AES_256_GCM_SHA384]
+  }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

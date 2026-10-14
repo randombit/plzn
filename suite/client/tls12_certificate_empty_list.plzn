@@ -1,0 +1,15 @@
+plzn tls "client/tls12-certificate-empty-list" {
+  rfc 5246 section 7.4.2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake {
+    send Certificate { entries: 0 }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if openssl
+  expect close if rustls
+  expect alert fatal/decode_error if libressl
+}

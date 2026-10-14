@@ -1,0 +1,25 @@
+plzn tls "server/tls12-point-extension/server-ec-point-formats-content" {
+  rfc 8422 section 5.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  xfail rustls "legally omits the optional ec_point_formats response, so its contents cannot be checked"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext ec_point_formats = [uncompressed, ansix962_compressed_prime, ansix962_compressed_char2] }
+    recv ServerHello { ext ec_point_formats == [uncompressed] }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

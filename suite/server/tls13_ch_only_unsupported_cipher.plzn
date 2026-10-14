@@ -1,0 +1,9 @@
+plzn tls "server/tls13-ch-only-unsupported-cipher" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { cipher_suites: [0xfe00] }
+  }
+  expect alert fatal/handshake_failure
+}

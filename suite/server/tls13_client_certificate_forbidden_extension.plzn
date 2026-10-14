@@ -1,0 +1,19 @@
+plzn tls "server/tls13-client-certificate-forbidden-supported-versions" {
+  rfc 8446 section 4.4.2
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  uut server { versions: [tls13], require_client_cert: true }
+  xfail go "accepts a recognized extension in a Certificate entry context where it is forbidden"
+  flow handshake {
+    send Certificate {
+      credential: rsa
+      +ext supported_versions = raw "0304"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if botan
+  expect alert fatal/unsupported_extension if gnutls
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/decode_error if rustls
+  xfail libressl "never parses client CertificateEntry extensions"
+}

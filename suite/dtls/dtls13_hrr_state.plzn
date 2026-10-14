@@ -1,0 +1,48 @@
+plzn tls "dtls13/client-hrr-generates-fresh-key-share" {
+  rfc 9147 section 5.1
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    recv ClientHello { key_share: capture $shares }
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    recv ClientHello { key_share: capture $shares }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $shares
+}
+
+plzn tls "dtls13/client-hrr-cookie-is-connection-specific" {
+  rfc 9147 section 5.1
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+
+  session retry {
+    flow handshake {
+      send HelloRetryRequest {
+        +ext cookie = raw "0010000102030405060708090a0b0c0d0e0f"
+      }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+
+  session fresh {
+    flow handshake {
+      recv ClientHello { lacks_ext: cookie }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

@@ -1,0 +1,14 @@
+plzn tls "client/tls13-client-keyupdate-unknown-mode" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: 0x03 }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+}

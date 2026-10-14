@@ -1,0 +1,19 @@
+plzn tls "dtls12/client-ecdhe-psk-unknown-hint" {
+  rfc 4279 section 2
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256]
+  }
+  peer { capabilities: [ecdhe_psk] }
+  flow handshake {
+    send ServerKeyExchange { psk_identity_hint: "someone-else" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

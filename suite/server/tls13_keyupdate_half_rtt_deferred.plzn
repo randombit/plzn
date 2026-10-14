@@ -1,0 +1,22 @@
+plzn tls "server/tls13-keyupdate-half-rtt-deferred" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    records_per_traffic_key: 1
+    half_rtt_data: ["h", "r", "t"]
+    session_tickets: 0
+  }
+  flow handshake until send Finished {
+    recv AppData
+    recv AppData
+    recv AppData
+    send Finished
+    send AppData
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

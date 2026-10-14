@@ -1,0 +1,35 @@
+plzn tls "client/tls13-early-data-removed-after-hrr" {
+  rfc 8446 section 4.2.10
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  xfail gnutls "after HelloRetryRequest sends ClientHello2 encrypted under the 0-RTT keys and offers early_data again"
+  peer { capabilities: [x25519] }
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket { +ext early_data = 1024 }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      recv ClientHello { has_ext: pre_shared_key, has_ext: early_data }
+      recv EarlyData { size: 32 }
+      send HelloRetryRequest { key_share_group: secp256r1 }
+      recv ClientHello { has_ext: pre_shared_key, lacks_ext: early_data }
+      send ServerHello
+      send EncryptedExtensions
+      send Finished
+      recv Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

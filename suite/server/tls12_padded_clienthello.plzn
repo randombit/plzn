@@ -1,0 +1,9 @@
+plzn tls "server/tls12-padded-clienthello" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello @ pad +5
+  }
+  expect alert fatal/decode_error
+}

@@ -1,0 +1,13 @@
+plzn tls "dtls12/client-data-after-close-notify" {
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send alert warning/close_notify
+    send AppData
+    wait 200ms
+  }
+  expect ok
+}

@@ -1,0 +1,14 @@
+plzn tls "dtls12/hello-verify-request-trailing-data" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  xfail openssl "ignores trailing bytes after the HelloVerifyRequest cookie and retries"
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send raw "16feff00000000000000000010030000040000000000000004fefd0000"
+    recv Alert
+  }
+  expect alert fatal/decode_error
+}

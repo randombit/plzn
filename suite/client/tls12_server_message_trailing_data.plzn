@@ -1,0 +1,66 @@
+plzn tls "client/tls12-trailing-serverhello" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake { send ServerHello @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls12-trailing-server-certificate" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake { send Certificate @ pad +1 }
+  expect alert fatal/decode_error
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-trailing-serverkeyexchange" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake { send ServerKeyExchange @ pad +1 }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "client/tls12-trailing-certificaterequest" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake { send CertificateRequest @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls12-trailing-serverhellodone" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake { send ServerHelloDone @ pad +1 }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "client/tls12-trailing-newsessionticket" {
+  rfc 5077 section 3.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { capabilities: [session_ticket] }
+  xfail gnutls "accepts trailing data in NewSessionTicket"
+  skip wolfssl "built without HAVE_SESSION_TICKET: the client never offers SessionTicket, so no NewSessionTicket is sent"
+  xfail go "accepts trailing data in NewSessionTicket"
+  flow handshake { send NewSessionTicket @ pad +1 }
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls12-trailing-server-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    send Finished @ pad +1
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/{decode_error,decrypt_error,handshake_failure}
+  expect close if wolfssl
+}

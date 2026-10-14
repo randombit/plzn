@@ -1,0 +1,48 @@
+plzn tls "dtls13/server-resume-psk" {
+  rfc 9147 section 5.10
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut server { versions: [dtls13] }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "dtls13/client-resume-psk" {
+  rfc 9147 section 5.10
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello { has_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

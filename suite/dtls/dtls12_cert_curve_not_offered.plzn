@@ -1,0 +1,13 @@
+plzn tls "dtls12/cert-curve-not-offered" {
+  rfc 8422 section 5.1.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp384r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/handshake_failure
+}

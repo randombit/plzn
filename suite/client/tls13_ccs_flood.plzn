@@ -1,0 +1,303 @@
+# RFC 8446 5: an implementation "may receive an unencrypted record of type
+# change_cipher_spec consisting of the single byte value 0x01 at any time after
+# the first ClientHello message has been sent or received and before the peer's
+# Finished message has been received and MUST simply drop it without further
+# processing". The RFC puts no number on "at any time". Every library here
+# caps a run of them as a flood defence, each at its own count:
+#   wolfSSL   one between two handshake messages (illegal_parameter on the 2nd)
+#   LibreSSL  two per handshake (unexpected_message on the 3rd)
+#   rustls    two per handshake (closes without an alert on the 3rd)
+#   Go        16 consecutive non-advancing records (unexpected_message on the 17th)
+#   OpenSSL   32 consecutive, the empty-record counter (unexpected_message on the 33rd)
+#   BoringSSL 32 consecutive, kMaxEmptyRecords (unexpected_message on the 33rd)
+#   GnuTLS    200 consecutive, DEFAULT_MAX_EMPTY_RECORDS (GNUTLS_E_TOO_MANY_EMPTY_PACKETS,
+#             sent as internal_error, on the 201st)
+#   Botan     32 consecutive useless records, Policy::max_useless_records
+#             (unexpected_message on the 33rd)
+# Each row's count is exactly the number of ChangeCipherSpec records on the wire:
+# the flows are written out in full, so the handshake preset's own compatibility
+# CCS is not sent.
+
+plzn tls "client/tls13-ccs-flood/after-server-hello-two" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after send ServerHello {
+    repeat 2 {
+      send ChangeCipherSpec
+    }
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+}
+
+plzn tls "client/tls13-ccs-flood/after-server-hello-three-to-sixteen" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix { count in [3, 16] }
+  flow handshake after send ServerHello {
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+}
+
+plzn tls "client/tls13-ccs-flood/after-server-hello-seventeen-to-thirty-two" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix { count in [17, 32] }
+  flow handshake after send ServerHello {
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "client/tls13-ccs-flood/after-server-hello-thirty-three-to-two-hundred" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix { count in [33, 100, 200] }
+  flow handshake after send ServerHello {
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls13-ccs-flood/after-server-hello-over-two-hundred" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix { count in [201, 1000] }
+  flow handshake after send ServerHello {
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls13-ccs-flood/after-hello-retry-request-two" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow {
+    recv ClientHello
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    repeat 2 {
+      send ChangeCipherSpec
+    }
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+}
+
+plzn tls "client/tls13-ccs-flood/after-hello-retry-request-three-to-sixteen" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix { count in [3, 16] }
+  flow {
+    recv ClientHello
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+}
+
+plzn tls "client/tls13-ccs-flood/after-hello-retry-request-seventeen-to-thirty-two" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix { count in [17, 32] }
+  flow {
+    recv ClientHello
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "client/tls13-ccs-flood/after-hello-retry-request-thirty-three-to-two-hundred" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix { count in [33, 100, 200] }
+  flow {
+    recv ClientHello
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "client/tls13-ccs-flood/after-hello-retry-request-over-two-hundred" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix { count in [201, 1000] }
+  flow {
+    recv ClientHello
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    repeat $count {
+      send ChangeCipherSpec
+    }
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if wolfssl
+  expect alert fatal/unexpected_message if libressl
+  expect close if rustls
+  expect alert fatal/unexpected_message if go
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}

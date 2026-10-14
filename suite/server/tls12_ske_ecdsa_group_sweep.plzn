@@ -1,0 +1,39 @@
+plzn tls "server/tls12-ske-ecdsa-p256-group-sweep" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  matrix {
+    group in [secp256r1]
+  }
+  flow handshake {
+    recv ServerKeyExchange { named_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ske-ecdsa-p256-other-groups" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    curves: [$group]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp256r1] }
+  matrix {
+    group in [x25519, x448, secp384r1, secp521r1]
+  }
+  flow handshake {
+    send ClientHello { +ext supported_groups = [$group, secp256r1] }
+    recv ServerKeyExchange { named_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

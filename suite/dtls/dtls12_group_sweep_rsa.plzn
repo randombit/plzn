@@ -1,0 +1,15 @@
+plzn tls "dtls12/group-sweep-rsa" {
+  rfc 8422 section 5.1.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  matrix { group in [x25519, x448, secp256r1, secp384r1, secp521r1] }
+  flow handshake {
+    recv ServerKeyExchange { named_group: $group }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

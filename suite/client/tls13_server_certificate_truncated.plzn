@@ -1,0 +1,10 @@
+plzn tls "client/tls13-server-certificate-truncated" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send Certificate @ truncate 8
+  }
+  expect alert fatal/decode_error
+  expect close if libressl
+}

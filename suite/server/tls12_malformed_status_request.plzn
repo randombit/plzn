@@ -1,0 +1,14 @@
+plzn tls "server/tls12-malformed-status-request" {
+  rfc 6066 section 8
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    ocsp_stapling: true
+  }
+  flow handshake {
+    send ClientHello {
+      +ext status_request = raw "01"
+    }
+  }
+  expect alert fatal/decode_error
+}

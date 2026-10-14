@@ -1,0 +1,22 @@
+plzn tls "server/tls13-auto-key-update-after-records" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    records_per_traffic_key: 2
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    send KeyUpdate { request_update: update_not_requested }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

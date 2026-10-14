@@ -1,0 +1,25 @@
+# In TLS 1.3 the alert type alone decides how an alert is handled, so a
+# closure alert sent at level fatal is still only a closure alert.
+plzn tls "server/tls13-fatal-level-close-notify-half-close" {
+  rfc 8446 section 6
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send alert fatal/close_notify
+    recv alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-fatal-level-user-canceled-ignored" {
+  rfc 8446 section 6
+  chain: [default]
+  uut server { versions: [tls13] }
+  xfail rustls "treats a fatal-level user_canceled as an error alert"
+  flow handshake {
+    send alert fatal/user_canceled
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

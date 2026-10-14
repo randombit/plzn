@@ -1,0 +1,20 @@
+plzn tls "client/tls12-new-session-ticket-truncated-lifetime" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello { has_ext: session_ticket }
+    send ServerHello { +ext session_ticket }
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send raw "1603030006040000020001"
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+}

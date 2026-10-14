@@ -1,0 +1,13 @@
+plzn tls "client/tls13-ee-wrong-message-extension" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext supported_versions = raw "0304"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/unsupported_extension if rustls
+}

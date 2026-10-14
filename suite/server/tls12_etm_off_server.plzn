@@ -1,0 +1,19 @@
+plzn tls "server/tls12-etm-off-server" {
+  rfc 7366 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send ClientHello {
+      +ext encrypt_then_mac
+    }
+    recv ServerHello { lacks_ext: encrypt_then_mac }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

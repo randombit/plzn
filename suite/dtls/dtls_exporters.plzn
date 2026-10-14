@@ -1,0 +1,122 @@
+plzn tls "dtls12/server-exporter" {
+  rfc 5705 section 4
+  chain: [default]
+  uut server { versions: [dtls12] }
+  flow handshake {
+    recv Exporter { label: "label", context: "context", length: 1024 }
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-exporter" {
+  rfc 5705 section 4
+  chain: [default]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    recv Exporter { label: "label", context: "context", length: 1024 }
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-exporter" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    recv Exporter { label: "EXPORTER-Channel-Binding", context: "", length: 32 }
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-exporter" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    recv Exporter { label: "EXPORTER-Channel-Binding", context: "", length: 32 }
+  }
+  expect ok
+}
+
+plzn tls "dtls12/server-exporter-after-resumption" {
+  rfc 5705 section 4
+  chain: [default]
+  uut server { versions: [dtls12] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "dtls12/client-exporter-after-resumption" {
+  rfc 5705 section 4
+  chain: [default]
+  uut client { versions: [dtls12] }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+  xfail libressl "its DTLS client fails every abbreviated handshake with an internal error (transcript never freed)"
+}
+
+plzn tls "dtls13/server-exporter-after-resumption" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls13] }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "dtls13/client-exporter-after-resumption" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13] }
+
+  session initial {
+    flow handshake {
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+}

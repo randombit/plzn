@@ -1,0 +1,13 @@
+plzn tls "client/tls13-hrr-ffdhe2048" {
+  rfc 7919 section 2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe2048] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

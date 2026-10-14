@@ -1,0 +1,14 @@
+plzn tls "server/tls13-key-share-ffdhe-p-minus-1" {
+  rfc 8446 section 4.2.8.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe2048] }
+  flow handshake {
+    send ClientHello {
+      key_share_point: p_minus_1
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

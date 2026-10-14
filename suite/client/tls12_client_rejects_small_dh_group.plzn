@@ -1,0 +1,18 @@
+plzn tls "client/tls12-client-rejects-small-dh-group" {
+  rfc 7919 section 4
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  matrix {
+    bits in [1024, 768]
+  }
+  flow handshake {
+    send ServerKeyExchange {
+      dh_p_bits: $bits
+    }
+  }
+  expect alert fatal/insufficient_security
+  expect alert fatal/handshake_failure if openssl
+}

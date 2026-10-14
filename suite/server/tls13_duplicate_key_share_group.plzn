@@ -1,0 +1,11 @@
+plzn tls "server/tls13-duplicate-key-share-group" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = raw "0048001d00200000000000000000000000000000000000000000000000000000000000000000001d00200000000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

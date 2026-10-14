@@ -1,0 +1,9 @@
+plzn tls "dtls12/client-hello-truncated-cookie" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow {
+    send ClientHello { cookie: [0x41] } @ set[handshake.cookie, 0] = 32, truncate 37
+  }
+  expect alert fatal/decode_error
+}

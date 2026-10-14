@@ -1,0 +1,13 @@
+plzn tls "client/tls12-client-offers-13-server-picks-12" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12, tls13]
+  }
+  flow handshake {
+    recv ClientHello { has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

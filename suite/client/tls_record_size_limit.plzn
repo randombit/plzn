@@ -1,0 +1,36 @@
+plzn tls "client/tls12-record-size-limit/advertised-and-enforced" {
+  rfc 8449 section 4
+  chain: [default]
+  uut client { versions: [tls12], record_size_limit: 512 }
+  flow handshake until recv ClientHello {
+    recv ClientHello { has_ext: record_size_limit }
+    send ServerHello { +ext record_size_limit = 512 }
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData { size: 513 }
+  }
+  expect alert fatal/record_overflow
+}
+
+plzn tls "client/tls13-record-size-limit/advertised-and-enforced" {
+  rfc 8449 section 4
+  chain: [default]
+  uut client { versions: [tls13], record_size_limit: 513 }
+  flow handshake until recv ClientHello {
+    recv ClientHello { has_ext: record_size_limit }
+    send ServerHello
+    send EncryptedExtensions { +ext record_size_limit = 513 }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData { size: 513 }
+  }
+  expect alert fatal/record_overflow
+}

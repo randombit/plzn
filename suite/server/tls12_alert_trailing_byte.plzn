@@ -1,0 +1,18 @@
+plzn tls "server/tls12-alert-trailing-byte" {
+  rfc 5246 section 7.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientHello {
+    send raw "1503030003020101"
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/unexpected_message if openssl
+  expect close if libressl
+}

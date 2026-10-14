@@ -1,0 +1,167 @@
+plzn tls "server/tls13-post-handshake-auth" {
+  rfc 8446 section 4.6.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: request
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Certificate
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-post-handshake-auth-with-key-update" {
+  rfc 8446 section 4.6.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: request
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send KeyUpdate { request_update: update_requested }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-post-handshake-auth-no-client-cert" {
+  rfc 8446 section 4.4.2.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: request
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-post-handshake-auth-no-client-cert-required" {
+  rfc 8446 section 4.4.2.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: require
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/certificate_required
+}
+
+plzn tls "server/tls13-post-handshake-auth-required-finished-without-certificate" {
+  rfc 8446 section 4.6.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: require
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Finished
+  }
+  expect alert fatal/{unexpected_message, certificate_required}
+}
+
+plzn tls "server/tls13-post-handshake-auth-bad-signature" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: request
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Certificate
+    send CertificateVerify @ xor[handshake.signature, -1] = 0xff
+    send Finished
+    recv AppData
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-post-handshake-auth-certificate-trailing-byte" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    post_handshake_auth: request
+  }
+  flow {
+    send ClientHello { +ext post_handshake_auth }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    recv CertificateRequest
+    send Certificate @ pad +1 0x01
+    send CertificateVerify
+    send Finished
+    recv AppData
+  }
+  expect alert fatal/decode_error
+}

@@ -1,0 +1,55 @@
+plzn tls "dtls13/server-handshake-fragmentation-and-ack" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server {
+    versions: [dtls13]
+    mtu: 256
+    initial_timeout_ms: 1000
+  }
+  flow handshake {
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-handshake-fragmentation-and-ack" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    mtu: 256
+    initial_timeout_ms: 1000
+  }
+  flow handshake {
+    expect no_timeout
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-reassembles-fragmented-client-hello" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello @ fragment 16
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-reassembles-fragmented-certificate" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send Certificate @ fragment 64
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

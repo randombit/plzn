@@ -1,0 +1,472 @@
+plzn tls "server/tls13-cert-compression-smoke-zlib" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-cert-compression-ignored" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = [zlib] }
+    recv ServerHello { lacks_ext: compress_certificate }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-zlib-preferred" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow {
+    send ClientHello { +ext compress_certificate = [zlib, brotli] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CompressedCertificate { algorithm: zlib }
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "020000" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "02000a" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "020100" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "020302" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "023fff" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "024000" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "024001" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "02fffe" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-alone" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "02ffff" }
+    recv Certificate { compressed: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0400000001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "04000a0001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0401000001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0403020001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "043fff0001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0440000001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0440010001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "04fffe0001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-then-zlib" {
+  rfc 8879 section 7.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "04ffff0001" }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-cert-compression-empty-list" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "00" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}
+
+plzn tls "server/tls13-cert-compression-duplicated-algorithms" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = [zlib, zlib, zlib] }
+    recv Certificate { compressed: 1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if rustls
+}
+
+plzn tls "server/tls13-cert-compression-zero-length-list" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "00000100020003" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}
+
+plzn tls "server/tls13-cert-compression-odd-length-list" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "05000100020003" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}
+
+plzn tls "server/tls13-cert-compression-truncated-list" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "08000100020003" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}
+
+plzn tls "server/tls13-cert-compression-padded-list" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "04000100020003" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}
+
+plzn tls "server/tls13-cert-compression-odd-extension-length" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  flow handshake {
+    send ClientHello { +ext compress_certificate = raw "0700010002000304" }
+    recv ServerHello
+  }
+  expect alert fatal/decode_error
+  expect ok if botan
+}

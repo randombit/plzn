@@ -1,0 +1,116 @@
+plzn tls "dtls13/mandatory-server-message-omissions/server-hello" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send Certificate
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-server-message-omissions/encrypted-extensions" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-server-message-omissions/certificate" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateVerify
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-server-message-omissions/certificate-verify" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-server-message-omissions/finished" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send AppData
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-client-message-omissions/initial-client-hello" {
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow {
+    # Classic epoch-zero record containing an empty DTLS ServerHello.
+    send raw "16fefd0000000000000000000c020000000000000000000000"
+    recv AppData
+  }
+  expect alert fatal/{unexpected_message, decode_error}
+}
+
+plzn tls "dtls13/mandatory-client-message-omissions/certificate-after-certificate-request" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut server { versions: [dtls13], require_client_cert: true }
+  flow handshake until send Certificate {
+    send Finished
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-client-message-omissions/certificate-verify-after-client-certificate" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [rsa_2048]
+  uut server { versions: [dtls13], require_client_cert: true }
+  flow handshake until send CertificateVerify {
+    send Finished
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls13/mandatory-client-message-omissions/finished" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake until send Finished {
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}

@@ -1,0 +1,20 @@
+plzn tls "server/tls13-unlisted-key-share-ignored-with-hrr" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  skip botan "aborts with illegal_parameter; see the sibling case"
+  skip openssl "aborts with illegal_parameter; see the sibling case"
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519, hrr] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [secp256r1]
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if libressl
+}

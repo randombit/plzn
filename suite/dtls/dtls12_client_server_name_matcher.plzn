@@ -1,0 +1,13 @@
+plzn tls "dtls12/client-server-name-matcher" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    recv ClientHello { server_name: "localhost" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

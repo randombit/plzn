@@ -1,0 +1,28 @@
+plzn tls "dtls12/client-old-epoch-appdata-during-reneg" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  xfail openssl "delivers the data at once, but its echo SSL_write drives the pending renegotiation first, so the reply waits for the handshake"
+  uut client {
+    versions: [dtls12]
+    renegotiation: server
+  }
+  flow handshake after send Finished {
+    send HelloRequest
+    recv ClientHello
+    send AppData
+    recv AppData
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "defers application data received under the established epoch until the pending renegotiation completes; Botan delivers it at once"
+}

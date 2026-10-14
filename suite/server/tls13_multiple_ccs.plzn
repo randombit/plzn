@@ -1,0 +1,118 @@
+plzn tls "server/tls13-multiple-ccs/valid-with-one-ccs" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake after send ClientHello {
+    send ChangeCipherSpec
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multiple-ccs/second-ccs-before-client-finished" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake after send ClientHello {
+    send ChangeCipherSpec
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-tcp-packet" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake after send ClientHello {
+    atomic {
+      send ChangeCipherSpec
+      send ChangeCipherSpec
+      send ChangeCipherSpec
+    }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  expect close if rustls
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-multiple-ccs/ch-and-multiple-ccs-in-one-tcp-packet" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    atomic {
+      send ClientHello
+      send ChangeCipherSpec
+      send ChangeCipherSpec
+      send ChangeCipherSpec
+    }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+  expect close if rustls
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-record" {
+  rfc 8446 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake after send ClientHello {
+    send record 20 raw "010101"
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/bad_record_mac if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-multiple-ccs/ccs-after-client-finished" {
+  rfc 8446 section 5
+  chain: [default]
+  xfail go "ignores a compatibility CCS received after the handshake"
+  uut server { versions: [tls13] }
+  flow handshake after send Finished {
+    send ChangeCipherSpec
+    wait 300 ms
+  }
+  expect alert fatal/{unexpected_message, bad_record_mac}
+}

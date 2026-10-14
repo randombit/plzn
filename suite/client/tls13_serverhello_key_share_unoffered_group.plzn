@@ -1,0 +1,12 @@
+plzn tls "client/tls13-serverhello-key-share-unoffered-group" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      key_share_group: secp384r1
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}

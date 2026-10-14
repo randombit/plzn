@@ -1,0 +1,31 @@
+plzn tls "server/tls12-truncating-of-krsa-cke/padded-client-key-exchange" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake after send ClientKeyExchange {
+    send ClientKeyExchange @ pad "fa"
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal
+}
+
+plzn tls "server/tls12-truncating-of-krsa-cke/truncated-client-key-exchange" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake after send ClientKeyExchange {
+    send ClientKeyExchange @ pad -1
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal
+}

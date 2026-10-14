@@ -1,0 +1,13 @@
+plzn tls "client/tls13-hrr-secp521r1" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp521r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

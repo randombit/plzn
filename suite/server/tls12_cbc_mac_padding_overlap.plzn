@@ -1,0 +1,27 @@
+plzn tls "server/tls12-cbc-mac-padding-overlap/mac-and-padding-set-to-0x31" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  flow handshake {
+    send AppData { size: 18 } @ set[record.plaintext, -48..-1] = 0x31
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-mac-padding-overlap/sha256-mac-and-padding-set-to-0x31" {
+  rfc 5246 section 6.2.3.2
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  matrix { suite in [0xc027] }
+  flow handshake {
+    send AppData { size: 18 } @ set[record.plaintext, -48..-1] = 0x31
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

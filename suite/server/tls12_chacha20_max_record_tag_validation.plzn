@@ -1,0 +1,30 @@
+plzn tls "server/tls12-chacha20-max-record-tag-validation/valid-handshake" {
+  rfc 7905 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [chacha20_poly1305] }
+  flow handshake {
+    send AppData { size: 16384 }
+    recv AppData { size: 16384 }
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-chacha20-max-record-tag-validation/tag-bit-flip" {
+  rfc 7905 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [chacha20_poly1305] }
+  matrix {
+    pos in -16..-1
+    val in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 16384 } @ xor[record.aead_tag, $pos] = $val
+  }
+  expect alert fatal/bad_record_mac
+}

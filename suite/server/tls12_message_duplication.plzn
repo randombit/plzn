@@ -1,0 +1,125 @@
+plzn tls "server/tls12-message-duplication/client-hello-before-client-key-exchange" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientKeyExchange {
+    send ClientHello
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-message-duplication/client-hello-before-change-cipher-spec" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send ClientHello
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-message-duplication/client-hello-before-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ChangeCipherSpec {
+    send ClientHello
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-message-duplication/change-cipher-spec-before-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ChangeCipherSpec {
+    send record 20 raw "01"
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-message-duplication/change-cipher-spec-after-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send Finished {
+    send record 20 raw "01"
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+  expect close if wolfssl
+  expect alert fatal/bad_record_mac if libressl
+}
+
+plzn tls "server/tls12-message-duplication/client-key-exchange-before-change-cipher-spec" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-message-duplication/client-key-exchange-before-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ChangeCipherSpec {
+    send ClientKeyExchange
+    send Finished
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls12-message-duplication/client-key-exchange-after-finished" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    send ClientKeyExchange
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/{unexpected_message,no_renegotiation} if boringssl
+}

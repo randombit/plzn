@@ -1,0 +1,530 @@
+# Floods of consecutive zero-length records at a TLS 1.2 server.
+#
+# RFC 5246 6.2.1: "Implementations MUST NOT send zero-length fragments of
+# Handshake, Alert, or ChangeCipherSpec content types. Zero-length fragments
+# of Application data MAY be sent as they are potentially useful as a traffic
+# analysis countermeasure." Nothing says how many empty records a receiver
+# must absorb, so each cap below is a library's own flood defence (OpenSSL's
+# comment: "an attacker could send empty records at a faster rate than we can
+# process"). The rows pin every backend's reaction rather than loosening to
+# an any-of list; suite/client/tls12_empty_record_flood.plzn pins the same
+# behaviour from the other side, where every library reacts identically.
+#
+# Per library, from source and a count sweep in both roles:
+#   OpenSSL    (3.6.5) every record whose plaintext is empty, after any
+#              decryption, counts toward MAX_EMPTY_RECORDS (32,
+#              ssl/record/methods/tls_common.c); the 33rd consecutive one is
+#              fatal unexpected_message (SSL_R_RECORD_TOO_SMALL). An
+#              unprotected empty handshake record is just such a record, so
+#              32 of them pass anywhere in the plaintext part of the handshake.
+#   BoringSSL  the same counter (kMaxEmptyRecords = 32, ssl/tls_record.cc,
+#              "too many empty fragments"), reset only by a non-empty record.
+#              While it waits for the client's ChangeCipherSpec it refuses
+#              any handshake record, empty or not (tls_open_change_cipher_spec).
+#   LibreSSL   (4.3.3) a zero-length record of any type but application data
+#              is SSL_R_BAD_LENGTH, alert unexpected_message, protected or not
+#              (ssl_pkt.c); empty application data is skipped up to
+#              SSL_MAX_EMPTY_RECORDS (32), and because the test is
+#              `count++ > 32` the 34th fails, SSL_R_PEER_BEHAVING_BADLY with
+#              no alert.
+#   rustls     (0.23.45) a record whose wire length is zero is
+#              InvalidEmptyPayload at the deframer, alert decode_error; a
+#              protected record that decrypts to nothing is counted whatever
+#              its type (ALLOWED_CONSECUTIVE_EMPTY_FRAGMENTS_MAX = 32,
+#              conn.rs) and the 33rd is PeerMisbehaved::TooManyEmptyFragments,
+#              returned without an alert.
+#   Go         (1.27.2) an empty handshake record is unexpected_message at
+#              once; empty application data is dropped through
+#              retryReadRecord, so the 17th consecutive one exceeds
+#              maxUselessRecords (16): unexpected_message "too many ignored
+#              records".
+#   GnuTLS     (3.8.13) a zero-length record on the wire under the null
+#              cipher is GNUTLS_E_UNEXPECTED_PACKET (lib/record.c
+#              recv_headers), alert unexpected_message; a protected record
+#              that decrypts to nothing is discarded whatever its type, up to
+#              DEFAULT_MAX_EMPTY_RECORDS (200), then
+#              GNUTLS_E_TOO_MANY_EMPTY_PACKETS, which has no entry in
+#              gnutls_error_to_alert and so goes out as internal_error.
+#   wolfSSL    (5.9.4) GetRecordHeader refuses a zero-length record of any
+#              type but application data with LENGTH_ERROR, sent as
+#              record_overflow; a protected handshake record that decrypts to
+#              nothing reaches DoHandShakeMsg, whose header parse fails
+#              (PARSE_ERROR, no alert); empty application data trips
+#              WOLFSSL_MAX_EMPTY_RECORDS (32; the test is `++count >= 32`, so
+#              the 32nd) with EMPTY_RECORD_LIMIT_E, and without
+#              WOLFSSL_EXTRA_ALERTS that is a close with no alert.
+#   Botan      (3.13.0 development HEAD) a zero-length record on the wire is
+#              "Received a completely empty record", alert decode_error;
+#              before the ClientHello the TLS 1.2 server has no sequence
+#              numbers yet, so that alert is not sent and the peer sees only
+#              the close. A protected record that decrypts to nothing counts
+#              toward Policy::max_useless_records (32), and the 33rd
+#              consecutive one is fatal unexpected_message.
+#
+# Positions: unprotected empty handshake records before the ClientHello,
+# after it, between its 64-byte fragments, and after the ClientKeyExchange;
+# protected empty handshake records after the client's ChangeCipherSpec; and
+# empty application data after the handshake, under an AEAD and a CBC suite
+# (a single empty application-data record is tls12_empty_app_data_record).
+
+# The first records on the connection are empty: Botan's TLS 1.2 server has no
+# sequence numbers before a ClientHello, so its decode_error is never written.
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hello-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send ClientHello {
+    repeat $count { send empty_record handshake }
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect close if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hello-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake until send ClientHello {
+    repeat $count { send empty_record handshake }
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect close if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send empty_record handshake }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake after send ClientHello {
+    repeat $count { send empty_record handshake }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+# The ClientHello is split into 64-byte records and the empties go before its
+# last one: still handshake content type, so no interleaving rule applies.
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hello-fragments-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 64 hold
+    repeat $count { send empty_record handshake }
+    flush_fragment
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hello-fragments-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello @ fragment 64 hold
+    repeat $count { send empty_record handshake }
+    flush_fragment
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+# BoringSSL is waiting for the ChangeCipherSpec here and refuses any handshake
+# record, so it never reaches its empty-record counter at this position.
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-exchange-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake after send ClientKeyExchange {
+    repeat $count { send empty_record handshake }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-exchange-over-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 1000]
+  }
+  flow handshake after send ClientKeyExchange {
+    repeat $count { send empty_record handshake }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if botan
+  expect alert fatal/decode_error if rustls
+  expect alert fatal/record_overflow if wolfssl
+}
+
+# Under the client's write keys: zero-length handshake fragments that decrypt
+# cleanly. Each library counts or rejects them.
+plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-one-to-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [1, 2, 32]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-thirty-three-to-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [33, 100, 200]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-over-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix {
+    count in [201, 1000]
+  }
+  flow handshake until send Finished {
+    repeat $count { send empty_record handshake }
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}
+
+# Legal zero-length application data, under AES-GCM and under AES-CBC (the
+# classic empty-fragment countermeasure shape); rustls has no CBC suite and skips
+# that half.
+plzn tls "server/tls12-empty-record-flood/application-data-two-to-sixteen" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [2, 16]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [17, 31]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+}
+
+plzn tls "server/tls12-empty-record-flood/application-data-thirty-two" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [32]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-empty-record-flood/application-data-thirty-three" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [33]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "server/tls12-empty-record-flood/application-data-thirty-four-to-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [34, 100, 200]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if libressl
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "server/tls12-empty-record-flood/application-data-over-two-hundred" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  matrix {
+    count in [201, 1000]
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256]
+  }
+  flow handshake {
+    repeat $count { send empty_record application_data }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if go
+  expect close if wolfssl
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect close if rustls
+  expect close if libressl
+  expect alert fatal/internal_error if gnutls
+  expect alert fatal/unexpected_message if botan
+}

@@ -1,0 +1,133 @@
+plzn tls "dtls12/appdata-before-handshake" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send record 23 "TEST MESSAGE"
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/empty-appdata-before-handshake" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "silently ignores an empty epoch-zero application-data record and continues the handshake"
+  flow {
+    recv ClientHello
+    send empty_record application_data
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "aborts on an empty epoch-zero application-data record without sending an alert"
+}
+
+plzn tls "dtls12/consecutive-warning-alerts-tolerated" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send alert warning/user_canceled
+    send alert warning/user_canceled
+    send alert warning/user_canceled
+    send alert warning/user_canceled
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/bogus-alert-level" {
+  rfc 5246 section 7.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send record 21 raw "0300"
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/large-authenticated-plaintext" {
+  rfc 5246 section 6.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send record 23 raw 0x41 * 16385
+  }
+  expect alert fatal/record_overflow
+}
+
+plzn tls "dtls12/oversized-unauthenticated-ciphertext-discarded" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # Pre-authentication overflow is silently discarded; the valid record proves state remains usable.
+    send raw "17fefd00010000000001008000" + 0x00 * 32768
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/multiple-appdata-records-in-one-datagram" {
+  rfc 6347 section 4.1.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send AppData { size: 3 }
+    send AppData { size: 3 }
+    recv AppData { size: 3 }
+    recv AppData { size: 3 }
+  }
+  expect ok
+}
+
+plzn tls "dtls12/send-extra-finished-packed" {
+  rfc 6347 section 4.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "silently drops the extra Finished instead of rejecting excess handshake data"
+  xfail libressl "silently drops the extra Finished instead of rejecting excess handshake data"
+  flow handshake after recv Finished {
+    send ChangeCipherSpec
+    send Finished
+    send Finished
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/send-extra-finished-reordered" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "silently drops the reordered extra Finished instead of rejecting excess handshake data"
+  flow handshake after recv Finished {
+    send ChangeCipherSpec
+    send Finished
+    send Finished
+    hold_flight
+    release_flight [0, 2]
+    release_flight
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "silently drops the reordered extra Finished instead of rejecting excess handshake data"
+}

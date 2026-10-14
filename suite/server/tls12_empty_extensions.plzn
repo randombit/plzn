@@ -1,0 +1,13 @@
+plzn tls "server/tls12-empty-extensions" {
+  rfc 5246 section 7.4.1.4.1
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  flow {
+    send ClientHello { extensions: [] }
+    recv ServerHello
+    close
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/handshake_failure if rustls
+}

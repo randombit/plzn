@@ -1,0 +1,16 @@
+# STRESS_TEST.md port 2.6 — invalid record content_type on the
+# first (plaintext) ClientHello. In practice, servers tolerate
+# this on the initial record for backwards compatibility (RFC
+# 8446 §5.1 note). This test verifies the handshake still
+# completes — it's a tolerance probe, not a rejection test.
+plzn tls "negative/tls13-invalid-content-type" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello @ set[record.content_type, 0] = 0xff
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

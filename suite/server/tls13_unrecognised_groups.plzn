@@ -1,0 +1,217 @@
+plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-secp256r1-listed" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, secp256r1] }
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [secp256r1, 0x0022..0x00fe]
+      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+    } @ fragment 16384
+    recv HelloRetryRequest { key_share_group: secp256r1, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-ec" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [0x0022..0x00fe, secp256r1]
+      +ext key_share = [0x0022..0x00fe : 0xab * $size, secp256r1]
+    } @ fragment 16384
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-ffdhe2048-listed" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, ffdhe2048] }
+  skip rustls "no FFDHE groups (ring provider)"
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [ffdhe2048, 0x0022..0x00fe]
+      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+    } @ fragment 16384
+    recv HelloRetryRequest { key_share_group: ffdhe2048, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-ec" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe2048] }
+  skip rustls "no FFDHE groups (ring provider)"
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [0x0022..0x00fe, ffdhe2048]
+      +ext key_share = [0x0022..0x00fe : 0xab * $size, ffdhe2048]
+    } @ fragment 16384
+    recv ServerHello { key_share_group: ffdhe2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ec" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { size in [64, 128, 256] }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [0x0022..0x00fe]
+      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+    } @ fragment 16384
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/{handshake_failure,illegal_parameter} if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-secp256r1-listed" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, secp256r1] }
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [secp256r1, 0x0105..0x01fa]
+      +ext key_share = [0x0105..0x01fa : 0xab * $size]
+    } @ fragment 16384
+    recv HelloRetryRequest { key_share_group: secp256r1, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-ffdhe" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [0x0105..0x01fa, secp256r1]
+      +ext key_share = [0x0105..0x01fa : 0xab * $size, secp256r1]
+    } @ fragment 16384
+    recv ServerHello { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-ffdhe2048-listed" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, ffdhe2048] }
+  skip rustls "no FFDHE groups (ring provider)"
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [ffdhe2048, 0x0105..0x01fa]
+      +ext key_share = [0x0105..0x01fa : 0xab * $size]
+    } @ fragment 16384
+    recv HelloRetryRequest { key_share_group: ffdhe2048, has_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-ffdhe" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [ffdhe2048] }
+  skip rustls "no FFDHE groups (ring provider)"
+  matrix { size in [64, 128, 256] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [0x0105..0x01fa, ffdhe2048]
+      +ext key_share = [0x0105..0x01fa : 0xab * $size, ffdhe2048]
+    } @ fragment 16384
+    recv ServerHello { key_share_group: ffdhe2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ffdhe" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { size in [64, 128, 256] }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [0x0105..0x01fa]
+      +ext key_share = [0x0105..0x01fa : 0xab * $size]
+    } @ fragment 16384
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-unrecognised-groups/valid-handshake" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

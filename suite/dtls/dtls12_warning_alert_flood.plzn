@@ -1,0 +1,224 @@
+# Floods of consecutive warning alerts over DTLS 1.2, both roles.
+#
+# The warning-alert caps in suite/server/tls12_warning_alert_flood.plzn carry
+# over to the datagram record layer for the libraries that have a DTLS shim
+# (rustls, Go and wolfSSL do not): OpenSSL and BoringSSL keep their limit of
+# 4 consecutive warnings (the 5th is fatal unexpected_message), Botan allows
+# 32 consecutive protected warnings (Policy::max_useless_records) but does
+# not count the unauthenticated epoch-zero ones, and LibreSSL has no bound.
+# GnuTLS tolerates them through the handshake and after it here; its 16-loop
+# handshake limit is reached only well past these counts and interacts with
+# DTLS retransmission, so the handshake rows stop at 16. Positions: warning alerts in the plaintext handshake and as application
+# data after it, each role.
+
+plzn tls "dtls12/warning-alert-flood/server-handshake-before-client-key-exchange-one-to-four" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake until send ClientKeyExchange {
+    repeat $count { send alert warning/user_canceled }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/warning-alert-flood/server-handshake-before-client-key-exchange-five-to-sixteen" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  matrix {
+    count in [5, 16]
+  }
+  flow handshake until send ClientKeyExchange {
+    repeat $count { send alert warning/user_canceled }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+}
+
+plzn tls "dtls12/warning-alert-flood/server-application-data-one-to-four" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/warning-alert-flood/server-application-data-five-to-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  matrix {
+    count in [5, 16, 32]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+}
+
+plzn tls "dtls12/warning-alert-flood/server-application-data-over-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if botan
+}
+
+plzn tls "dtls12/warning-alert-flood/client-handshake-before-server-hello-one-to-four" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/warning-alert-flood/client-handshake-before-server-hello-five-to-sixteen" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  matrix {
+    count in [5, 16]
+  }
+  flow handshake until send ServerHello {
+    repeat $count { send alert warning/user_canceled }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+}
+
+plzn tls "dtls12/warning-alert-flood/client-application-data-one-to-four" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  matrix {
+    count in [1, 4]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+plzn tls "dtls12/warning-alert-flood/client-application-data-five-to-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  matrix {
+    count in [5, 16, 32]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+}
+
+plzn tls "dtls12/warning-alert-flood/client-application-data-over-thirty-two" {
+  rfc 6347 section 4.1
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  matrix {
+    count in [33, 100]
+  }
+  flow handshake {
+    repeat $count { send alert warning/user_canceled }
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if botan
+}

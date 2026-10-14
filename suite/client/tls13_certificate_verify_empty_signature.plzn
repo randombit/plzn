@@ -1,0 +1,10 @@
+plzn tls "client/tls13-certificate-verify-empty-signature" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send CertificateVerify { signature: [] }
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if gnutls
+}

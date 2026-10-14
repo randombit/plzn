@@ -1,0 +1,15 @@
+plzn tls "client/tls12-client-refuses-renegotiation" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    renegotiation: none
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+  }
+  expect alert warning/no_renegotiation
+  expect alert fatal/no_renegotiation if boringssl
+}

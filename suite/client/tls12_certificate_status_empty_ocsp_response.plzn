@@ -1,0 +1,17 @@
+plzn tls "client/tls12-certificate-status-empty-ocsp-response" {
+  rfc 6066 section 8
+  chain: [default]
+  skip openssl "does not offer status_request unless configured (no shim knob yet)"
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send raw "16030300081600000401000000"
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}

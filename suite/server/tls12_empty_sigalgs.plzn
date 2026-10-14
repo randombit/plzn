@@ -1,0 +1,15 @@
+plzn tls "server/tls12-empty-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = raw "0000"
+    }
+  }
+  expect alert fatal/decode_error
+  xfail libressl "treats an empty signature_algorithms extension as absent and signs with the SHA-1 default"
+}

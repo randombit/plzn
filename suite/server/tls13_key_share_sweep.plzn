@@ -1,0 +1,26 @@
+plzn tls "server/tls13-key-share-sweep" {
+  rfc 8446 section 4.2.8
+  rfc 7919 section 2
+  rfc 8734 section 2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in [x25519, x448, secp256r1, secp384r1, secp521r1,
+              brainpoolP256r1tls13, brainpoolP384r1tls13,
+              ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192,
+              X25519MLKEM768, X448MLKEM1024, SecP256r1MLKEM768, SecP384r1MLKEM1024,
+              MLKEM512, MLKEM768, MLKEM1024]
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite, key_share_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

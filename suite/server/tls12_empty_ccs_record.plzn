@@ -1,0 +1,20 @@
+plzn tls "server/tls12-empty-ccs-record" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send empty_record change_cipher_spec
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect ok if openssl
+  expect alert fatal/unexpected_message if libressl
+}

@@ -1,0 +1,12 @@
+plzn tls "server/tls12-low-legacy-version" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { legacy_version: 0x0300 }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/handshake_failure if openssl
+}

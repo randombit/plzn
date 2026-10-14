@@ -1,0 +1,13 @@
+plzn tls "server/tls12-lengths/tls12-echo-length" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { len in [1, 2, 3, 15, 16, 17, 255, 256, 257, 4095, 4096, 4097, 8191, 8192, 8193, 16383, 16384] }
+  flow handshake {
+    send AppData { size: $len }
+    recv AppData { size: $len }
+  }
+  expect ok
+}

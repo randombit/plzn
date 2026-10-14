@@ -1,0 +1,34 @@
+plzn tls "dtls12/mtu-dtls12-server" {
+  rfc 6347 section 4.1.1
+  chain: [ecdsa_p256]
+  matrix {
+    suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_128_CBC_SHA256, ECDHE_ECDSA_WITH_3DES_EDE_CBC_SHA]
+  }
+  uut server {
+    versions: [dtls12]
+    mtu: 256
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    send AppData
+    recv AppData
+  }
+  assert max_datagram_size 256
+  expect ok
+}
+
+plzn tls "dtls12/mtu-dtls12-client-certificate" {
+  rfc 6347 section 4.1.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    mtu: 256
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  assert max_datagram_size 256
+  expect ok
+}

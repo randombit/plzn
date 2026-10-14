@@ -1,0 +1,64 @@
+# A single far-future-message_seq handshake fragment whose 24-bit total-length
+# field claims a near-maximal 16777215 bytes while the fragment itself carries
+# one byte at offset 0. Where dtls12_{client,server}_header_only_flood bound the
+# *count* of pending future-sequence claims, this bounds the *size* a single
+# claim may reserve: a peer must not pre-allocate the announced length when it
+# first sees the fragment, and the real in-sequence flight must still complete
+# (RFC 6347 4.2.3). Botan's DTLS reassembly was memory-exhaustible by far-future
+# fragments before 3.13.0, and a lone oversized-length claim is the cheapest
+# shape of that attack. Both roles.
+
+plzn tls "dtls12/server-large-length-future-fragment" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail botan "enforces maximum_handshake_message_size (65536) at parse time in tls_handshake_io.cpp before reading message_seq, so a fragment declaring an oversized total length aborts with handshake_failure rather than being dropped as an out-of-window future stray (RFC 6347 4.2.3)"
+  xfail gnutls "keeps the far-future fragment buffered after the handshake, then silently drops every application record; its server reassembler mishandles far-future fragments, as the fragment-window cases also show"
+  flow {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    large_length_fragment 16777215
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-large-length-future-fragment" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail botan "enforces maximum_handshake_message_size (65536) at parse time in tls_handshake_io.cpp before reading message_seq, so a fragment declaring an oversized total length aborts with handshake_failure rather than being dropped as an out-of-window future stray (RFC 6347 4.2.3)"
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    large_length_fragment 16777215
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

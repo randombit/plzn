@@ -1,0 +1,15 @@
+plzn tls "client/tls13-ee-record-size-limit-too-small" {
+  rfc 8449 section 4
+  chain: [default]
+  xfail openssl "ignores an unrequested record_size_limit in EncryptedExtensions and completes (RFC 8446 4.2 MUST abort)"
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext record_size_limit = raw "003f"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/unsupported_extension if rustls
+  xfail libressl "ignores an unrequested record_size_limit in EncryptedExtensions and completes (RFC 8446 4.2 MUST abort)"
+}

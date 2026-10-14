@@ -1,0 +1,15 @@
+plzn tls "client/tls13-ticket-zero-length" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts a zero-length TLS 1.3 ticket"
+  xfail gnutls "accepts a zero-length TLS 1.3 ticket"
+  skip wolfssl "built without HAVE_SESSION_TICKET: DoTls13NewSessionTicket discards every ticket unparsed"
+  flow handshake after recv Finished {
+    send NewSessionTicket { ticket: "" }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  xfail libressl "accepts a zero-length TLS 1.3 ticket"
+}

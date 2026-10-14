@@ -1,0 +1,22 @@
+plzn tls "client/tls12-warning-unknown-ca-tolerated" {
+  rfc 5246 section 7.2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake after recv ClientHello {
+    send raw "15030300020130"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

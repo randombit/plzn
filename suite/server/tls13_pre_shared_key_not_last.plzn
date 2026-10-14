@@ -1,0 +1,14 @@
+plzn tls "server/tls13-pre-shared-key-not-last" {
+  rfc 8446 section 4.2.11
+  chain: []
+  uut server { versions: [tls13] }
+  psk {
+    identity: "Client_identity"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    # Binder patching follows its mapped position, isolating extension order from binder validity.
+    send ClientHello { reverse_extensions }
+  }
+  expect alert fatal/illegal_parameter
+}

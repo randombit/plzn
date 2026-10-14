@@ -1,0 +1,51 @@
+plzn tls "client/tls13-certificate-request-forbidden-supported-versions" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  peer { request_client_cert: true }
+  xfail go "accepts a recognized extension in a CertificateRequest context where it is forbidden"
+  xfail gnutls "accepts a recognized extension in a CertificateRequest context where it is forbidden"
+  xfail boringssl "accepts a recognized extension in a CertificateRequest context where it is forbidden"
+  xfail rustls "accepts a recognized extension in a CertificateRequest context where it is forbidden"
+  flow handshake {
+    send CertificateRequest {
+      +ext supported_versions = raw "0304"
+    }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "client/tls13-certificate-forbidden-supported-versions" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts a recognized extension in a Certificate entry context where it is forbidden"
+  flow handshake {
+    send Certificate {
+      +ext supported_versions = raw "0304"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if gnutls
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "client/tls13-new-session-ticket-forbidden-supported-versions" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail go "accepts a recognized extension in a NewSessionTicket context where it is forbidden"
+  xfail gnutls "accepts a recognized extension in a NewSessionTicket context where it is forbidden"
+  xfail boringssl "accepts a recognized extension in a NewSessionTicket context where it is forbidden"
+  skip wolfssl "built without HAVE_SESSION_TICKET: DoTls13NewSessionTicket discards every ticket unparsed"
+  xfail rustls "accepts a recognized extension in a NewSessionTicket context where it is forbidden"
+  flow handshake after recv Finished {
+    send NewSessionTicket {
+      +ext supported_versions = raw "0304"
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+}

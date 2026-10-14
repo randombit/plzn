@@ -1,0 +1,60 @@
+# RFC 5077 permits a renewed ticket during the abbreviated handshake;
+# the Schannel January 2016 interoperability advisory documents this path.
+plzn tls "client/legacy-ticket-resumption" {
+  rfc 5077 section 3.1
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+
+  session initial {
+    flow handshake {
+      recv ClientHello { has_ext: session_ticket }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake after recv Finished {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == true
+  }
+}
+
+plzn tls "client/legacy-hello-request-renegotiation" {
+  rfc 5746 section 3.7
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/legacy-ecdsa-client-certificate" {
+  rfc 4492 section 5.5
+  chain: [rsa_2048]
+  client_chain: [ecdsa_p256]
+  matrix { version in [tls10, tls11] }
+  uut client { versions: [$version] }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha], request_client_cert: true }
+  flow handshake {
+    recv Certificate { leaf_key: ecdsa_p256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

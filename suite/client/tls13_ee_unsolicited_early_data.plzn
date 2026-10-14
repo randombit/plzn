@@ -1,0 +1,13 @@
+plzn tls "client/tls13-ee-unsolicited-early-data" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send EncryptedExtensions {
+      +ext early_data
+    }
+  }
+  expect alert fatal/unsupported_extension
+  expect alert fatal/illegal_parameter if botan
+  xfail libressl "accepts an unsolicited early_data extension in EncryptedExtensions"
+}

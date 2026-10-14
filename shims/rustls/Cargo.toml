@@ -1,0 +1,17 @@
+[package]
+name = "plzn-rustls-shim"
+version = "0.1.0"
+edition = "2024"
+publish = false
+rust-version = "1.87"
+
+[[bin]]
+name = "rustls_shim"
+path = "src/main.rs"
+
+[dependencies]
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+plzn = { path = "../.." }
+rustls = { version = "=0.23.45", default-features = false, features = ["aws-lc-rs", "std", "tls12"] }
+rustls-pemfile = "2"
+serde_json = "1"

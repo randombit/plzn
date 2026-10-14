@@ -1,0 +1,25 @@
+plzn tls "client/tls12-resume-declined" {
+  rfc 5077 section 3.2
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+
+  session initial {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session second {
+    flow handshake {
+      recv ClientHello { has_ext: session_ticket }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

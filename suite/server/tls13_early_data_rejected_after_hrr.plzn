@@ -1,0 +1,33 @@
+plzn tls "server/tls13-early-data-rejected-after-hrr" {
+  rfc 8446 section 4.2.10
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail gnutls "retains the early-data read epoch after HRR and rejects plaintext ClientHello2 as bad_record_mac"
+  peer { capabilities: [x25519, secp256r1, hrr] }
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello
+      send EarlyData { size: 32 }
+      recv HelloRetryRequest { key_share_group: secp256r1 }
+      send ClientHello
+      recv ServerHello
+      recv EncryptedExtensions { lacks_ext: early_data }
+      close
+    }
+    expect ok
+  }
+}

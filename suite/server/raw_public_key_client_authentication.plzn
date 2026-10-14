@@ -1,0 +1,409 @@
+plzn tls "server/tls12-raw-public-key-client-authentication" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [raw_public_key]
+    }
+    recv ServerHello { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-raw-public-key-client-authentication" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [raw_public_key]
+    }
+    recv EncryptedExtensions { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-certificate-types-prefers-raw-public-key" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    recv ServerHello { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-certificate-types-prefers-raw-public-key" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    recv EncryptedExtensions { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-certificate-types-prefers-x509" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [x509, raw_public_key]
+  }
+  xfail openssl "selects the client's raw-public-key preference instead of its configured X.509 preference"
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    recv ServerHello { ext client_certificate_type == x509 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail gnutls "selects the first supported type in the client's list; its certificate-type selection ignores its own CTYPE priority order"
+}
+
+plzn tls "server/tls13-client-certificate-types-prefers-x509" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [x509, raw_public_key]
+  }
+  xfail openssl "selects the client's raw-public-key preference instead of its configured X.509 preference"
+  xfail gnutls "selects the first supported type in the client's list; its certificate-type selection ignores its own CTYPE priority order"
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    recv EncryptedExtensions { ext client_certificate_type == x509 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-certificate-type-ignores-unknown-value" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [5, raw_public_key]
+    }
+    recv ServerHello { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-certificate-type-ignores-unknown-value" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [5, raw_public_key]
+    }
+    recv EncryptedExtensions { ext client_certificate_type == raw_public_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-certificate-type-absence-selects-x509" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-certificate-type-absence-selects-x509" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-raw-public-key-only-rejects-absent-client-certificate-type" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  xfail openssl "accepts an X.509 client credential despite its raw-public-key-only policy"
+  xfail gnutls "accepts an X.509 client credential despite its raw-public-key-only policy"
+  flow handshake {}
+  expect alert fatal/{unsupported_certificate,handshake_failure}
+}
+
+plzn tls "server/tls13-raw-public-key-only-rejects-absent-client-certificate-type" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  xfail openssl "accepts an X.509 client credential despite its raw-public-key-only policy"
+  xfail gnutls "accepts an X.509 client credential despite its raw-public-key-only policy"
+  flow handshake {}
+  expect alert fatal/{unsupported_certificate,handshake_failure}
+}
+
+plzn tls "server/tls12-rejects-empty-client-certificate-type-list" {
+  rfc 7250 section 3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  flow handshake {
+    send ClientHello { +ext client_certificate_type = [] }
+  }
+  expect alert fatal/{decode_error,illegal_parameter,unsupported_certificate}
+}
+
+plzn tls "server/tls13-rejects-empty-client-certificate-type-list" {
+  rfc 7250 section 3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  flow handshake {
+    send ClientHello { +ext client_certificate_type = [] }
+  }
+  expect alert fatal/{decode_error,illegal_parameter,unsupported_certificate}
+}
+
+plzn tls "server/tls12-rejects-default-only-client-certificate-type-list" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  xfail openssl "accepts the forbidden default-only certificate-type list"
+  xfail gnutls "accepts the forbidden default-only certificate-type list"
+  flow handshake {
+    send ClientHello { +ext client_certificate_type = [x509] }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "server/tls13-rejects-default-only-client-certificate-type-list" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key, x509]
+  }
+  xfail openssl "accepts the forbidden default-only certificate-type list"
+  xfail gnutls "accepts the forbidden default-only certificate-type list"
+  flow handshake {
+    send ClientHello { +ext client_certificate_type = [x509] }
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+}
+
+plzn tls "server/tls12-rejects-x509-client-certificate-encoded-as-raw-public-key" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send Certificate { certificate_type: x509 }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "server/tls13-rejects-x509-client-certificate-encoded-as-raw-public-key" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send Certificate { certificate_type: x509 }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "server/tls12-rejects-raw-public-key-encoded-as-x509-client-certificate" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [x509, raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [x509, raw_public_key]
+    }
+    send Certificate { certificate_type: raw_public_key }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "server/tls13-rejects-raw-public-key-encoded-as-x509-client-certificate" {
+  rfc 7250 section 4.1
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [x509, raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send ClientHello {
+      -ext server_certificate_type
+      +ext client_certificate_type = [x509, raw_public_key]
+    }
+    send Certificate { certificate_type: raw_public_key }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "server/tls12-rejects-empty-client-raw-public-key" {
+  rfc 7250 section 3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send Certificate { certificate_list: [] }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown,certificate_required,handshake_failure}
+}
+
+plzn tls "server/tls13-rejects-empty-client-raw-public-key" {
+  rfc 7250 section 3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake {
+    send Certificate { certificate_list: [0, 0, 0, 0, 0] }
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown,certificate_required}
+}
+
+plzn tls "server/tls13-rejects-raw-public-key-without-certificate-verify" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    client_certificate_types: [raw_public_key]
+  }
+  peer { capabilities: [offer_rpk] }
+  flow handshake until send CertificateVerify {
+    send Finished
+  }
+  expect alert fatal/unexpected_message
+}

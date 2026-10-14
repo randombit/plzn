@@ -1,0 +1,70 @@
+plzn tls "client/tls13-mandatory-server-message-omissions/server-hello" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  flow {
+    recv ClientHello
+    send Certificate
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "client/tls13-mandatory-server-message-omissions/encrypted-extensions" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "client/tls13-mandatory-server-message-omissions/certificate" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send CertificateVerify
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "client/tls13-mandatory-server-message-omissions/certificate-verify" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "client/tls13-mandatory-server-message-omissions/finished" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut client { versions: [tls13], curves: [secp256r1] }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send AppData
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

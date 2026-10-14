@@ -1,0 +1,149 @@
+plzn tls "server/tls13-grease-cipher-suite" {
+  rfc 8701
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [$grease, AES_128_GCM_SHA256]
+    }
+    recv ServerHello { cipher_suite: AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-extension" {
+  rfc 8701
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello { +ext $grease = zeros 25 }
+    recv ServerHello { lacks_ext: $grease }
+    recv EncryptedExtensions { lacks_ext: $grease }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-supported-version" {
+  rfc 8701 section 3.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [$grease, tls13] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-supported-group-and-key-share" {
+  rfc 8701
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [x25519]
+  }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [$grease, x25519]
+      +ext key_share = [$grease : 0x00 * 32, x25519]
+    }
+    recv ServerHello { key_share_group: x25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-signature-algorithms" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls13]
+    signing_prefs: [rsa_pss_rsae_sha256]
+  }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [$grease, rsa_pss_rsae_sha256, rsa_pkcs1_sha256]
+      +ext signature_algorithms_cert = [$grease, rsa_pss_rsae_sha256, rsa_pkcs1_sha256]
+    }
+    recv CertificateVerify { algorithm: rsa_pss_rsae_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-alpn-identifiers" {
+  rfc 8701
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    alpn_select: "h2"
+    expect_alpn: "h2"
+  }
+  flow handshake {
+    send ClientHello {
+      +ext alpn = ["GREASE_00", "GREASE_01", "GREASE_02", "GREASE_03",
+                   "GREASE_04", "GREASE_05", "GREASE_06", "GREASE_07",
+                   "GREASE_08", "GREASE_09", "GREASE_10", "GREASE_11",
+                   "GREASE_12", "GREASE_13", "GREASE_14", "GREASE_15", "h2"]
+    }
+    recv EncryptedExtensions { ext alpn == "h2" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-grease-psk-key-exchange-mode" {
+  rfc 8701 section 3.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  # RFC 8701 2 reserves eight one-byte GREASE PskKeyExchangeModes; 3.2: the
+  # server MUST ignore them and negotiate with the remaining mode.
+  matrix {
+    mode in [0x0b, 0x2a, 0x49, 0x68, 0x87, 0xa6, 0xc5, 0xe4]
+  }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [$mode, psk_dhe_ke] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-rejects-grease-client-certificate-verify-signature" {
+  rfc 8701 section 4.1
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  uut server { versions: [tls13], require_client_cert: true }
+  # RFC 8701 4.1: the server MUST fail the connection if a GREASE value is
+  # the signature algorithm in a client CertificateVerify signature.
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send CertificateVerify { algorithm: $grease }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

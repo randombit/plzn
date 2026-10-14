@@ -1,0 +1,50 @@
+plzn tls "server/cross-version-resumption/tls12-ticket-is-not-a-tls13-psk" {
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server { versions: [tls12, tls13] }
+  peer { capabilities: [session_ticket] }
+
+  session initial [version: tls12] {
+    flow handshake { close }
+    expect ok
+    assert resumed == false
+  }
+
+  session tls13 [resumes: initial, version: tls13] {
+    flow handshake {
+      recv ServerHello { lacks_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "server/cross-version-resumption/tls13-ticket-is-not-a-tls12-session" {
+  rfc 5246 section 7.4.1.2
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server { versions: [tls13, tls12] }
+  peer { capabilities: [session_ticket] }
+
+  session initial [version: tls13] {
+    flow handshake {
+      send AppData
+      recv AppData
+      close
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session tls12 [resumes: initial, version: tls12] {
+    flow handshake {
+      recv ServerHello { resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}

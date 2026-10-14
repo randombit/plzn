@@ -1,0 +1,15 @@
+plzn tls "client/tls13-hrr-ffdhe-unoffered" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [hrr] }
+  flow handshake {
+    send HelloRetryRequest {
+      key_share_group: ffdhe2048
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

@@ -1,0 +1,17 @@
+# The Brainpool group code points of RFC 8734 exist only in TLS 1.3; a TLS 1.2
+# server must not select them for ECDHE.
+plzn tls "server/tls12-ignores-tls13-brainpool-group" {
+  rfc 8734 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  }
+  matrix {
+    group in [brainpoolP256r1tls13, brainpoolP384r1tls13, brainpoolP512r1tls13]
+  }
+  flow handshake {
+    send ClientHello { +ext supported_groups = [$group] }
+  }
+  expect alert fatal/{handshake_failure, insufficient_security}
+}

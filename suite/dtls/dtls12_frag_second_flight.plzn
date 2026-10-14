@@ -1,0 +1,29 @@
+plzn tls "dtls12/frag-cke-1" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientKeyExchange @ fragment 1 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-cke-16" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientKeyExchange @ fragment 16 }
+  expect ok
+}
+
+plzn tls "dtls12/frag-duplicate-fragments" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ duplicate_fragment 16 }
+  expect ok
+}

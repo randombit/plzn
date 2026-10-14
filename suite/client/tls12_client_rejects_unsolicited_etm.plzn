@@ -1,0 +1,17 @@
+plzn tls "client/tls12-client-rejects-unsolicited-etm" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    recv ClientHello { lacks_ext: encrypt_then_mac }
+    send ServerHello {
+      +ext encrypt_then_mac
+    }
+  }
+  expect alert fatal/unsupported_extension
+  xfail libressl "accepts an unsolicited encrypt_then_mac extension (it implements no EtM)"
+}

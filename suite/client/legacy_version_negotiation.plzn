@@ -1,0 +1,21 @@
+plzn tls "client/tls10-rejects-tls11-serverhello" {
+  rfc 2246 section 7.4.1.2
+  chain: [rsa_2048]
+  uut client { versions: [tls10] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ServerHello { legacy_version: tls11 }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "client/tls11-rejects-tls10-serverhello" {
+  rfc 4346 section 7.4.1.2
+  chain: [rsa_2048]
+  uut client { versions: [tls11] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ServerHello { legacy_version: tls10 }
+  }
+  expect alert fatal/protocol_version
+}

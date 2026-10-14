@@ -1,0 +1,22 @@
+plzn tls "client/tls13-server-key-update" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: update_requested }
+    send AppData
+    recv KeyUpdate { request_update: update_not_requested }
+    recv AppData
+  }
+  expect ok
+}

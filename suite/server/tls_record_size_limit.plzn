@@ -1,0 +1,90 @@
+plzn tls "server/tls12-record-size-limit/server-sent-size-tls12" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 512 }
+    recv ServerHello { has_ext: record_size_limit }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData { size: 744 }
+    recv AppData { size: 512 }
+    recv AppData { size: 232 }
+    close alert warning/close_notify
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/server-sent-size-tls13" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 513 }
+    recv ServerHello
+    recv EncryptedExtensions { has_ext: record_size_limit }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData { size: 744 }
+    recv AppData { size: 512 }
+    recv AppData { size: 232 }
+    close alert warning/close_notify
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/server-sent-size-max-fragment-length-tls12" {
+  rfc 6066 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  skip botan "does not implement max_fragment_length"
+  skip boringssl "does not implement max_fragment_length"
+  skip go "does not implement max_fragment_length"
+  skip rustls "does not implement max_fragment_length"
+  skip wolfssl "this build does not implement max_fragment_length"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext max_fragment_length = 512 }
+    recv ServerHello { ext max_fragment_length == 512 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData { size: 744 } @ fragment 512
+    recv AppData { size: 512 }
+    recv AppData { size: 232 }
+    close alert warning/close_notify
+  }
+  expect ok
+  skip libressl "does not implement max_fragment_length"
+}

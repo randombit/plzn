@@ -1,0 +1,11 @@
+plzn tls "dtls12/no-common-cipher" {
+  rfc 6347 section 4.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_256_GCM_SHA384]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

@@ -1,0 +1,13 @@
+plzn tls "client/tls13-server-certificate-nonempty-context" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send Certificate @ set[0] = 0x05
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if openssl
+  expect alert fatal/decode_error if rustls
+  expect close if libressl
+}

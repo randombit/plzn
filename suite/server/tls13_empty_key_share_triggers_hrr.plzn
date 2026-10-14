@@ -1,0 +1,16 @@
+plzn tls "server/tls13-empty-key-share-triggers-hrr" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = raw "0000"
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

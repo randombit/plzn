@@ -1,0 +1,208 @@
+plzn tls "server/tls12-eddsa-in-certificate-verify/valid-handshake" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+    verify_prefs: [ed25519]
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/md5-ecdsa-forced" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_md5 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/sha512-ecdsa-forced" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ed25519, algorithm: ecdsa_secp521r1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decrypt_error if rustls
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/advertise-ed25519-as-ed448" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: ed25519, algorithm: ed448 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/empty-signature" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { signature: [] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-r-component" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { } @ set[handshake.signature, 2..33] = 0
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-s-component" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { } @ set[handshake.signature, 34..65] = 0
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-eddsa-in-certificate-verify/corrupted-signature" {
+  rfc 8422 section 5.10
+  skip botan "no Ed25519 TLS signature scheme"
+  # handshake.signature includes a two-byte length; offsets from 2 address the Ed25519 signature.
+  matrix {
+    pos in [2, 3, 33, 34, 65]
+    v in [0x01, 0x80]
+  }
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ed25519, ed448] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: ed25519 }
+    send ClientKeyExchange
+    send CertificateVerify { } @ xor[handshake.signature, $pos] = $v
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decrypt_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if libressl
+}

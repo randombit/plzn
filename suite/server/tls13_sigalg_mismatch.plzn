@@ -1,0 +1,11 @@
+plzn tls "server/tls13-sigalg-mismatch" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384]
+    }
+  }
+  expect alert fatal/handshake_failure
+}

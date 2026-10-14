@@ -1,0 +1,19 @@
+plzn tls "dtls12/client-psk-hint" {
+  rfc 4279 section 2
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [PSK_WITH_AES_128_GCM_SHA256]
+  }
+  peer { capabilities: [psk] }
+  flow handshake {
+    send ServerKeyExchange { psk_identity_hint: "plzn-dtls-id" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

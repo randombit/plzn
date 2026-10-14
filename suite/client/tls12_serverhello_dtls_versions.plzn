@@ -1,0 +1,88 @@
+# A TLS 1.2 client (stream transport) answered with a ServerHello whose
+# version fields claim DTLS (DTLS 1.0 = 0xfeff, DTLS 1.2 = 0xfefd,
+# DTLS 1.3 = 0xfefc). None of these is a version the client offered, so the
+# client must refuse (RFC 5246 7.4.1.3: the server selects the lower of the
+# client's offer and its own highest, never a version the client did not
+# offer).
+
+plzn tls "client/tls12-serverhello-dtls-legacy-version" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    legacy_version in [0xfeff, 0xfefd]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: $legacy_version }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "client/tls12-serverhello-dtls13-legacy-version" {
+  rfc 5246 section 7.4.1.3
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    send ServerHello { legacy_version: 0xfefc }
+  }
+  expect alert fatal/protocol_version
+}
+
+# A TLS 1.2 ServerHello carrying supported_versions that selects a DTLS
+# version, sent to a client that offered TLS 1.3 and 1.2. RFC 8446 4.2.1: a
+# server that negotiates TLS 1.3 sets selected_version to a version the
+# client offered; anything else is illegal.
+plzn tls "client/tls12-serverhello-supported-versions-selects-dtls" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client { versions: [tls12, tls13] }
+  matrix {
+    version in [dtls12, dtls13]
+  }
+  flow handshake {
+    send ServerHello { +ext supported_versions = $version }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+  expect alert fatal/protocol_version if libressl
+  expect alert fatal/protocol_version if rustls
+  expect alert fatal/protocol_version if go
+}
+
+# The same selection sent to a client whose only version is TLS 1.2. Botan,
+# rustls and Go still offer supported_versions = [tls12] and refuse the
+# selection as a version they did not offer; OpenSSL's TLS 1.2-only client
+# omits the extension, so to it the ServerHello's copy is unsolicited
+# (RFC 8446 4.2: unsupported_extension).
+plzn tls "client/tls12-only-client-serverhello-supported-versions-selects-dtls" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    version in [dtls12, dtls13]
+  }
+  flow handshake {
+    send ServerHello { +ext supported_versions = $version }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/unsupported_extension if openssl
+}
+
+# The record header of the ServerHello claims DTLS 1.2. OpenSSL and Go treat
+# a {254, x} first record as "not TLS" and hang up without an alert.
+plzn tls "client/tls12-serverhello-dtls-record-version" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut client { versions: [tls12] }
+  # rustls 0.23's record reader intends to accept only 0x03XX, but its guard
+  # covers unknown code points only and the DTLS versions are known
+  # ProtocolVersion variants; the handshake completes. rustls main (commit
+  # 1509dfc8, 2026-03-08) checks the raw value and rejects it.
+  xfail rustls "accepts the DTLS 1.2 wire version in the record header of the ServerHello"
+  flow handshake {
+    send ServerHello @ record_version 0xfefd
+  }
+  expect alert fatal/protocol_version
+  expect close if openssl
+  expect close if go
+}

@@ -1,0 +1,229 @@
+{
+  "schema_version": 1,
+  "overrides": {
+    "server/client-compat-56-android-2-3-7-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-58-android-4-0-4-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-59-android-4-1-1-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-60-android-4-2-2-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-41-bingbot-dec-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-47-bingpreview-dec-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-10-chrome-27-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-12-chrome-29-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-14-firefox-10-0-12-esr-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-16-firefox-21-on-fedora-19": "alert fatal/protocol_version",
+    "server/client-compat-13-firefox-21-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-17-firefox-22-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-48-firefox-24-2-0-esr-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-50-firefox-26-on-win-8": "alert fatal/protocol_version",
+    "server/client-compat-72-googlebot-jun-2014-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-40-googlebot-oct-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-64-ie-10-on-win-phone-8-0": "alert fatal/protocol_version",
+    "server/client-compat-18-ie-6-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-100-ie-6-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-19-ie-7-on-vista": "alert fatal/protocol_version",
+    "server/client-compat-21-ie-8-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-20-ie-8-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-101-ie-8-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-113-ie-8-10-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-25-java-6u45-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-26-java-7u25-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-27-openssl-0-9-8y-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-29-opera-12-15-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-39-opera-16-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-32-safari-5-1-9-on-os-x-10-6-8": "alert fatal/protocol_version",
+    "server/client-compat-34-safari-6-0-4-on-os-x-10-8-4": "alert fatal/protocol_version",
+    "server/client-compat-44-tor-17-0-9-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-42-yahoo-slurp-oct-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-52-yandexbot-3-0-on-unknown": "alert fatal/protocol_version"
+  },
+  "patterns": [
+    {
+      "pattern": "server/tls12-client-hello-max-size*",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-extensions/n-extensions[n=40??]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-extensions/n-extensions[n=8192]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-extensions/n-extensions-last-empty[n=40??]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-extensions/n-extensions-last-empty[n=8192]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-extensions/16300-extensions*",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-client-hello-reassembly/*",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/padding-ext[i=1638?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/padding-ext[i=3686?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/padding-ext[i=6502?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/ext-80[i=1638?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/ext-80[i=3686?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/ext-80[i=6502?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/two-ext[i=1638?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/two-ext[i=3686?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/two-ext[i=6092?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/two-ext[i=6093?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/n-cipher-suites[i=81??]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/n-cipher-suites[i=184??]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/max-cipher-suites",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/fragmented-padding-ext[i=36864]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-hello/fragmented-padding-ext-65k",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-number-of-extensions/n-empty-extensions[n=409?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-number-of-extensions/n-empty-extensions[n=819?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-number-of-extensions/16000-empty-extensions",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-large-number-of-extensions/n-empty-extensions-with-ems[n=409?]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-signature-algorithms/tolerance-n-unknown[n=23754]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-signature-algorithms/tolerance-n-unknown[n=32000]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cert[n=32000]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-large-number-of-extensions/empty-unassigned-first-4096",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-large-number-of-extensions/empty-unassigned-window*",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/duplicated-n-non-rsa[n=8132]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/duplicated-n-non-rsa[n=23754]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/duplicated-n-non-rsa[n=32000]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/n-invalid-pkcs1[n=8132]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/n-invalid-pkcs1[n=23754]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/n-invalid-pkcs1[n=32000]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/tolerance-n-unknown[n=8132]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/tolerance-n-unknown[n=23754]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/tolerance-n-unknown[n=32000]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-*[size=128]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-*[size=256]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/known-*-share-after-unknown-ec[size=128]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/known-*-share-after-unknown-ec[size=256]",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-*",
+      "expect": "alert fatal/illegal_parameter"
+    },
+    {
+      "pattern": "server/tls13-unrecognised-groups/known-*-share-after-unknown-ffdhe*",
+      "expect": "alert fatal/illegal_parameter"
+    }
+  ]
+}

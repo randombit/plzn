@@ -1,0 +1,118 @@
+plzn tls "server/tls12-record-layer-fragmentation/small-hello" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { record_len in [1, 2, 3, 5, 8, 13, 100, 1024, 4096, 16384] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = 1 } @ fragment $record_len
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-record-layer-fragmentation/2k-hello" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { record_len in [1, 5, 13, 100, 1024, 4096, 16384] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = 2048 } @ fragment $record_len
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-record-layer-fragmentation/16k-hello" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  matrix { record_len in [5, 100, 1024, 4096, 16384] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = 16000 } @ fragment $record_len
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-record-layer-fragmentation/tls13-hello" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { record_len in [1, 5, 100, 1024, 16384] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = 2048 } @ fragment $record_len
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-record-layer-fragmentation/tls13-16k-hello" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { record_len in [5, 100, 1024, 16384] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext padding = 16000 } @ fragment $record_len
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

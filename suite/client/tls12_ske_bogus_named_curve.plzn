@@ -1,0 +1,15 @@
+plzn tls "client/tls12-ske-bogus-named-curve" {
+  rfc 8422 section 5.4
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, x25519] }
+  flow handshake {
+    send ServerKeyExchange { named_group: ffdhe2048 }
+  }
+  expect alert fatal/illegal_parameter
+  # OpenSSL accepts an FFDHE group in an ECDHE ServerKeyExchange and fails only when
+  # its DH share does not fit the ClientKeyExchange point field (internal_error).
+  expect alert fatal/internal_error if openssl
+}

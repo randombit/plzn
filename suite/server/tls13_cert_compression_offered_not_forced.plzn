@@ -1,0 +1,14 @@
+plzn tls "server/tls13-cert-compression-offered-not-forced" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext compress_certificate = raw "020001"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

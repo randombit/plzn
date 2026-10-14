@@ -1,0 +1,13 @@
+plzn tls "server/tls12-static-rsa-wrong-premaster-version-no-early-response" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake after send ClientKeyExchange {
+    wait 200 ms
+  }
+  # The flow deliberately stops here and reports an abandoned handshake to the shim.
+  expect ok
+}

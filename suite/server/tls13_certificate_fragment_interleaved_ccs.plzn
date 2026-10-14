@@ -1,0 +1,17 @@
+plzn tls "server/tls13-certificate-fragment-interleaved-ccs" {
+  rfc 8446 section 5.1
+  chain: [default]
+  xfail botan "rejects the compatibility ChangeCipherSpec instead of dropping it while the fragmented handshake message is pending"
+  uut server { versions: [tls13], require_client_cert: true }
+  flow handshake until send Certificate {
+    send Certificate @ fragment 16 hold
+    send ChangeCipherSpec
+    flush_fragment
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail rustls "rejects a compatibility CCS which RFC 8446 section 5 requires recipients to ignore"
+}

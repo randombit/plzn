@@ -1,0 +1,14 @@
+plzn tls "client/tls13-serverhello-bad-version" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      +ext supported_versions = raw "0305"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if rustls
+  expect alert fatal/protocol_version if libressl
+}

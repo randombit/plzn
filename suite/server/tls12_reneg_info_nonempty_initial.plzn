@@ -1,0 +1,14 @@
+plzn tls "server/tls12-reneg-info-nonempty-initial" {
+  rfc 5746 section 3.6
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  xfail rustls "does not check renegotiation_info on an initial ClientHello (no renegotiation support)"
+  flow handshake {
+    send ClientHello {
+      +ext renegotiation_info = raw "04aabbccdd"
+    }
+  }
+  expect alert fatal/handshake_failure
+}

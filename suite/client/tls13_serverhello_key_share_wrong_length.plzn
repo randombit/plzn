@@ -1,0 +1,13 @@
+plzn tls "client/tls13-serverhello-key-share-wrong-length" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      +ext key_share = raw "001d001f00000000000000000000000000000000000000000000000000000000000000"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if boringssl
+  expect alert fatal/decode_error if libressl
+}

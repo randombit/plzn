@@ -1,0 +1,10 @@
+# Negative, wildcard form: any fatal alert during the handshake
+# counts as a match. Used to cover tests where the exact code
+# isn't pinned by the spec.
+plzn tls "negative/alert-any-fatal" {
+  rfc 5246
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {}
+  expect alert fatal
+}

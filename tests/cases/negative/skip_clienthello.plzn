@@ -1,0 +1,17 @@
+# STRESS_TEST.md port 1.6 — skip ClientHello entirely, send
+# a CKE-shaped record as the very first message. The server
+# should reject this with unexpected_message.
+#
+# Record header: content_type=0x16 (handshake), version=0x0303,
+# length=0x0106 (262 bytes). Handshake header: type=0x10 (CKE),
+# length=0x000102 (258 bytes). Body: 258 bytes of 0xff.
+plzn tls "negative/skip-clienthello" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow {
+    send raw "160303010610000102" + 0xff * 258
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}

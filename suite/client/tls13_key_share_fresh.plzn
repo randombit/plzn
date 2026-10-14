@@ -1,0 +1,16 @@
+plzn tls "client/tls13-key-share-fresh-across-connections" {
+  rfc 9846 section 4.3.8
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519]
+  }
+  repeat 8
+  flow handshake {
+    recv ClientHello { key_share: capture $ks }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $ks
+}

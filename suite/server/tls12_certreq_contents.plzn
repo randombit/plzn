@@ -1,0 +1,15 @@
+plzn tls "server/tls12-certreq-contents" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    recv Certificate { entries: 1 }
+    recv CertificateRequest { certificate_types: [ecdsa_sign], signature_algorithms: [ecdsa_secp256r1_sha256] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

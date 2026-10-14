@@ -1,0 +1,35 @@
+plzn tls "server/tls13-supported-versions-forward-compat" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_versions = raw "0403050304"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+# A TLS 1.2 ClientHello whose supported_versions puts an unknown version
+# above 0x0304 (here a GREASE value) ahead of TLS 1.2, sent to a server with
+# both versions enabled. RFC 8446 4.2.1: the server ignores the unknown entry
+# and negotiates TLS 1.2. LibreSSL decides "TLS 1.3 ClientHello" from the
+# numerically highest entry, routes the hello to its TLS 1.3 server and then
+# demands the TLS 1.3 extensions (missing_extension).
+plzn tls "server/tls12-13-supported-versions-unknown-high-then-tls12" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut server { versions: [tls12, tls13] }
+  xfail libressl "treats a ClientHello as TLS 1.3 because its supported_versions lists an unknown version above 0x0304, then rejects the TLS 1.2 hello with missing_extension"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [0x0a0a, tls12] }
+    recv ServerHello { legacy_version: 0x0303, lacks_ext: supported_versions }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

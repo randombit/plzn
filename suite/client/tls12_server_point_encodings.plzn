@@ -1,0 +1,41 @@
+plzn tls "client/tls12-server-point-zero" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: zero }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "client/tls12-server-point-truncated" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: truncated }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "client/tls12-server-point-padded" {
+  rfc 8422 section 5.7
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: padded }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

@@ -1,0 +1,56 @@
+plzn tls "client/tls13-serverhello-ends-record-before-encrypted-extensions" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail gnutls "accepts EncryptedExtensions coalesced with ServerHello in the preceding plaintext epoch"
+  flow handshake until send ServerHello {
+    coalesce old_keys {
+      send ServerHello
+      send EncryptedExtensions
+    }
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "accepts EncryptedExtensions coalesced with ServerHello in the preceding plaintext epoch"
+}
+
+plzn tls "client/tls13-server-finished-ends-record-before-key-update" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail rustls "accepts a KeyUpdate coalesced after server Finished in the preceding handshake-key record"
+  flow handshake until send Finished {
+    coalesce old_keys {
+      send Finished
+      send KeyUpdate { request_update: update_not_requested }
+    }
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "accepts a KeyUpdate coalesced after server Finished in the preceding handshake-key record"
+}
+
+plzn tls "client/tls13-key-update-ends-record-before-next-key-update" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail gnutls "accepts two KeyUpdates in one record under the pre-update keys"
+  xfail wolfssl "accepts two KeyUpdates in one record under the pre-update keys"
+  flow handshake after recv Finished {
+    coalesce old_keys {
+      send KeyUpdate { request_update: update_not_requested }
+      send KeyUpdate { request_update: update_requested }
+    }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  # LibreSSL drops the rest of a record after one post-handshake message, then
+  # fails AEAD on the next record and closes without an alert.
+  expect close if libressl
+}

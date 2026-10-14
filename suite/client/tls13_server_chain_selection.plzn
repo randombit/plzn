@@ -1,0 +1,13 @@
+plzn tls "client/tls13-server-picks-ecdsa-chain" {
+  rfc 8446 section 4.4.2.2
+  chain: [rsa_2048, ecdsa_p256]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [ecdsa_secp256r1_sha256]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

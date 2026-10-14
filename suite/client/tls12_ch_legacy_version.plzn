@@ -1,0 +1,11 @@
+plzn tls "client/tls12-ch-legacy-version" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv ClientHello {
+      legacy_version: 0x0303
+    }
+  }
+  expect ok
+}

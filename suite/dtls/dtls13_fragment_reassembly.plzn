@@ -1,0 +1,93 @@
+plzn tls "dtls13/server-reassembles-reordered-overlapping-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ reorder_overlap 3 }
+  expect ok
+}
+
+plzn tls "dtls13/client-reassembles-reordered-overlapping-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ reorder_overlap 3 }
+  expect ok
+}
+
+plzn tls "dtls13/server-reassembles-duplicate-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ duplicate_fragment 7 }
+  expect ok
+}
+
+plzn tls "dtls13/client-reassembles-duplicate-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ duplicate_fragment 7 }
+  expect ok
+}
+
+plzn tls "dtls13/server-reassembles-complete-and-fragmented-message" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ complete_and_fragments 3 }
+  expect ok
+}
+
+plzn tls "dtls13/client-reassembles-complete-and-fragmented-message" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ complete_and_fragments 3 }
+  expect ok
+}
+
+plzn tls "dtls13/server-ignores-empty-handshake-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ empty_fragments }
+  expect ok
+}
+
+plzn tls "dtls13/client-ignores-empty-handshake-fragments" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ empty_fragments }
+  expect ok
+}
+
+plzn tls "dtls13/server-discards-fragment-at-window-upper-bound" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  # Seven is the first message sequence outside the receiver's flight window.
+  flow handshake { send ClientHello @ future_sequence 7 }
+  expect ok
+}
+
+plzn tls "dtls13/client-discards-fragment-at-window-upper-bound" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut client { versions: [dtls13] }
+  # Seven is the first message sequence outside the receiver's flight window.
+  flow handshake { send ServerHello @ future_sequence 7 }
+  expect ok
+}
+
+plzn tls "dtls13/server-processes-valid-fragment-packed-with-future-fragment" {
+  rfc 9147 section 5.8
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello @ future_sequence_packed 1000
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

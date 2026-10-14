@@ -1,0 +1,15 @@
+plzn tls "server/tls13-key-share-compressed-point" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    group in [0x0017, 0x0018]
+  }
+  flow handshake {
+    send ClientHello {
+      key_share_point: compressed
+    }
+  }
+  expect alert fatal/illegal_parameter
+  xfail libressl "accepts a compressed EC point in a TLS 1.3 key share"
+}

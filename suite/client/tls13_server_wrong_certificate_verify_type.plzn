@@ -1,0 +1,12 @@
+plzn tls "client/tls13-server-wrong-certificate-verify-type" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    mtype in [0x01, 0x02, 0x14, 0xff]
+  }
+  flow handshake {
+    send CertificateVerify @ set[handshake.msg_type, 0] = $mtype
+  }
+  expect alert fatal/{decode_error, unexpected_message}
+}

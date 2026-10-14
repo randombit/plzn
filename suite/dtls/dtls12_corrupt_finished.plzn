@@ -1,0 +1,11 @@
+plzn tls "dtls12/corrupt-finished" {
+  rfc 6347 section 4.2.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send Finished @ xor[0] = 0x01
+  }
+  expect alert fatal/decrypt_error
+}

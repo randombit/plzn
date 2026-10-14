@@ -1,0 +1,29 @@
+plzn tls "dtls12/client-auth-rsa-server" {
+  rfc 5246 section 7.4.4
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    recv CertificateRequest { has_sigalg: 0x0403 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-auth-rsa-client" {
+  rfc 5246 section 7.4.4
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

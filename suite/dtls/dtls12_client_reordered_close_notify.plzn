@@ -1,0 +1,20 @@
+# Botan PR #5783, TLS_Closure_Teardown_Test::data_after_close_notify:
+# https://github.com/randombit/botan/pull/5783
+# An application datagram is generated BEFORE close_notify but delivered
+# AFTER it. Unlike sending new data after closing, this is ordinary network
+# reordering. The peer must neither echo the late data nor send a fatal alert.
+plzn tls "dtls12/client-ignores-data-reordered-behind-close-notify" {
+  rfc 5246 section 7.2.1
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    send AppData
+    recv AppData
+    send AppData
+    hold_flight
+    send alert warning/close_notify
+    release_flight
+    wait 200ms
+  }
+  expect ok
+}

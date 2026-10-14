@@ -1,0 +1,15 @@
+plzn tls "server/tls13-key-share-padded" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    group in groups(tls13)
+  }
+  flow handshake {
+    send ClientHello {
+      key_share_point: padded
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

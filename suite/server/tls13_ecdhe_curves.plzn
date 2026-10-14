@@ -1,0 +1,122 @@
+# LibreSSL 4.3 sets no decode_error for an EC key share that fails to decode and
+# falls back to internal_error (4.4.0 sends decode_error), so the internal_error
+# pins below are that alert choice, not an internal failure.
+
+plzn tls "server/tls13-ecdhe-curves/right-0-padded" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x001d, 0x0017, 0x0018, 0x0019]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: padded }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/right-truncated" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x001d, 0x0017, 0x0018, 0x0019]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: truncated }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/share-from-other-curve-p256" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  flow handshake {
+    send ClientHello { key_share_point: secp384r1 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/share-from-other-curve" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x001d, 0x0018, 0x0019]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: secp256r1 }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/point-at-infinity" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x0017, 0x0018, 0x0019]
+  }
+  flow handshake {
+    send ClientHello { key_share_point: [0x00] }
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/point-outside-curve" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x0017, 0x0018, 0x0019]
+  }
+  flow handshake {
+    send ClientHello @ xor[handshake.key_share, -1] = 0x01
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-ecdhe-curves/x-and-y-zero" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix {
+    group in [0x0017, 0x0018, 0x0019]
+  }
+  flow handshake {
+    # key_share_point: zero alone starts with the 0x00 point-at-infinity tag;
+    # set the uncompressed tag so the share is the point (0, 0), not on the curve.
+    send ClientHello { key_share_point: zero } @ set[handshake.key_share, 0] = 0x04
+    recv ServerHello
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

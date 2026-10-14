@@ -1,0 +1,20 @@
+plzn tls "server/tls13-cipher-negotiation" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite, key_share_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

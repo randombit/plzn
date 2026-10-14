@@ -1,0 +1,12 @@
+plzn tls "dtls12/empty-old-fragment-no-retransmit" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send raw "16 fefd 0000 000000000005 000c 14 00000c 0000 000000 000000"
+    wait 200ms
+  }
+  expect ok
+}

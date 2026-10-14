@@ -1,0 +1,83 @@
+plzn tls "server/tls12-client-chain-picks-rsa" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  client_chain: [ecdsa_p256, rsa_2048]
+  uut server {
+    versions: [tls12]
+    verify_prefs: [rsa_pss_rsae_sha256, rsa_pkcs1_sha256]
+    require_client_cert: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-chain-picks-ecdsa" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  client_chain: [rsa_2048, ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    verify_prefs: [ecdsa_secp256r1_sha256]
+    require_client_cert: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-chain-picks-rsa" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  client_chain: [ecdsa_p256, rsa_2048]
+  uut server {
+    versions: [tls13]
+    verify_prefs: [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384]
+    require_client_cert: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-client-single-credential-presented-as-is" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    verify_prefs: [rsa_pss_rsae_sha256, rsa_pkcs1_sha256]
+    require_client_cert: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/{handshake_failure, illegal_parameter}
+}
+
+plzn tls "server/tls12-client-chain-none" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  client_chain: []
+  uut server {
+    versions: [tls12]
+    request_client_cert: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

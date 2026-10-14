@@ -1,0 +1,39 @@
+plzn tls "client/tls12-signature-algorithms-offer-excludes-md5-sha1-and-anonymous" {
+  rfc 9155 section 2
+  chain: [default]
+  uut client { versions: [tls12] }
+  matrix {
+    scheme in [rsa_pkcs1_md5, ecdsa_md5, dsa_sha1, 0x0200]
+  }
+  flow handshake {
+    recv ClientHello {
+      has_ext: signature_algorithms
+      lacks_signature_algorithm: $scheme
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-signature-algorithms-offer-excludes-rsa-and-ecdsa-sha1" {
+  rfc 9155 section 2
+  chain: [default]
+  uut client { versions: [tls12] }
+  xfail gnutls "advertises rsa_pkcs1_sha1 and ecdsa_sha1 despite RFC 9155"
+  xfail go "advertises rsa_pkcs1_sha1 and ecdsa_sha1 despite RFC 9155"
+  xfail boringssl "advertises rsa_pkcs1_sha1 despite RFC 9155"
+  xfail libressl "advertises rsa_pkcs1_sha1 and ecdsa_sha1 despite RFC 9155"
+  matrix {
+    scheme in [rsa_pkcs1_sha1, ecdsa_sha1]
+  }
+  flow handshake {
+    recv ClientHello {
+      has_ext: signature_algorithms
+      lacks_signature_algorithm: $scheme
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

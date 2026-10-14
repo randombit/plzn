@@ -1,0 +1,18 @@
+plzn tls "client/tls13-hrr-generates-fresh-key-share" {
+  rfc 9846 section 4.3.8
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    recv ClientHello { key_share: capture $shares }
+    send HelloRetryRequest { key_share_group: secp256r1 }
+    recv ClientHello { key_share: capture $shares }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  assert unique $shares
+}

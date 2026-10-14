@@ -1,0 +1,17 @@
+plzn tls "dtls12/client-ed25519-cert-suite-sweep" {
+  rfc 8422 section 5.4
+  chain: [ed25519]
+  matrix { suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM] }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [$suite]
+    verify_prefs: [ed25519]
+  }
+  flow handshake {
+    recv ClientHello { cipher_suites: [$suite] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/illegal_parameter if botan
+}

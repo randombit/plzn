@@ -1,0 +1,31 @@
+plzn tls "server/tls13-early-data-missing-end-of-early-data" {
+  rfc 8446 section 4.5
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail gnutls "sends unexpected_message under the handshake write key after Server Finished, where TLS 1.3 requires the application write key"
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello
+      send EarlyData { size: 32 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: early_data }
+      recv Finished
+      send Finished
+      recv AppData
+    }
+    expect alert fatal/unexpected_message
+  }
+}

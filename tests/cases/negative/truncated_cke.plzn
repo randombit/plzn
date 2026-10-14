@@ -1,0 +1,11 @@
+# Send a ClientKeyExchange with a truncated ECDH public key
+# (1 byte instead of 32). The server should reject this.
+plzn tls "negative/truncated-cke" {
+  rfc 5246 section 7.4.7
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange { ecdh_Yc: [0x04] }
+  }
+  expect alert fatal/illegal_parameter
+}

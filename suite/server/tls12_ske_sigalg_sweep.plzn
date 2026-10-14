@@ -1,0 +1,18 @@
+plzn tls "server/tls12-ske-rsa-sigalg-sweep" {
+  rfc 5246 section 7.4.3
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  matrix {
+    sigalg in [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pkcs1_sha256, rsa_pkcs1_sha384, rsa_pkcs1_sha512]
+  }
+  flow handshake {
+    recv ServerKeyExchange { signature_scheme: $sigalg }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

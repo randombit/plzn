@@ -1,0 +1,13 @@
+plzn tls "dtls12/replay-final-flight" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after send Finished {
+    resend_flight
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

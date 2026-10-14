@@ -1,0 +1,29 @@
+plzn tls "client/tls13-hrr-cookie-is-connection-specific" {
+  rfc 9846 section 4.3.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+
+  session retry {
+    flow handshake {
+      send HelloRetryRequest {
+        +ext cookie = raw "0010000102030405060708090a0b0c0d0e0f"
+      }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session fresh {
+    flow {
+      recv ClientHello { lacks_ext: cookie }
+      close
+    }
+    expect ok
+  }
+}

@@ -1,0 +1,92 @@
+plzn tls "server/tls-fallback-scsv/reject-downgrade-last" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12, tls13]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, FALLBACK_SCSV]
+    }
+  }
+  xfail botan "accepts a fallback ClientHello despite supporting TLS 1.3"
+  xfail rustls "accepts a fallback ClientHello despite supporting TLS 1.3"
+  expect alert fatal/inappropriate_fallback
+}
+
+plzn tls "server/tls-fallback-scsv/reject-downgrade-first" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12, tls13]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [FALLBACK_SCSV, ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+    }
+  }
+  xfail botan "accepts a fallback ClientHello despite supporting TLS 1.3"
+  xfail rustls "accepts a fallback ClientHello despite supporting TLS 1.3"
+  expect alert fatal/inappropriate_fallback
+}
+
+plzn tls "server/tls-fallback-scsv/noop-at-tls12-maximum" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, FALLBACK_SCSV]
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls-fallback-scsv/reject-tls11-fallback-to-tls12" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server { versions: [tls11, tls12] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_CBC_SHA, FALLBACK_SCSV]
+    }
+  }
+  expect alert fatal/inappropriate_fallback
+}
+
+plzn tls "server/tls-fallback-scsv/reject-tls10-fallback-to-tls11" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server { versions: [tls10, tls11] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_CBC_SHA, FALLBACK_SCSV]
+    }
+  }
+  expect alert fatal/inappropriate_fallback
+}
+
+plzn tls "server/tls-fallback-scsv/noop-at-tls11-maximum" {
+  rfc 7507 section 3
+  chain: [rsa_2048]
+  uut server { versions: [tls11] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_CBC_SHA, FALLBACK_SCSV]
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

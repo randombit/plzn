@@ -1,0 +1,15 @@
+plzn tls "client/tls12-certreq-empty-types" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest { certificate_types: [] }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/handshake_failure if boringssl
+  xfail openssl "accepts a CertificateRequest with an empty certificate_types list"
+  xfail libressl "accepts a CertificateRequest with an empty certificate_types list"
+}

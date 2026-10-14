@@ -1,0 +1,106 @@
+# A TLS 1.3 client (stream transport) answered with a ServerHello or
+# HelloRetryRequest whose version fields claim DTLS (DTLS 1.0 = 0xfeff,
+# DTLS 1.2 = 0xfefd, DTLS 1.3 = 0xfefc). RFC 8446 4.2.1: the client aborts
+# with illegal_parameter if selected_version is a version it did not offer;
+# RFC 8446 4.1.3: ServerHello.legacy_version MUST be 0x0303, and a client
+# may reject other values.
+
+plzn tls "client/tls13-serverhello-dtls-legacy-version" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    legacy_version in [0xfeff, 0xfefd, 0xfefc]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: $legacy_version }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/{decode_error,protocol_version} if boringssl
+  expect alert fatal/illegal_parameter if go
+  # OpenSSL's TLS 1.3 client never looks at ServerHello.legacy_version.
+  expect ok if openssl
+}
+
+plzn tls "client/tls13-serverhello-supported-versions-selects-dtls" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    version in [dtls12, dtls13]
+  }
+  flow handshake {
+    send ServerHello { +ext supported_versions = $version }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if rustls
+  expect alert fatal/protocol_version if libressl
+  expect alert fatal/protocol_version if go
+}
+
+plzn tls "client/tls13-hrr-supported-versions-selects-dtls" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix {
+    version in [dtls12, dtls13]
+  }
+  flow handshake {
+    send HelloRetryRequest { +ext supported_versions = $version }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if libressl
+  expect alert fatal/protocol_version if go
+}
+
+plzn tls "client/tls13-hrr-dtls-legacy-version" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix {
+    legacy_version in [0xfefd, 0xfefc]
+  }
+  flow handshake {
+    send HelloRetryRequest { legacy_version: $legacy_version }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/{decode_error,protocol_version} if boringssl
+  expect alert fatal/illegal_parameter if openssl
+  expect alert fatal/illegal_parameter if go
+  # rustls never looks at HelloRetryRequest.legacy_version.
+  expect ok if rustls
+}
+
+# The record header of the ServerHello claims DTLS 1.3. RFC 8446 5.1 says the
+# record version MUST be ignored for all purposes, yet every implementation
+# sanity-checks the first record's major byte (as the corpus's
+# rejects-garbage-initial-record-version rows also expect, see notes/TODO.md).
+# OpenSSL and Go treat {254, x} as "not TLS" and hang up without an alert;
+# Botan's TLS 1.3 record layer answers illegal_parameter.
+plzn tls "client/tls13-serverhello-dtls-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  # rustls 0.23's record reader intends to accept only 0x03XX, but its guard
+  # covers unknown code points only and the DTLS versions are known
+  # ProtocolVersion variants; the handshake completes. rustls main (commit
+  # 1509dfc8, 2026-03-08) checks the raw value and rejects it.
+  xfail rustls "accepts the DTLS 1.3 wire version in the record header of the ServerHello"
+  flow handshake {
+    send ServerHello @ record_version 0xfefc
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/illegal_parameter if botan
+  expect close if openssl
+  expect close if go
+}

@@ -1,0 +1,10 @@
+plzn tls "selftest/local-rejection/tls13-no-signing-scheme" {
+  rfc 8446 section 4.4.2.2
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls13]
+    verify_prefs: [ecdsa_secp256r1_sha256]
+  }
+  flow handshake {}
+  expect reject fatal/handshake_failure
+}

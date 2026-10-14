@@ -1,0 +1,95 @@
+plzn tls "dtls12/sigalg-rsa-pss-sha256" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256] }
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-rsa-pss-sha384" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha384] }
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-rsa-pss-sha512" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha512] }
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha512 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-rsa-pkcs1-sha256" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-rsa-pkcs1-sha384" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha384] }
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-rsa-pkcs1-sha512" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512] }
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha512 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

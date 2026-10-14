@@ -1,0 +1,16 @@
+plzn tls "server/tls13-psk-without-ke-modes" {
+  rfc 8446 section 4.2.9
+  chain: []
+  uut server { versions: [tls13] }
+  psk {
+    identity: "Client_identity"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientHello {
+      -ext psk_key_exchange_modes
+    }
+  }
+  expect alert fatal/missing_extension
+  expect alert fatal/internal_error if boringssl
+}

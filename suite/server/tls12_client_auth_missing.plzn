@@ -1,0 +1,12 @@
+plzn tls "server/tls12-client-auth-missing" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  flow handshake {
+    send Certificate { entries: 0 }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/certificate_required if rustls
+}

@@ -1,0 +1,13 @@
+plzn tls "client/tls13-server-key-update-not-requested" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    send KeyUpdate { request_update: update_not_requested }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

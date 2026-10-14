@@ -1,0 +1,12 @@
+plzn tls "dtls12/client-auth-empty-certificate" {
+  rfc 5246 section 7.4.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake {
+    send Certificate { certificate_list: [] }
+  }
+  expect alert fatal/handshake_failure
+}

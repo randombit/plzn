@@ -1,0 +1,15 @@
+plzn tls "dtls12/cookie-mismatch" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_require_cookie: true
+  }
+  flow {
+    send ClientHello { cookie: [0xba, 0xdc, 0x00, 0x6b, 0x1e, 0xba, 0xdc, 0x00, 0x6b, 0x1e, 0xba, 0xdc, 0x00, 0x6b, 0x1e, 0xff] }
+    recv HelloVerifyRequest
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/handshake_failure if libressl
+}

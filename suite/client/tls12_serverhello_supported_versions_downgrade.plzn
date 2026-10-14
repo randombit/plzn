@@ -1,0 +1,14 @@
+plzn tls "client/tls12-serverhello-supported-versions-downgrade" {
+  rfc 8446 section 4.2.1
+  chain: [default]
+  uut client {
+    versions: [tls12, tls13]
+  }
+  flow handshake {
+    send ServerHello {
+      +ext supported_versions = raw "0303"
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unsupported_extension if boringssl
+}

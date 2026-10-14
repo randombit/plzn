@@ -1,0 +1,16 @@
+plzn tls "client/tls12-serverhello-reneg-info-nonempty-initial" {
+  rfc 5746 section 3.4
+  chain: [default]
+  xfail rustls "does not verify renegotiation_info on the initial ServerHello and completes (RFC 5746 3.4 MUST abort)"
+  uut client {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ServerHello {
+      +ext renegotiation_info = raw "0c000000000000000000000000"
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/illegal_parameter if openssl
+  expect alert fatal/decode_error if libressl
+}

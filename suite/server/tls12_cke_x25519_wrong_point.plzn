@@ -1,0 +1,12 @@
+plzn tls "server/tls12-cke-x25519-wrong-point" {
+  rfc 7748 section 5
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, x25519] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientKeyExchange @ xor[handshake.ecdh_point, -1] = 0x01
+  }
+  expect alert fatal/bad_record_mac
+}

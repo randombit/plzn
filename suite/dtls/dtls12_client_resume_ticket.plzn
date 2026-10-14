@@ -1,0 +1,26 @@
+plzn tls "dtls12/client-resume-ticket" {
+  rfc 5077 section 3.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      recv ClientHello { has_ext: session_ticket }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake after recv Finished {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  xfail libressl "its DTLS client fails every abbreviated handshake with an internal error (transcript never freed)"
+}

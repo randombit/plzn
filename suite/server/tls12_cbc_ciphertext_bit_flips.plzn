@@ -1,0 +1,17 @@
+plzn tls "server/tls12-cbc-ciphertext-bit-flips/xor-position" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  matrix {
+    pos in -42..-1
+    val in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80]
+  }
+  flow handshake {
+    send AppData { size: 18 } @ xor[record.encrypted_record, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

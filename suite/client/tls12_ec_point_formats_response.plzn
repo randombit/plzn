@@ -1,0 +1,14 @@
+plzn tls "client/tls12-server-ec-point-formats-without-uncompressed" {
+  rfc 8422 section 5.1.2
+  chain: [ecdsa_p256]
+  uut client { versions: [tls12] }
+  xfail openssl "accepts a ServerHello ec_point_formats list that omits uncompressed (fixed in OpenSSL 4.1)"
+  xfail wolfssl "accepts a ServerHello ec_point_formats list that omits uncompressed"
+  flow handshake {
+    send ServerHello {
+      +ext ec_point_formats = [ansix962_compressed_prime]
+    }
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+  expect close if go
+}

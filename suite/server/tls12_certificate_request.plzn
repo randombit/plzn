@@ -1,0 +1,108 @@
+plzn tls "server/tls12-certificate-request/valid-handshake" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: none }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-request/with-certificate" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-request/check-sigalgs-in-cert-request" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest { signature_algorithms: [rsa_pss_rsae_sha256, rsa_pkcs1_sha256, ecdsa_secp256r1_sha256] }
+    recv ServerHelloDone
+    send Certificate { credential: none }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-certificate-request/check-cert-types-in-cert-request" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384, ecdsa_secp521r1_sha512, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest { certificate_types: [rsa_sign, ecdsa_sign] }
+    recv ServerHelloDone
+    send Certificate { credential: none }
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

@@ -1,0 +1,28 @@
+plzn tls "dtls12/client-duplicate-server-flight-defers-to-timer" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    discard_flight
+    retransmit_flight
+    wait 200ms
+    advance_clock 1ms
+    expect_retransmit
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

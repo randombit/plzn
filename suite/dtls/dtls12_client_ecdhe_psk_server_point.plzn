@@ -1,0 +1,53 @@
+plzn tls "dtls12/client-ecdhe-psk-server-point-zero" {
+  rfc 8422 section 5.11
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: zero }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/client-ecdhe-psk-server-point-truncated" {
+  rfc 8422 section 5.7
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: truncated }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/client-ecdhe-psk-server-point-padded" {
+  rfc 8422 section 5.7
+  chain: []
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [ECDHE_PSK_WITH_CHACHA20_POLY1305_SHA256]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  flow handshake {
+    send ServerKeyExchange { key_share_point: padded }
+  }
+  expect alert fatal/illegal_parameter
+}

@@ -1,0 +1,75 @@
+plzn tls "server/tls12-renegotiation-disabled-client-cert/secure-renegotiation-with-client-cert" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    hello_request_after_app_data: true, require_client_cert_on_renegotiation: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    recv HelloRequest
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-disabled-client-cert/insecure-renegotiation-after-hello-request" {
+  rfc 5746 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    hello_request_after_app_data: true, require_client_cert_on_renegotiation: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    recv HelloRequest
+    renegotiate insecure
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-renegotiation-disabled-client-cert/renegotiation-refused-after-hello-request" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    hello_request_after_app_data: true, require_client_cert_on_renegotiation: true
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    recv HelloRequest
+    send alert warning/no_renegotiation
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/handshake_failure if libressl
+}
+
+# A ClientHello answering the server's own HelloRequest is not a
+# client-initiated renegotiation, so a server that only permits
+# server-initiated renegotiation must take it.
+plzn tls "server/tls12-renegotiation-disabled-client-cert/server-initiated-only" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    hello_request_after_app_data: true, renegotiation: server
+  }
+  xfail libressl "refuses the renegotiation its own HelloRequest asked for with a fatal no_renegotiation alert"
+  flow handshake {
+    send AppData
+    recv AppData
+    recv HelloRequest
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

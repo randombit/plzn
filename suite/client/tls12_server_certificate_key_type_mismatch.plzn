@@ -1,0 +1,23 @@
+plzn tls "client/tls12-server-certificate-key-type-mismatch/ecdsa-under-ecdhe-rsa" {
+  rfc 5246 section 7.4.2
+  chain: [ecdsa_p256]
+  uut client { versions: [tls12] }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ServerHello { cipher_suite: ECDHE_RSA_WITH_AES_128_GCM_SHA256 }
+  }
+  expect alert fatal/{handshake_failure,bad_certificate,unsupported_certificate,certificate_unknown,illegal_parameter,decrypt_error}
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-server-certificate-key-type-mismatch/rsa-under-ecdhe-ecdsa" {
+  rfc 5246 section 7.4.2
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ServerHello { cipher_suite: ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 }
+  }
+  expect alert fatal/{handshake_failure,bad_certificate,unsupported_certificate,certificate_unknown,illegal_parameter,decrypt_error}
+  expect close if wolfssl
+}

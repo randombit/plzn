@@ -1,0 +1,13 @@
+plzn tls "dtls12/hello-verify-request-truncated-cookie" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send raw "16feff00000000000000000010030000040000000000000004fefd0500"
+    recv Alert
+  }
+  expect alert fatal/decode_error
+}

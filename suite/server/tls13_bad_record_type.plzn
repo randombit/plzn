@@ -1,0 +1,12 @@
+plzn tls "server/tls13-bad-record-type" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send AppData { size: 18 } @ set[record.content_type, 0] = 0x00
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/bad_record_mac if boringssl
+  expect alert fatal/decode_error if rustls
+}

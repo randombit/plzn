@@ -1,0 +1,80 @@
+plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-128" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { encrypted_premaster: 0x00 * 128 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+  expect close if boringssl
+}
+
+plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-256" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { encrypted_premaster: 0x00 * 256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-384" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { encrypted_premaster: 0x00 * 384 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+  expect close if boringssl
+}
+
+plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-512" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { encrypted_premaster: 0x00 * 512 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+  expect close if boringssl
+}
+
+plzn tls "server/tls12-invalid-rsa-key-exchange-messages/modulus-as-encrypted-premaster" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { encrypted_premaster: modulus }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+  expect close if boringssl
+  expect alert fatal/decrypt_error if openssl
+  expect alert fatal/decrypt_error if libressl
+}

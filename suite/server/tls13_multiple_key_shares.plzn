@@ -1,0 +1,33 @@
+plzn tls "server/tls13-multiple-key-shares" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [x25519, secp256r1, secp384r1]
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-multiple-key-shares/all-ffdhe-groups" {
+  rfc 7919 section 2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+      +ext key_share = [ffdhe2048, ffdhe3072, ffdhe4096, ffdhe6144, ffdhe8192]
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

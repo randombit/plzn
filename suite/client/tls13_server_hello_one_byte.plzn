@@ -1,0 +1,10 @@
+plzn tls "client/tls13-server-hello-one-byte" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after recv ClientHello {
+    send raw "16030300050200000100"
+    wait 300 ms
+  }
+  expect alert fatal/decode_error
+}

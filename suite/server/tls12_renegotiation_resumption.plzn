@@ -1,0 +1,114 @@
+plzn tls "server/tls12-renegotiation-resumption/session-id" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate resumed
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-resumption/session-ticket" {
+  rfc 5077 section 3.4
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_ticket] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate resumed
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate resumed { -ext signature_algorithms }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms-cert" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms_cert = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256] }
+    send AppData
+    recv AppData
+    renegotiate resumed { -ext signature_algorithms_cert }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-resumption/omitted-both-signature-algorithm-extensions" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_id] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms_cert = [rsa_pss_rsae_sha256, ecdsa_secp256r1_sha256] }
+    send AppData
+    recv AppData
+    renegotiate resumed {
+      -ext signature_algorithms
+      -ext signature_algorithms_cert
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-renegotiation-resumption/scsv-is-forbidden" {
+  rfc 5746 section 4.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256]
+  }
+  peer { capabilities: [session_id] }
+  xfail gnutls "accepts TLS_EMPTY_RENEGOTIATION_INFO_SCSV in a renegotiation ClientHello (RFC 5746 3.7)"
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate resumed {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, EMPTY_RENEGOTIATION_INFO_SCSV]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert warning/no_renegotiation if boringssl
+}
+
+plzn tls "server/tls12-renegotiation/session-ticket-removal-forces-full-handshake" {
+  rfc 5077 section 3.4
+  chain: [default]
+  uut server { versions: [tls12] }
+  peer { capabilities: [session_ticket] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate { -ext session_ticket }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,42 @@
+plzn tls "server/tls12-legacy-renegotiation/secure-appdata-crossing-renegotiation" {
+  rfc 5746 section 3.5
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    send AppData
+    begin_renegotiation
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-legacy-renegotiation/scsv-in-renegotiation" {
+  rfc 5746 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate { cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, EMPTY_RENEGOTIATION_INFO_SCSV] }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/no_renegotiation if boringssl
+  expect close if gnutls
+}

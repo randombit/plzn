@@ -1,0 +1,11 @@
+plzn tls "client/tls13-serverhello-duplicate-extension" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      +ext dup supported_versions = raw "0304"
+    }
+  }
+  expect alert fatal/{decode_error, illegal_parameter}
+}

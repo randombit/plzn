@@ -1,0 +1,15 @@
+plzn tls "server/tls13-key-share-low-order-x25519" {
+  rfc 8446 section 7.4.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [x25519] }
+  flow handshake {
+    send ClientHello {
+      key_share_point: zero
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect close if libressl
+}

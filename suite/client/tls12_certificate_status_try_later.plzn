@@ -1,0 +1,23 @@
+plzn tls "client/tls12-certificate-status-unsigned-try-later" {
+  rfc 6960 section 4.2.1
+  chain: [default]
+  skip openssl "does not offer status_request unless configured (no shim knob yet)"
+  skip wolfssl "does not offer status_request unless configured (no shim knob yet)"
+  xfail botan "accepts an OCSP tryLater response and continues"
+  xfail boringssl "accepts an OCSP tryLater response and continues"
+  xfail gnutls "continues past an OCSP tryLater staple: the client shim verifies nothing (no trust anchor), and GnuTLS soft-fails non-successful responses without must-staple anyway"
+  xfail go "accepts an OCSP tryLater response and continues"
+  xfail rustls "accepts an OCSP tryLater response and continues"
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send raw "160303000d160000090100000530030a0103"
+    wait 300 ms
+  }
+  expect alert fatal/bad_certificate_status_response
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}

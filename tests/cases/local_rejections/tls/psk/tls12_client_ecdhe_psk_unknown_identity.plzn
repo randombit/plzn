@@ -1,0 +1,15 @@
+plzn tls "selftest/local-rejection/tls12-client-ecdhe-psk-unknown-identity" {
+  rfc 5489 section 3.3
+  chain: []
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  uut client {
+    versions: [tls12]
+    psk_identity: "not-an-identity"
+  }
+  peer { capabilities: [ecdhe_psk] }
+  flow handshake {}
+  expect reject fatal/unknown_psk_identity
+}

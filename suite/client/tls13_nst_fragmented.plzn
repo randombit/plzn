@@ -1,0 +1,14 @@
+plzn tls "client/tls13-nst-fragmented" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  matrix {
+    size in [1, 16, 64]
+  }
+  flow handshake after recv Finished {
+    send NewSessionTicket @ fragment $size
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,17 @@
+plzn tls "client/tls13-server-empty-ccs-record" {
+  rfc 8446 section 5
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake after send ServerHello {
+    send empty_record change_cipher_spec
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/{unexpected_message, decode_error}
+  expect alert fatal/bad_record_mac if boringssl
+}

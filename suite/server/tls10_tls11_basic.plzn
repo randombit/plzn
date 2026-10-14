@@ -1,0 +1,102 @@
+plzn tls "server/legacy-basic" {
+  rfc 2246 section 7
+  rfc 4346 section 7
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-ecdhe-rsa" {
+  rfc 4492 section 5
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-ecdhe-ecdsa" {
+  rfc 4492 section 5
+  chain: [ecdsa_p256]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [ecdhe_ecdsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-dhe-rsa" {
+  rfc 2246 section 7.4.3
+  rfc 4346 section 7.4.3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [dhe_rsa, aes128_cbc_sha, ffdhe2048] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-client-authentication" {
+  rfc 2246 section 7.4.6
+  rfc 4346 section 7.4.6
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version], require_client_cert: true }
+  peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-psk" {
+  rfc 4279 section 2
+  chain: []
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [psk, aes128_cbc_sha] }
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/legacy-ecdhe-psk" {
+  rfc 5489 section 3
+  chain: []
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [ecdhe_psk, aes128_cbc_sha] }
+  psk {
+    identity: "plzn-psk-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

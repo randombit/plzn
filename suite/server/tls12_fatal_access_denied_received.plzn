@@ -1,0 +1,16 @@
+plzn tls "server/tls12-fatal-access-denied-received" {
+  rfc 5246 section 7.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientHello {
+    send raw "15030300020231"
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    wait 300 ms
+  }
+  expect close
+}

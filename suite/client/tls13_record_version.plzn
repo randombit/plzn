@@ -1,0 +1,62 @@
+plzn tls "client/tls13-ignores-ciphertext-legacy-record-version" {
+  rfc 8446 section 5.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail openssl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail boringssl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail gnutls "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail botan "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  xfail rustls "uses a fixed record version in TLS 1.3 AEAD processing instead of the received ignored field"
+  xfail wolfssl "with a version-pinned method, rejects any legacy_record_version but 0x0303 / 0x0304 (VERSION_ERROR)"
+  xfail go "rejects the semantically ignored TLS 1.3 legacy_record_version"
+  flow handshake {
+    send Finished @ record_version 0x03ff
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+}
+
+plzn tls "client/tls13-ignores-server-hello-legacy-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail openssl "closes after receiving the ignored ServerHello legacy_record_version"
+  xfail boringssl "rejects the ignored ServerHello legacy_record_version"
+  xfail gnutls "rejects the ignored ServerHello legacy_record_version"
+  xfail botan "rejects the ignored ServerHello legacy_record_version"
+  xfail rustls "rejects the ignored ServerHello legacy_record_version"
+  xfail wolfssl "with a version-pinned method, rejects any legacy_record_version but 0x0303 / 0x0304 (VERSION_ERROR)"
+  xfail go "closes after receiving the ignored ServerHello legacy_record_version"
+  flow handshake {
+    send ServerHello @ record_version 0xffff
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+}
+
+plzn tls "client/tls13-ignores-post-hrr-server-hello-legacy-record-version" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  xfail boringssl "rejects the ignored post-HRR ServerHello legacy_record_version"
+  xfail gnutls "rejects the ignored post-HRR ServerHello legacy_record_version"
+  xfail botan "rejects the ignored post-HRR ServerHello legacy_record_version"
+  xfail rustls "rejects the ignored post-HRR ServerHello legacy_record_version"
+  xfail wolfssl "with a version-pinned method, rejects any legacy_record_version but 0x0303 / 0x0304 (VERSION_ERROR)"
+  xfail go "rejects the ignored post-HRR ServerHello legacy_record_version"
+  flow handshake {
+    send ServerHello @ record_version 0xffff
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "rejects the semantically ignored TLS 1.3 legacy_record_version"
+}

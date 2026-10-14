@@ -1,0 +1,36 @@
+plzn tls "dtls12/server-hello-unoffered-suite" {
+  rfc 5246 section 7.4.1.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ServerHello { cipher_suite: AES_128_GCM_SHA256 }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+}
+
+plzn tls "dtls12/server-hello-dtls10-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: 0xfeff }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls12/server-hello-unoffered-compression" {
+  rfc 5246 section 7.4.1.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ServerHello { legacy_compression_method: 1 }
+  }
+  expect alert fatal/illegal_parameter
+}

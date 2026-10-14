@@ -1,0 +1,27 @@
+plzn tls "dtls13/server-empty-key-share-triggers-hrr" {
+  rfc 9147 section 5.7
+  chain: [default]
+  uut server { versions: [dtls13] }
+  peer { capabilities: [hrr] }
+  flow handshake {
+    send ClientHello { +ext key_share = raw "0000" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-completes-hrr" {
+  rfc 9147 section 5.7
+  chain: [default]
+  uut client {
+    versions: [dtls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

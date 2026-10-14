@@ -1,0 +1,14 @@
+plzn tls "server/tls13-psk-ke" {
+  rfc 8446 section 4.2.9
+  chain: []
+  uut server { versions: [tls13] }
+  psk {
+    identity: "Client_identity"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

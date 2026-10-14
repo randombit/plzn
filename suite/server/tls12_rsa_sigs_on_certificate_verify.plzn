@@ -1,0 +1,264 @@
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/valid-handshake" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha256-prf" {
+  rfc 5246 section 7.4.8
+  skip botan "Botan TLS does not implement the explicit RSA/SHA-1 SignatureScheme"
+  uut server {
+    versions: [tls12], require_client_cert: true
+    verify_prefs: [rsa_pkcs1_sha1]
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha1 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha256-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha256-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha512-with-sha256-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha384-prf" {
+  rfc 5246 section 7.4.8
+  skip botan "Botan TLS does not implement the explicit RSA/SHA-1 SignatureScheme"
+  uut server {
+    versions: [tls12], require_client_cert: true
+    verify_prefs: [rsa_pkcs1_sha1]
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha1 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha384-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha256 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha384-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha384 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha512-with-sha384-prf" {
+  rfc 5246 section 7.4.8
+  uut server {
+    versions: [tls12], require_client_cert: true
+  }
+  peer { capabilities: [aes256_gcm_sha384] }
+  chain: [rsa_2048]
+  client_chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pkcs1_md5] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv CertificateRequest
+    recv ServerHelloDone
+    send Certificate { credential: rsa }
+    send ClientKeyExchange
+    send CertificateVerify { sign_with: rsa_pkcs1_sha512 }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

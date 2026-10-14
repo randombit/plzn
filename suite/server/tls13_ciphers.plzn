@@ -1,0 +1,42 @@
+plzn tls "server/tls13-nociphers/only-a-tls12-suite" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [RSA_WITH_AES_256_CBC_SHA] }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-invalid-ciphers/unknown-suite-then-valid" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix { c in [0x0a0a, 0x1300, 0x13ff, 0xffff, 0xfefe] }
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [$c, AES_128_GCM_SHA256] }
+    recv ServerHello { cipher_suite: AES_128_GCM_SHA256 }
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-invalid-ciphers/only-an-unknown-suite" {
+  rfc 8446 section 4.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix { c in [0x0a0a, 0x1300, 0x13ff, 0xffff, 0xfefe] }
+  flow handshake until send ClientHello {
+    send ClientHello { cipher_suites: [$c] }
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+}

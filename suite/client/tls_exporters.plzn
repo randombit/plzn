@@ -1,0 +1,109 @@
+plzn tls "client/tls12-exporter-with-context" {
+  rfc 5705 section 4
+  chain: [rsa]
+  uut client { versions: [tls12], cipher_suites: [$suite] }
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_256_GCM_SHA384]
+  }
+  flow handshake {
+    recv Exporter { label: "label", context: "context", length: 1024 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-exporter-without-context" {
+  rfc 5705 section 4
+  chain: [rsa]
+  uut client { versions: [tls12], cipher_suites: [$suite] }
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_256_GCM_SHA384]
+  }
+  flow handshake {
+    recv Exporter { label: "label", context: none, length: 1 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-exporter-with-empty-context" {
+  rfc 5705 section 4
+  chain: [rsa]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv Exporter { label: "label", context: "", length: 32 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-exporter" {
+  rfc 8446 section 7.5
+  chain: [default]
+  uut client { versions: [tls13], cipher_suites: [$suite] }
+  matrix {
+    suite in [TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256]
+  }
+  flow handshake {
+    recv Exporter { label: "label", context: "context", length: 1024 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-tls-exporter-channel-binding" {
+  rfc 9266 section 4
+  chain: [default]
+  uut client { versions: [tls12] }
+  flow handshake {
+    recv Exporter { label: "EXPORTER-Channel-Binding", context: "", length: 32 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-tls-exporter-channel-binding" {
+  rfc 9266 section 4
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv Exporter { label: "EXPORTER-Channel-Binding", context: "", length: 32 }
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-exporter-after-resumption" {
+  rfc 5705 section 4
+  chain: [default]
+  uut client { versions: [tls12] }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+}
+
+plzn tls "client/tls13-exporter-after-resumption" {
+  rfc 8446 section 7.5
+  chain: [default]
+  uut client { versions: [tls13] }
+
+  session initial {
+    flow handshake {
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv Exporter { label: "label", context: "context", length: 32 }
+    }
+    expect ok
+  }
+}

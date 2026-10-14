@@ -1,0 +1,245 @@
+plzn tls "server/tls12-connection-abort/before-client-hello" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-client-hello" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientHello {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-server-hello-done" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv ServerHelloDone {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-client-key-exchange" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-client-change-cipher-spec" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ChangeCipherSpec {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-client-finished" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send Finished {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-server-change-cipher-spec" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv ChangeCipherSpec {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-server-finished" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-sending-application-data" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-connection-abort/after-receiving-application-data" {
+  rfc 5246 section 7.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/before-client-hello" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake until send ClientHello {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-client-hello" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after send ClientHello {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-server-hello" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after recv ServerHello {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-encrypted-extensions" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after recv EncryptedExtensions {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-server-certificate" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after recv Certificate {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-server-certificate-verify" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after recv CertificateVerify {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-server-finished" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after recv Finished {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-client-finished" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake after send Finished {
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-client-application-data" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake {
+    send AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-connection-abort/after-server-application-data" {
+  rfc 8446 section 6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

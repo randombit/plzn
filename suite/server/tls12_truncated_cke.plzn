@@ -1,0 +1,13 @@
+plzn tls "server/tls12-truncated-cke" {
+  rfc 5246 section 7.4.7
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange { ecdh_Yc: [0x04] }
+  }
+  expect alert fatal/illegal_parameter
+  xfail libressl "aborts on the truncated ClientKeyExchange without the required alert"
+}

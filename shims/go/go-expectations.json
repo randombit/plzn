@@ -1,0 +1,268 @@
+{
+  "schema_version": 1,
+  "overrides": {
+    "client/tls12-alert-invalid-level": "alert fatal/unexpected_message",
+    "client/tls12-alert-trailing-byte": "alert fatal/unexpected_message",
+    "client/tls12-alert-truncated": "alert fatal/unexpected_message",
+    "client/tls12-certificate-empty-list": "alert fatal/unexpected_message",
+    "client/tls12-server-close-notify-mid-handshake": "close",
+    "client/tls12-mandatory-server-message-omissions/server-key-exchange": "alert fatal/internal_error",
+    "client/tls12-server-finished-corrupt": "alert fatal/handshake_failure",
+    "client/tls12-server-ske-corrupt": "alert fatal/illegal_parameter",
+    "client/tls12-ske-bad-signature": "alert fatal/illegal_parameter",
+    "client/tls13-client-keyupdate-unknown-mode": "alert fatal/decode_error",
+    "client/tls13-mandatory-server-message-omissions/server-hello": "alert fatal/decode_error",
+    "client/tls13-server-certificate-nonempty-context": "alert fatal/decode_error",
+    "client/tls13-serverhello-bad-version": "alert fatal/protocol_version",
+    "client/tls13-serverhello-invalid-legacy-version[legacy_version=772]": "alert fatal/illegal_parameter",
+    "client/tls13-serverhello-invalid-legacy-version[legacy_version=1285]": "alert fatal/illegal_parameter",
+
+    "client/tls12-client-rejects-etm-with-aead": {
+      "xfail": "accepts encrypt_then_mac with an AEAD suite"
+    },
+    "client/tls12-client-rejects-unsolicited-etm": {
+      "xfail": "accepts an unsolicited encrypt_then_mac extension"
+    },
+    "client/tls12-serverhello-session-id-too-long": {
+      "xfail": "accepts a 33-byte TLS 1.2 ServerHello session ID"
+    },
+    "client/tls12-serverhello-supported-versions-downgrade": {
+      "xfail": "accepts supported_versions in a TLS 1.2 ServerHello"
+    },
+    "client/tls12-serverhello-unsolicited-extension": {
+      "xfail": "accepts an unsolicited max_fragment_length extension"
+    },
+    "client/tls13-certreq-missing-sigalgs": {
+      "xfail": "accepts CertificateRequest without signature_algorithms and sends an empty certificate"
+    },
+    "client/tls13-client-certificate-signature-algorithms-cert/excludes-certificate": {
+      "xfail": "sends a certificate excluded by signature_algorithms_cert"
+    },
+    "client/tls13-client-certificate-signature-algorithms-cert/absent-falls-back": {
+      "xfail": "does not apply signature_algorithms to certificate signatures when signature_algorithms_cert is absent"
+    },
+    "client/tls13-ee-ec-point-formats": {
+      "xfail": "accepts ec_point_formats in EncryptedExtensions"
+    },
+    "client/tls13-ee-fragment-interleaved-ccs": {
+      "xfail": "rejects a compatibility CCS interleaved with fragmented EncryptedExtensions"
+    },
+    "client/tls13-ee-psk-key-exchange-modes": {
+      "xfail": "accepts psk_key_exchange_modes in EncryptedExtensions"
+    },
+    "client/tls13-ee-record-size-limit-too-small": {
+      "xfail": "accepts an invalid record_size_limit in EncryptedExtensions"
+    },
+    "client/tls13-ee-wrong-message-extension": {
+      "xfail": "accepts supported_versions in EncryptedExtensions"
+    },
+    "client/tls13-serverhello-wrong-message-extension": {
+      "xfail": "accepts ec_point_formats in ServerHello"
+    },
+
+    "client/tls12-trailing-newsessionticket": {
+      "normal": true
+    },
+    "client/tls12-wrong-type-newsessionticket": {
+      "normal": true
+    },
+    "client/tls12-rejects-new-session-ticket-prefix-after-server-hello-done": {
+      "xfail": "accepts a partial NewSessionTicket prefix buffered across the TLS 1.2 key change"
+    },
+    "client/tls13-ticket-zero-length": {
+      "normal": true
+    },
+
+
+    "server/tls12-alert-invalid-level": "alert fatal/unexpected_message",
+    "server/tls12-alert-trailing-byte": "alert fatal/unexpected_message",
+    "server/tls12-bad-record-after-handshake": "alert fatal/bad_record_mac",
+    "server/tls12-certificate-verify-malformed-sig/sha256-in-sha1-envelope": "alert fatal/decrypt_error",
+    "server/tls12-consecutive-warning-alerts/five-warning-alerts": "ok",
+    "server/tls12-ec-point-formats-without-uncompressed": "alert fatal/missing_extension",
+    "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/truncated-Yc": "alert fatal/illegal_parameter",
+    "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/padded-Yc": "alert fatal/illegal_parameter",
+    "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha1": "alert fatal/decrypt_error",
+    "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha1": "alert fatal/decrypt_error",
+    "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha1": "alert fatal/decrypt_error",
+    "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha1": "alert fatal/decrypt_error",
+    "server/tls12-eddsa-in-certificate-verify/sha512-ecdsa-forced": "alert fatal/decrypt_error",
+    "server/tls12-empty-alert-record": "alert fatal/unexpected_message",
+    "server/tls12-empty-cipher-suites": "alert fatal/handshake_failure",
+    "server/tls12-empty-compression-methods": "alert fatal/illegal_parameter",
+    "server/tls12-empty-finished": "alert fatal/handshake_failure",
+    "server/tls12-finished-trailing-data": "alert fatal/handshake_failure",
+    "server/tls12-hello-request-by-client/after-handshake": "alert warning/no_renegotiation",
+    "server/tls12-invalid-client-hello/handshake-type-fuzz[i=1]": "alert fatal/decode_error",
+    "server/tls12-invalid-client-hello/handshake-type-fuzz[i=3]": "alert fatal/decode_error",
+    "server/tls12-invalid-client-hello/handshake-type-fuzz[i=4]": "alert fatal/decode_error",
+    "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-384": "alert fatal/illegal_parameter",
+    "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-512": "alert fatal/illegal_parameter",
+    "server/tls12-invalid-rsa-key-exchange-messages/modulus-as-encrypted-premaster": "alert fatal/illegal_parameter",
+    "server/tls12-no-chain-certificate-suite": "alert fatal/unrecognized_name",
+    "server/finished-bad-verify-data-tls12": "alert fatal/handshake_failure",
+    "server/tls12-padded-finished": "alert fatal/handshake_failure",
+    "server/tls12-renegotiation-refused": "alert fatal/unexpected_message",
+    "server/tls12-sslv2-client-hello": "alert fatal/protocol_version",
+    "server/tls12-sslv2-empty-record": "alert fatal/protocol_version",
+    "server/tls12-sslv2-empty-record-type-0": "alert fatal/protocol_version",
+    "server/tls12-sslv2-empty-record-type-1": "alert fatal/protocol_version",
+    "server/tls12-sslv2-just-version": "alert fatal/protocol_version",
+    "server/tls12-truncated-finished": "alert fatal/handshake_failure",
+
+    "server/tls12-client-hello-max-size": {
+      "xfail": "rejects a valid ClientHello larger than Go's 64 KiB handshake-message limit"
+    },
+    "server/tls12-client-hello-max-size/no-alpn": {
+      "xfail": "rejects a valid ClientHello larger than Go's 64 KiB handshake-message limit"
+    },
+    "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa": {
+      "xfail": "accepts an ECDSA/SHA-1 CertificateVerify"
+    },
+    "server/tls12-session-id-too-long": {
+      "xfail": "accepts a 33-byte TLS 1.2 ClientHello session ID"
+    },
+    "server/tls12-static-rsa-wrong-premaster-version-fails-after-finished": {
+      "xfail": "does not enforce the RSA premaster-secret rollback-version check"
+    },
+
+    "server/tls13-bad-record-type": "alert fatal/bad_record_mac",
+    "server/tls13-ccs-invalid-byte": "alert fatal/decode_error",
+    "server/tls13-ch-duplicate-extension": "alert fatal/decode_error",
+    "server/tls13-ch-empty-cipher-suites": "alert fatal/handshake_failure",
+    "server/tls13-double-clienthello": "alert fatal/bad_record_mac",
+    "server/tls13-empty-compression-methods": "alert fatal/illegal_parameter",
+    "server/tls13-finished-plaintext/unencrypted-finished": "alert fatal/bad_record_mac",
+    "server/tls13-invalid-first-content-type": "close",
+    "server/tls13-keyupdate-unknown-mode": "alert fatal/decode_error",
+    "server/tls13-missing-supported-groups": "alert fatal/handshake_failure",
+    "server/tls13-multiple-ccs/multiple-ccs-in-one-record": "alert fatal/decode_error",
+    "server/tls13-unencrypted-alert/unencrypted-alert": "alert fatal/bad_record_mac",
+
+    "server/tls13-certificate-fragment-interleaved-ccs": {
+      "xfail": "rejects a compatibility CCS interleaved with a fragmented Certificate"
+    },
+    "server/tls13-early-data-without-psk": {
+      "xfail": "aborts instead of ignoring early_data offered without a PSK"
+    },
+    "server/tls13-malformed-certificate-authorities": {
+      "skip": "Go does not implement certificate_authorities and validly treats its payload as opaque"
+    },
+    "server/tls13-session-id-too-long": {
+      "xfail": "accepts a 33-byte TLS 1.3 legacy_session_id"
+    },
+
+    "server/client-compat-56-android-2-3-7-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-58-android-4-0-4-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-59-android-4-1-1-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-60-android-4-2-2-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-41-bingbot-dec-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-47-bingpreview-dec-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-10-chrome-27-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-12-chrome-29-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-14-firefox-10-0-12-esr-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-16-firefox-21-on-fedora-19": "alert fatal/protocol_version",
+    "server/client-compat-13-firefox-21-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-17-firefox-22-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-48-firefox-24-2-0-esr-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-50-firefox-26-on-win-8": "alert fatal/protocol_version",
+    "server/client-compat-72-googlebot-jun-2014-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-40-googlebot-oct-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-64-ie-10-on-win-phone-8-0": "alert fatal/protocol_version",
+    "server/client-compat-18-ie-6-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-100-ie-6-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-19-ie-7-on-vista": "alert fatal/protocol_version",
+    "server/client-compat-21-ie-8-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-20-ie-8-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-101-ie-8-on-xp": "alert fatal/protocol_version",
+    "server/client-compat-113-ie-8-10-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-25-java-6u45-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-26-java-7u25-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-27-openssl-0-9-8y-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-29-opera-12-15-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-39-opera-16-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-32-safari-5-1-9-on-os-x-10-6-8": "alert fatal/protocol_version",
+    "server/client-compat-34-safari-6-0-4-on-os-x-10-8-4": "alert fatal/protocol_version",
+    "server/client-compat-44-tor-17-0-9-on-win-7": "alert fatal/protocol_version",
+    "server/client-compat-42-yahoo-slurp-oct-2013-on-unknown": "alert fatal/protocol_version",
+    "server/client-compat-52-yandexbot-3-0-on-unknown": "alert fatal/protocol_version"
+  },
+  "patterns": [
+    {
+      "pattern": "server/tls12-client-hello-fragments-interleaved-ccs/*",
+      "expect": "close"
+    },
+    {
+      "pattern": "server/tls12-extended-master-secret/ems-with-session-resume*",
+      "skip": "Go servers do not implement TLS 1.2 session-ID resumption"
+    },
+    {
+      "pattern": "server/tls12-extended-master-secret/ems-session-resume-without-extension*",
+      "skip": "Go servers do not implement TLS 1.2 session-ID resumption"
+    },
+    {
+      "pattern": "server/tls12-finished-bitflip*",
+      "expect": "alert fatal/handshake_failure"
+    },
+    {
+      "pattern": "server/tls12-resumption-with-wrong-ciphers/session-id-resume*",
+      "skip": "Go servers do not implement TLS 1.2 session-ID resumption"
+    },
+    {
+      "pattern": "server/tls12-resumption-with-wrong-ciphers/cipher-from-old-hello-not-selected*",
+      "skip": "Go servers do not implement TLS 1.2 session-ID resumption and use server cipher preference"
+    },
+    {
+      "pattern": "server/tls12-rsa-padding-failures-deferred-to-finished/wrong-premaster-version*",
+      "xfail": "Go deliberately omits the legacy RSA premaster-secret rollback-version check"
+    },
+    {
+      "pattern": "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-*",
+      "skip": "Go rejects the RSA-PSS-restricted client certificate before reaching CertificateVerify"
+    },
+    {
+      "pattern": "server/tls12-session-id-resumption/issued-session-id-resumes*",
+      "skip": "Go servers do not implement TLS 1.2 session-ID resumption"
+    },
+    {
+      "pattern": "server/tls12-truncating-of-client-hello/big-pad*",
+      "expect": "alert fatal/internal_error"
+    },
+    {
+      "pattern": "server/tls12-truncating-of-finished/*",
+      "expect": "alert fatal/handshake_failure"
+    },
+    {
+      "pattern": "server/tls13-certificate-verify/pss-key-*",
+      "skip": "Go rejects the RSA-PSS-restricted client certificate before reaching CertificateVerify"
+    },
+    {
+      "pattern": "server/tls13-client-cert-compression-*",
+      "expect": "alert fatal/unexpected_message"
+    },
+    {
+      "pattern": "server/tls13-hrr-for-preferred-group-over-available-share",
+      "skip": "Go validly uses an available share instead of sending an HRR for its preferred group"
+    },
+    {
+      "pattern": "server/tls13-key-share-client-preference",
+      "skip": "Go validly applies server rather than client group preference"
+    },
+    {
+      "pattern": "server/tls13-keyupdate/invalid-message-type*",
+      "expect": "alert fatal/decode_error"
+    },
+    {
+      "pattern": "server/tls13-post-handshake-unexpected-message*",
+      "expect": "alert fatal/decode_error"
+    },
+    {
+      "pattern": "server/tls13-unlisted-key-share-rejected",
+      "skip": "RFC 8446 permits ignoring the unlisted share and requesting another group"
+    },
+    {
+      "pattern": "server/tls13-zero-length-data/*interleaved-in-handshake",
+      "expect": "close"
+    }
+  ]
+}

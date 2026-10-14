@@ -1,0 +1,11 @@
+plzn tls "client/tls13-ch-legacy-version" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    recv ClientHello {
+      legacy_version: 0x0303
+    }
+  }
+  expect ok
+}

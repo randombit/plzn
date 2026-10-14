@@ -1,0 +1,35 @@
+plzn tls "server/tls13-count-tickets/two" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 2
+  }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [psk_dhe_ke] }
+    recv NewSessionTicket
+    recv NewSessionTicket
+    send AppData
+    recv AppData
+    wait 150 ms
+  }
+  assert new_session_tickets == 2
+  expect ok
+}
+
+plzn tls "server/tls13-count-tickets/none" {
+  rfc 8446 section 4.6.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 0
+  }
+  flow handshake {
+    send ClientHello { +ext psk_key_exchange_modes = [psk_dhe_ke] }
+    send AppData
+    recv AppData
+    wait 150 ms
+  }
+  assert new_session_tickets == 0
+  expect ok
+}

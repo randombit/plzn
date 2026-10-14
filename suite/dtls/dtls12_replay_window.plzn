@@ -1,0 +1,80 @@
+plzn tls "dtls12/replay-window" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+  # Each iteration sends a request and a byte-identical replay of it. The UUT
+  # must answer once per iteration and drop every replayed datagram, so exactly
+  # 200 application records come back; an answered replay would be a 201st.
+  assert app_data_records == 200
+}
+
+plzn tls "dtls12/replay-window-large-gaps" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    map_record_sequences multiply 1023
+    send ChangeCipherSpec
+    send Finished
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+  assert app_data_records == 200
+}
+
+plzn tls "dtls12/replay-window-non-monotonic" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ChangeCipherSpec {
+    # Botan's replay window is 64 records; xor 63 traverses the complete window.
+    map_record_sequences xor 63
+    send ChangeCipherSpec
+    send Finished
+    repeat 128 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+  assert app_data_records == 128
+}
+
+plzn tls "dtls12/replay-window-to-server" {
+  rfc 6347 section 4.1.2.6
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+    wait 20ms
+  }
+  expect ok
+  # The closing `wait` drains any late datagram; an answered replay would be
+  # counted here and push the total past 200.
+  assert app_data_records == 200
+}

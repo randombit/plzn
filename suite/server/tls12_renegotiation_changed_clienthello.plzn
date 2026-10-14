@@ -1,0 +1,15 @@
+plzn tls "server/tls12-renegotiation-changed-clienthello/drop-ems" {
+  rfc 7627 section 5.3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate { -ext extended_master_secret }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/no_renegotiation if boringssl
+  skip libressl "does not implement extended_master_secret"
+}

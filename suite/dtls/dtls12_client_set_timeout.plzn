@@ -1,0 +1,100 @@
+plzn tls "dtls12/client-set-timeout-decrease" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  skip botan "Botan has no API to rescale a live DTLS retransmission timer"
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    set_timeout 200ms
+    expect next_timeout 200ms
+    advance_clock 200ms
+    expect_retransmit
+    expect next_timeout 400ms
+    set_timeout 400ms
+    expect next_timeout 800ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-set-timeout-fire" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  skip botan "Botan has no API to rescale a live DTLS retransmission timer"
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 400
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 400ms
+    advance_clock 200ms
+    expect next_timeout 200ms
+    set_timeout 200ms
+    expect next_timeout 0ms
+    advance_clock 0ms
+    expect_retransmit
+    expect next_timeout 400ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-set-timeout-increase" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  skip botan "Botan has no API to rescale a live DTLS retransmission timer"
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 200
+  }
+  flow {
+    recv ClientHello
+    expect next_timeout 200ms
+    set_timeout 400ms
+    expect next_timeout 400ms
+    advance_clock 200ms
+    expect next_timeout 200ms
+    advance_clock 200ms
+    expect_retransmit
+    expect next_timeout 800ms
+    set_timeout 200ms
+    expect next_timeout 400ms
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

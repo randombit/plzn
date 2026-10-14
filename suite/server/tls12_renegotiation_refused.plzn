@@ -1,0 +1,16 @@
+plzn tls "server/tls12-renegotiation-refused" {
+  rfc 5746 section 4.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+    renegotiation: none
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate
+  }
+  expect alert warning/no_renegotiation
+  expect alert fatal/no_renegotiation if boringssl
+  expect alert fatal/no_renegotiation if libressl
+}

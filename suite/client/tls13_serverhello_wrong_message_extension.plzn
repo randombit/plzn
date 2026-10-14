@@ -1,0 +1,13 @@
+plzn tls "client/tls13-serverhello-wrong-message-extension" {
+  rfc 8446 section 4.2
+  chain: [default]
+  xfail rustls "tolerates supported_groups in the ServerHello and completes"
+  uut client { versions: [tls13] }
+  flow handshake {
+    send ServerHello {
+      +ext supported_groups = raw "00020017"
+    }
+  }
+  expect alert fatal/{illegal_parameter, unsupported_extension}
+  expect alert fatal/illegal_parameter if botan
+}

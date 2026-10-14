@@ -1,0 +1,13 @@
+plzn tls "server/tls12-cke-point-not-on-curve" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange @ xor[handshake.ecdh_point, -1] = 0x01
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

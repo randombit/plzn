@@ -1,0 +1,14 @@
+plzn tls "server/tls13-certificate-request-sigalgs" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  flow handshake {
+    recv CertificateRequest { has_ext: signature_algorithms }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

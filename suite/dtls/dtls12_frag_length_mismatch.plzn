@@ -1,0 +1,84 @@
+plzn tls "dtls12/frag-length-mismatch" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  # Botan (PR #5783, 2026-11-03) lets an epoch-0 ClientHello fragment whose
+  # header disagrees with the buffered slot restart that slot instead of
+  # alerting, so one planted fragment cannot sink every later handshake
+  # attempt. The sibling cases below pin that behaviour and its limits.
+  skip botan "restarts the unauthenticated ClientHello reassembly from the conflicting fragment instead of alerting; see the sibling cases"
+  xfail openssl "abandons the handshake without an alert when fragments disagree on the message length"
+  flow handshake { send ClientHello @ length_mismatch 16 }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if libressl
+}
+
+# Botan's side of the case above: the conflicting fragment silently replaces
+# the slot, and a retransmitted, consistent ClientHello then completes the
+# handshake. `retransmit_flight` would replay the inconsistent fragments, and a
+# second `send ClientHello` is suppressed until a HelloVerifyRequest arrives, so
+# the retransmission is plzn's own first ClientHello for this case (deterministic
+# seeding) sent raw under record sequence number 5, as a retransmission timer
+# would send it. Regenerate the literal if plzn's default DTLS 1.2 ClientHello
+# changes: Botan's cookie binds the hello, so a stale literal fails at
+# `recv ServerHello` with a second HelloVerifyRequest.
+plzn tls "dtls12/frag-length-mismatch-restart" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  skip openssl "aborts at the inconsistent fragment; see dtls12/frag-length-mismatch"
+  skip libressl "aborts at the inconsistent fragment; see dtls12/frag-length-mismatch"
+  skip boringssl "aborts at the inconsistent fragment; see dtls12/frag-length-mismatch"
+  flow handshake until send ClientHello {
+    send ClientHello @ length_mismatch 200
+    send raw "16fefd000000000000000500c1010000b500000000000000b5fefdba8fffe509ec76c89963f309e91154ef96a2e6b31478e35dd2135332f0e1d0ba00000046c02fc02b009c009ec030c02c009d009fcca8cca9ccaac010c006c060c05cc050c052c061c05dc051c053c08ac086c07ac07cc08bc087c07bc07dc0acc09cc09ec0adc09dc09f010000450000000e000c0000096c6f63616c686f7374000a000600040017001d000b00020100000d00160014040305030603080708040805080604010501060100170000ff01000100"
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The leniency is confined to the unauthenticated first ClientHello: the same
+# inconsistency in a server-sent message, or in a client message after the
+# cookie exchange, remains a fatal decode error on Botan.
+plzn tls "dtls12/frag-length-mismatch-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "abandons the handshake without an alert when fragments disagree on the message length"
+  flow handshake { send ServerHello @ length_mismatch 16 }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/frag-length-mismatch-after-cookie" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail openssl "abandons the handshake without an alert when fragments disagree on the message length"
+  flow handshake { send ClientKeyExchange @ length_mismatch 16 }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  expect close if libressl
+}

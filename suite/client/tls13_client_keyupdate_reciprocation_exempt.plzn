@@ -1,0 +1,26 @@
+plzn tls "client/tls13-client-keyupdate-reciprocation-exempt" {
+  rfc 8446 section 4.6.3
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    records_per_traffic_key: 3
+    min_key_update_interval_ms: 60000
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv AppData
+    send AppData
+    recv KeyUpdate { request_update: update_requested }
+    recv AppData
+    send KeyUpdate { request_update: update_not_requested }
+    send KeyUpdate { request_update: update_requested }
+    send AppData
+    recv KeyUpdate { request_update: update_not_requested }
+    recv AppData
+  }
+  expect ok
+}

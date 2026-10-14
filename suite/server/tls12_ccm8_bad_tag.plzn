@@ -1,0 +1,14 @@
+plzn tls "server/tls12-ccm8-bad-tag" {
+  rfc 5246 section 6.2.3
+  uut server { versions: [tls12] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [RSA_WITH_AES_128_CCM_8]
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    send AppData { size: 18 } @ xor[record.aead_tag, 0] = 0x01
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

@@ -1,0 +1,72 @@
+plzn tls "dtls12/client-certificate-selection-type-rsa" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  client_chain: [ecdsa_p256, rsa_2048]
+  uut client { versions: [dtls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      certificate_types: [rsa_sign]
+      signature_algorithms: [ecdsa_secp256r1_sha256, rsa_pkcs1_sha256]
+    }
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-certificate-selection-type-ecdsa" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  client_chain: [rsa_2048, ecdsa_p256]
+  uut client { versions: [dtls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      certificate_types: [ecdsa_sign]
+      signature_algorithms: [rsa_pkcs1_sha256, ecdsa_secp256r1_sha256]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-certificate-selection-type-ecdsa-ed25519" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  client_chain: [rsa_2048, ed25519]
+  xfail botan "does not treat Ed25519 as an ecdsa_sign client-certificate type in DTLS 1.2"
+  uut client { versions: [dtls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      certificate_types: [ecdsa_sign]
+      signature_algorithms: [rsa_pkcs1_sha256, ed25519]
+    }
+    recv Certificate { entries: 1, leaf_key: ed25519 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-certificate-selection-preserves-preference" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  client_chain: [ecdsa_p384, ecdsa_p256]
+  uut client { versions: [dtls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest {
+      certificate_types: [ecdsa_sign]
+      signature_algorithms: [ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384]
+    }
+    recv Certificate { entries: 1, leaf_key: ecdsa_p384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

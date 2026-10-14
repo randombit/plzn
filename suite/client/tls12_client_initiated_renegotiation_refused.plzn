@@ -1,0 +1,19 @@
+plzn tls "client/tls12-client-initiated-renegotiation-refused" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    renegotiate_after_handshake: true
+  }
+  flow handshake after send Finished {
+    send AppData
+    recv AppData
+    recv ClientHello { has_ext: renegotiation_info }
+    send alert warning/no_renegotiation
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/handshake_failure if libressl
+}

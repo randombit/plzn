@@ -1,0 +1,101 @@
+plzn tls "server/tls13-no-unknown-groups/valid-handshake" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, secp256r1] }
+  flow handshake {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown-plus-recognised" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  peer { capabilities: [hrr, secp256r1] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = [1..22, 34..255, secp256r1]
+      +ext key_share = raw "0000"
+    }
+    recv HelloRetryRequest { has_ext: key_share }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [1..22, 34..255]
+      +ext key_share = raw "0000"
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-no-unknown-groups/window-0x0105" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [0x0105..0x01ff]
+      +ext key_share = raw "0000"
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-no-unknown-groups/window-sweep-low" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { base in 0x0300..0x1000 step 0x0100 }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [$base..$base + 255]
+      +ext key_share = raw "0000"
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls13-no-unknown-groups/window-sweep-high" {
+  rfc 8446 section 4.2.7
+  chain: [default]
+  uut server {
+    versions: [tls13]
+  }
+  matrix { base in 0x1200..0xff00 step 0x0100 }
+  flow {
+    send ClientHello {
+      +ext supported_groups = [$base..$base + 255]
+      +ext key_share = raw "0000"
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}

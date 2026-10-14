@@ -1,0 +1,152 @@
+plzn tls "server/tls12-record-size-limit/maximum-client-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 65535 }
+    recv ServerHello { has_ext: record_size_limit }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/maximum-client-limit" {
+  rfc 8449 section 4
+  chain: [default]
+  uut server { versions: [tls13] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 65535 }
+    recv ServerHello
+    recv EncryptedExtensions { has_ext: record_size_limit }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/takes-precedence-over-max-fragment-length" {
+  rfc 8449 section 5
+  chain: [default]
+  uut server { versions: [tls12] }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello {
+      +ext record_size_limit = 16385
+      +ext max_fragment_length = 512
+    }
+    recv ServerHello {
+      has_ext: record_size_limit
+      lacks_ext: max_fragment_length
+    }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls13-record-size-limit/takes-precedence-over-max-fragment-length" {
+  rfc 8449 section 5
+  chain: [default]
+  uut server { versions: [tls13] }
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello {
+      +ext record_size_limit = 16385
+      +ext max_fragment_length = 512
+    }
+    recv ServerHello
+    recv EncryptedExtensions {
+      has_ext: record_size_limit
+      lacks_ext: max_fragment_length
+    }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}
+
+plzn tls "server/tls12-record-size-limit/across-prf-hashes" {
+  rfc 8449 section 4
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+  }
+  peer { capabilities: [rsa] }
+  matrix {
+    suite in [RSA_WITH_AES_128_CBC_SHA256, RSA_WITH_AES_256_GCM_SHA384]
+  }
+  skip botan "does not implement record_size_limit in TLS 1.2"
+  skip boringssl "does not implement record_size_limit"
+  skip go "does not implement record_size_limit"
+  skip openssl "does not implement record_size_limit"
+  skip rustls "does not implement record_size_limit"
+  skip wolfssl "this build does not implement record_size_limit"
+  flow handshake until send ClientHello {
+    send ClientHello { +ext record_size_limit = 16385 }
+    recv ServerHello {
+      cipher_suite: $suite
+      has_ext: record_size_limit
+    }
+    recv Certificate
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement record_size_limit"
+}

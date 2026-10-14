@@ -1,0 +1,13 @@
+plzn tls "client/tls13-rejects-server-end-of-early-data" {
+  rfc 9846 section 4.6
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send AppData
+    recv AppData
+    send Renegotiation { msg_type: 5 }
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+  expect close if libressl
+}

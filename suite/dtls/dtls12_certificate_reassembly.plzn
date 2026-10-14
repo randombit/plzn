@@ -1,0 +1,79 @@
+# Conformance ports from Botan PR #5783, test_tls_handshake_io.cpp:
+# https://github.com/randombit/botan/pull/5783
+# "consistent retransmits are tolerated" uses identical overlapping fragments.
+# Exercise Certificate as well as the existing ClientHello case; Finished
+# verification and an application round trip check the reassembled transcript.
+plzn tls "dtls12/client-reassembles-duplicate-certificate-fragments" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    send Certificate @ duplicate_fragment 256
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# "multi-fragment reassembly in order" and "out-of-order msg_seq waits for
+# in-sequence message": the first Certificate fragment is insufficient, even
+# when the later ServerKeyExchange and ServerHelloDone have already arrived.
+plzn tls "dtls12/client-waits-for-incomplete-certificate" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate @ fragment 64
+    hold_flight
+    # Release ServerHello and only the first Certificate fragment.
+    release_flight [0, 1]
+    send ServerKeyExchange
+    send ServerHelloDone
+    wait 100ms
+    release_flight
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/server-reassembles-duplicate-client-certificate-fragments" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake {
+    send Certificate @ duplicate_fragment 256
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# "sparse reassembly tolerates fragments at high offset": deliver the tail
+# first, then fill the gap. Use the existing large Certificate fixture shape
+# so the flow contains a real handshake message. This checks successful
+# reassembly, not Botan's internal allocation accounting or policy ceiling.
+plzn tls "dtls12/client-reassembles-large-certificate-tail-first" {
+  rfc 6347 section 4.2.3
+  chain: [rsa_2048]
+  uut client { versions: [dtls12] }
+  xfail gnutls "cannot reassemble tail-first fragments (merge_handshake_packet shrinks the covered range on a prepend); this flight first trips its cap of 8 partial records per datagram (GNUTLS_E_TOO_MANY_HANDSHAKE_PACKETS)"
+  flow handshake {
+    send Certificate { entries: 50 } @ reorder 1000
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

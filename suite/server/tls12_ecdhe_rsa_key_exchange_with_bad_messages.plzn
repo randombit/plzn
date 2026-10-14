@@ -1,0 +1,94 @@
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/invalid-point-0-1" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero } @ set[handshake.ecdh_point, -1] = 0x01
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/invalid-point-0-0" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/y-all-zero" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange @ set[handshake.ecdh_point, 33] = 0x00, @ set[handshake.ecdh_point, 34] = 0x00, @ set[handshake.ecdh_point, 35] = 0x00, @ set[handshake.ecdh_point, 36] = 0x00, @ set[handshake.ecdh_point, 37] = 0x00, @ set[handshake.ecdh_point, 38] = 0x00, @ set[handshake.ecdh_point, 39] = 0x00, @ set[handshake.ecdh_point, 40] = 0x00, @ set[handshake.ecdh_point, 41] = 0x00, @ set[handshake.ecdh_point, 42] = 0x00, @ set[handshake.ecdh_point, 43] = 0x00, @ set[handshake.ecdh_point, 44] = 0x00, @ set[handshake.ecdh_point, 45] = 0x00, @ set[handshake.ecdh_point, 46] = 0x00, @ set[handshake.ecdh_point, 47] = 0x00, @ set[handshake.ecdh_point, 48] = 0x00, @ set[handshake.ecdh_point, 49] = 0x00, @ set[handshake.ecdh_point, 50] = 0x00, @ set[handshake.ecdh_point, 51] = 0x00, @ set[handshake.ecdh_point, 52] = 0x00, @ set[handshake.ecdh_point, 53] = 0x00, @ set[handshake.ecdh_point, 54] = 0x00, @ set[handshake.ecdh_point, 55] = 0x00, @ set[handshake.ecdh_point, 56] = 0x00, @ set[handshake.ecdh_point, 57] = 0x00, @ set[handshake.ecdh_point, 58] = 0x00, @ set[handshake.ecdh_point, 59] = 0x00, @ set[handshake.ecdh_point, 60] = 0x00, @ set[handshake.ecdh_point, 61] = 0x00, @ set[handshake.ecdh_point, 62] = 0x00, @ set[handshake.ecdh_point, 63] = 0x00, @ set[handshake.ecdh_point, 64] = 0x00
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/self-inconsistent-point" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange @ xor[handshake.ecdh_point, -1] = 0xff
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/truncated-Yc" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange @ pad -1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect close if rustls
+}
+
+plzn tls "server/tls12-ecdhe-rsa-key-exchange-with-bad-messages/padded-Yc" {
+  rfc 8422 section 5.11
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientKeyExchange @ pad +1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}

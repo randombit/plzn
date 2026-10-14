@@ -1,0 +1,14 @@
+plzn tls "client/tls13-hrr-final-serverhello-keeps-cipher-suite" {
+  rfc 9846 section 4.2.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    send HelloRetryRequest { cipher_suite: TLS_AES_128_GCM_SHA256 }
+    send ServerHello { cipher_suite: TLS_AES_256_GCM_SHA384 }
+  }
+  expect alert fatal/illegal_parameter
+}

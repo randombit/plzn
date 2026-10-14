@@ -1,0 +1,44 @@
+plzn tls "dtls12/client-p384-cert-suite-sweep" {
+  rfc 5246 section 7.4.3
+  chain: [ecdsa_p384]
+  matrix { suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_AES_256_GCM_SHA384, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256, ECDHE_ECDSA_WITH_AES_128_CCM, ECDHE_ECDSA_WITH_AES_256_CCM] }
+  uut client {
+    versions: [dtls12]
+    cipher_suites: [$suite]
+  }
+  flow handshake {
+    recv ClientHello { cipher_suites: [$suite] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-p384-cert-sha384-signature" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p384]
+  uut client {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ServerKeyExchange { signature_scheme: ecdsa_secp384r1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-p384-cert-client-auth" {
+  rfc 5246 section 7.4.4
+  chain: [ecdsa_p384]
+  uut client {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa], request_client_cert: true }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

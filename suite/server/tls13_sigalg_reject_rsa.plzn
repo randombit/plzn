@@ -1,0 +1,10 @@
+plzn tls "server/tls13-sigalg-reject-rsa" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  matrix {
+    sigalg in [0x0403, 0x0503, 0x0603, 0x0807]
+  }
+  flow handshake {}
+  expect alert fatal/handshake_failure
+}

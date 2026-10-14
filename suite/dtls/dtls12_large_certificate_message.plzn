@@ -1,0 +1,30 @@
+plzn tls "dtls12/large-message" {
+  rfc 6347 section 4.2.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send Certificate { entries: 50 } @ fragment 1000
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/large-message-reject" {
+  rfc 6347 section 4.2.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [dtls12]
+    max_cert_list: 16384
+  }
+  flow handshake {
+    send Certificate { entries: 50 } @ fragment 1000
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if boringssl
+  # OpenSSL abandons a fragmented message it cannot reassemble without an alert.
+  expect close if openssl
+  expect close if libressl
+}

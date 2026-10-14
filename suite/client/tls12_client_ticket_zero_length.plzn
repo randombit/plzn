@@ -1,0 +1,24 @@
+plzn tls "client/tls12-ticket-zero-length" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_ticket] }
+  flow {
+    recv ClientHello { has_ext: session_ticket }
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send NewSessionTicket { ticket: "" }
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

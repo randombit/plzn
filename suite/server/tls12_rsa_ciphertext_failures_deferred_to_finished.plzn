@@ -1,0 +1,134 @@
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-1-byte" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 49 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-4-bytes" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 52 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-8-bytes" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 56 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-40-bytes" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x03 * 88 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/low-hamming-weight-plaintext" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { rsa_plaintext: 0x01 * 256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/high-hamming-weight-plaintext" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { rsa_plaintext: 0xfe * 256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/46-byte-zero-premaster-with-type-3-suffix" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { premaster_secret: 0x00 * 46 } @ set[pkcs1.padding, -1] = 0x00, @ set[pkcs1.separator, 0] = 0x03
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/all-zero-plaintext" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { rsa_plaintext: 0x00 * 256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/all-ones-plaintext" {
+  rfc 5246 section 7.4.7.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow handshake {
+    send ClientKeyExchange { rsa_plaintext: 0xff * 256 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/{bad_record_mac,decode_error,decrypt_error}
+}

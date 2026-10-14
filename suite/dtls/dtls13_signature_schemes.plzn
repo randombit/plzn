@@ -1,0 +1,55 @@
+plzn tls "dtls13/server-certificate-verify-rsa-pss-sweep" {
+  rfc 9147 section 5.3
+  rfc 8446 section 4.4.3
+  chain: [rsa_2048]
+  uut server { versions: [dtls13] }
+  matrix {
+    scheme in [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [$scheme]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    recv CertificateVerify { algorithm: $scheme }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-certificate-verify-ecdsa-p256" {
+  rfc 9147 section 5.3
+  rfc 8446 section 4.4.3
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [ecdsa_secp256r1_sha256]
+      +ext signature_algorithms_cert = [ecdsa_secp256r1_sha256]
+    }
+    recv CertificateVerify { algorithm: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-auth-ecdsa-p256" {
+  rfc 9147 section 5.3
+  rfc 8446 section 4.4.3
+  chain: [default]
+  client_chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls13]
+    curves: [secp256r1]
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv CertificateVerify { algorithm: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

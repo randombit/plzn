@@ -1,0 +1,14 @@
+plzn tls "server/tls12-malformed-supported-groups" {
+  rfc 5246 section 7.4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      +ext supported_groups = raw "00"
+    }
+  }
+  expect alert fatal/decode_error
+}

@@ -1,0 +1,35 @@
+plzn tls "server/tls12-does-not-select-finite-field-dhe" {
+  rfc 10015 section 3
+  chain: [rsa_2048]
+  uut server { versions: [tls12] }
+  xfail openssl "still selects finite-field DHE in TLS 1.2"
+  xfail botan "still selects finite-field DHE in TLS 1.2"
+  xfail gnutls "still selects finite-field DHE in TLS 1.2"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+    }
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+  expect any { alert fatal, close, reset } if wolfssl
+  xfail libressl "still selects finite-field DHE in TLS 1.2"
+}
+
+plzn tls "server/tls12-does-not-select-rsa-key-transport" {
+  rfc 10015 section 4
+  chain: [rsa_2048]
+  uut server { versions: [tls12] }
+  xfail openssl "still selects RSA key transport in TLS 1.2"
+  xfail botan "still selects RSA key transport in TLS 1.2"
+  xfail gnutls "still selects RSA key transport in TLS 1.2"
+  xfail go "still selects RSA key transport in TLS 1.2"
+  xfail boringssl "still selects RSA key transport in TLS 1.2"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_GCM_SHA256]
+    }
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+  expect any { alert fatal, close, reset } if wolfssl
+  xfail libressl "still selects RSA key transport in TLS 1.2"
+}

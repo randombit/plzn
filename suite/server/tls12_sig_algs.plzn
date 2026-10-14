@@ -1,0 +1,355 @@
+plzn tls "server/tls12-sig-algs/valid-handshake" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha256-only" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha384-only" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha384]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha384 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha512-only" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha512]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pss_rsae_sha512 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha256-only" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_pss_sha256]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha384-only" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_pss_sha384]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha512-only" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_pss_sha512]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-sig-algs/md5-first" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_md5, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pkcs1_sha1, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/md5-first-no-sha1" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_md5, rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/no-sha1" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512, rsa_pkcs1_sha384, rsa_pkcs1_sha256, rsa_pkcs1_sha224, rsa_pss_pss_sha256, rsa_pss_pss_sha384, rsa_pss_pss_sha512]
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/extra-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "0018041818010a0a0918ffff06010501040103010809080a080b"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-sig-algs/only-undefined-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "000a041818010a0a0918ffff"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "server/tls12-sig-algs/empty-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "0000"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/decode_error
+  xfail libressl "treats an empty signature_algorithms extension as absent and signs with the SHA-1 default"
+}
+
+plzn tls "server/tls12-sig-algs/fuzz-length-of-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "00030401"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-sig-algs/truncate-sigalgs-extension" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "00040401"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-sig-algs/odd-length-of-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "0003040104"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-sig-algs/padded-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = raw "0004020104010403"
+      +ext supported_groups = [secp256r1, x25519, secp384r1, secp521r1]
+    }
+  }
+  expect alert fatal/decode_error
+}

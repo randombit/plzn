@@ -1,0 +1,17 @@
+plzn tls "server/tls13-external-psk-obfuscated-ticket-age" {
+  rfc 8446 section 4.2.11.1
+  chain: []
+  uut server { versions: [tls13] }
+  xfail gnutls "rejects nonzero obfuscated_ticket_age for an external PSK (RFC 8446 4.2.11.1 says servers MUST ignore it)"
+  matrix { age in [1, 2147483647, 2147483648, 4294967295] }
+  psk {
+    identity: "Client_identity"
+    secret: "6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientHello { obfuscated_ticket_age: $age }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

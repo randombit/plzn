@@ -1,0 +1,124 @@
+plzn tls "client/tls13-rejects-server-hello-prefix-after-hello-retry-request" {
+  rfc 8446 section 4.1.4
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake until send HelloRetryRequest {
+    send HelloRetryRequest { key_share_group: secp256r1 } @ trailing "02"
+    recv ClientHello
+    send ServerHello @ omit_prefix 1
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  expect ok if openssl
+  expect ok if gnutls
+  expect ok if go
+  expect close if wolfssl
+  # A HelloRetryRequest is not a key change, so carrying the partial ServerHello
+  # across it is permitted (RFC 8446 5.1).
+  expect ok if libressl
+}
+
+plzn tls "client/tls13-rejects-trailing-partial-message-after-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail rustls "rejects the partial message but sends an alert that is not decryptable after the Finished key change"
+  flow handshake until send Finished {
+    send Finished @ trailing "00"
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "client/tls13-rejects-trailing-partial-message-after-resumed-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    session_tickets: 1
+  }
+  xfail rustls "rejects the partial message but sends an alert that is not decryptable after the Finished key change"
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake until send Finished {
+      send Finished @ trailing "00"
+      recv Finished
+      send AppData
+      recv AppData
+    }
+    expect alert fatal/unexpected_message
+  }
+}
+
+plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail gnutls "carries a partial EncryptedExtensions across the ServerHello key change"
+  flow handshake until send ServerHello {
+    send ServerHello @ trailing "08"
+    send ChangeCipherSpec
+    send EncryptedExtensions @ omit_prefix 1
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+  xfail libressl "carries a partial EncryptedExtensions across the ServerHello key change"
+}
+
+plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello-without-ccs" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail gnutls "carries a partial EncryptedExtensions across the ServerHello key change"
+  flow handshake until send ServerHello {
+    send ServerHello @ trailing "08"
+    send EncryptedExtensions @ omit_prefix 1
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+  }
+  expect alert fatal/unexpected_message
+  expect close if wolfssl
+  xfail libressl "carries a partial EncryptedExtensions across the ServerHello key change"
+}
+
+plzn tls "client/tls13-rejects-next-key-update-prefix-before-key-change" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  xfail gnutls "carries a partial second KeyUpdate across the first KeyUpdate key change"
+  flow handshake after recv Finished {
+    send KeyUpdate { request_update: update_not_requested } @ trailing "18"
+    send KeyUpdate { request_update: update_requested } @ omit_prefix 1
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  # LibreSSL drops the rest of a record after one post-handshake message, then
+  # fails AEAD on the next record and closes without an alert.
+  expect close if libressl
+}

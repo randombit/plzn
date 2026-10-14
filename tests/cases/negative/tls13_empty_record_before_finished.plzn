@@ -1,0 +1,13 @@
+# STRESS_TEST.md port 2.4 — empty record before Finished (TLS 1.3).
+# Inject a zero-length APPLICATION_DATA record before sending
+# Finished. The server should reject this.
+plzn tls "tls13/empty-record-before-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send raw 0x1703030000
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+}

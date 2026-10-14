@@ -1,0 +1,14 @@
+plzn tls "server/tls13-ignores-status-request-v2" {
+  rfc 9846 section 4.5.1.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    # One ocsp_multi item with an empty OCSPStatusRequest (RFC 6961 2.2).
+    send ClientHello { +ext status_request_v2 = raw "000702000400000000" }
+    recv EncryptedExtensions { lacks_ext: status_request_v2 }
+    recv Certificate { leaf_lacks_ext: status_request_v2 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

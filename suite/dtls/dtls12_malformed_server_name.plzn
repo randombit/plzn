@@ -1,0 +1,13 @@
+plzn tls "dtls12/malformed-server-name" {
+  rfc 5246 section 7.4.1.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ClientHello {
+      +ext server_name = raw "00"
+    }
+  }
+  expect alert fatal/decode_error
+}

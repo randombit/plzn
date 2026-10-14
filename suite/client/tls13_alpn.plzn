@@ -1,0 +1,97 @@
+plzn tls "client/tls13-alpn-advertisement-and-selection" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    alpn_advertise: ["foo", "bar", "baz"]
+    expect_alpn: "foo"
+  }
+  flow handshake {
+    recv ClientHello { ext alpn == ["foo", "bar", "baz"] }
+    send EncryptedExtensions { +ext alpn = "foo" }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "client/tls13-alpn-reject-unoffered-selection" {
+  rfc 7301 section 3.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    alpn_advertise: ["foo", "bar"]
+  }
+  flow handshake {
+    send EncryptedExtensions { +ext alpn = "baz" }
+  }
+  xfail gnutls "ignores an ALPN selection it did not offer and continues with no protocol"
+  expect alert fatal/{illegal_parameter,decode_error,unsupported_extension,no_application_protocol}
+}
+
+plzn tls "client/tls13-alpn-empty-selection" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    alpn_advertise: ["foo"]
+  }
+  flow handshake {
+    send EncryptedExtensions { +ext alpn = raw "000100" }
+  }
+  xfail gnutls "ignores an empty ALPN protocol name and continues with no protocol"
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls13-alpn-reject-multiple-selected-protocols" {
+  rfc 7301 section 3.2
+  chain: [default]
+  xfail gnutls "accepts an EncryptedExtensions ALPN response containing multiple protocols"
+  uut client {
+    versions: [tls13]
+    alpn_advertise: ["foo", "bar"]
+  }
+  flow handshake {
+    send EncryptedExtensions { +ext alpn = raw "000803666f6f03626172" }
+  }
+  expect alert fatal/{decode_error, illegal_parameter, no_application_protocol}
+}
+
+plzn tls "client/tls13-alpn-resumption" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    alpn_advertise: ["foo", "bar"]
+    expect_alpn: "foo"
+  }
+
+  session initial {
+    flow {
+      recv ClientHello { ext alpn == ["foo", "bar"] }
+      send ServerHello
+      send EncryptedExtensions { +ext alpn = "foo" }
+      send Certificate
+      send CertificateVerify
+      send Finished
+      recv Finished
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello {
+        has_ext: pre_shared_key
+        ext alpn == ["foo", "bar"]
+      }
+      send EncryptedExtensions { +ext alpn = "foo" }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+  skip libressl "its client does not resume TLS 1.3 sessions"
+}

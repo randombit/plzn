@@ -1,0 +1,59 @@
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_md5" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_md5] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha1" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha1] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha224" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha224] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha256" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha384" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha384] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha512" {
+  rfc 8446 section 4.2.3
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha512] }
+  }
+  expect alert fatal/handshake_failure
+}

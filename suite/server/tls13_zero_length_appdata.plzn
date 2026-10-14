@@ -1,0 +1,11 @@
+plzn tls "server/tls13-zero-length-appdata" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send AppData { size: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

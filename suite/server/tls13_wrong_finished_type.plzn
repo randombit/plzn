@@ -1,0 +1,12 @@
+plzn tls "server/tls13-wrong-finished-type" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    msgtype in [0x01, 0x0b, 0xff]
+  }
+  flow handshake {
+    send Finished @ set[handshake.msg_type, 0] = $msgtype
+  }
+  expect alert fatal
+}

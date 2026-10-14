@@ -1,0 +1,89 @@
+plzn tls "server/tls12-cbc-mac-corruption/sha1" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  matrix {
+    pos in [-1, -2, -6, -12, -20]
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 16 } @ xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-mac-corruption/sha256" {
+  rfc 5246 section 6.2.3.2
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc027]
+    pos in [-1, -2, -6, -12, -20, -21, -24, -31, -32]
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 16 } @ xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-mac-corruption/sha384" {
+  rfc 5246 section 6.2.3.2
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc028]
+    pos in [-1, -2, -6, -12, -20, -21, -24, -31, -32, -33, -38, -40, -48]
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 16 } @ xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-mac-corruption/sha1-with-256-byte-padding" {
+  rfc 5246 section 6.2.3.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [aes128_cbc_sha] }
+  matrix {
+    pos in [-1, -2, -6, -12, -20]
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 12 } @ cbc_pad 255, xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "server/tls12-cbc-mac-corruption/sha256-with-256-byte-padding" {
+  rfc 5246 section 6.2.3.2
+  uut server {
+    versions: [tls12]
+  }
+  chain: [rsa_2048]
+  matrix {
+    suite in [0xc027]
+    pos in [-1, -20, -32]
+    val in [0x01, 0xff]
+  }
+  flow handshake {
+    send AppData { size: 16 } @ cbc_pad 255, xor[record.mac, $pos] = $val
+    recv AppData
+  }
+  expect alert fatal/bad_record_mac
+}

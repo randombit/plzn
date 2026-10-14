@@ -1,0 +1,10 @@
+# Negative wildcard: any handshake failure matches. Useful for
+# state-machine tests where the RFC mandates "the peer aborts the
+# handshake" without pinning a specific alert code.
+plzn tls "negative/handshake-fails" {
+  rfc 5246
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {}
+  expect handshake-fails
+}

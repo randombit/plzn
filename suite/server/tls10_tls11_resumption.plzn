@@ -1,0 +1,46 @@
+plzn tls "server/legacy-ticket-resumption" {
+  rfc 5077 section 3
+  chain: [rsa_2048]
+  matrix { version in [tls10, tls11] }
+  uut server { versions: [$version] }
+  peer { capabilities: [rsa, aes128_cbc_sha, session_ticket] }
+
+  session initial {
+    flow handshake { close }
+    expect ok
+    assert resumed == false
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == true
+  }
+}
+
+plzn tls "server/tls10-ticket-is-not-resumed-in-tls11" {
+  rfc 2246 section 7.4.1.2
+  chain: [rsa_2048]
+  uut server { versions: [tls10, tls11] }
+  peer { capabilities: [rsa, aes128_cbc_sha, session_ticket] }
+  xfail gnutls "resumes a TLS 1.0 ticket by answering the TLS 1.1 ClientHello at TLS 1.0"
+
+  session initial [version: tls10] {
+    flow handshake { close }
+    expect ok
+    assert resumed == false
+  }
+
+  session tls11 [resumes: initial, version: tls11] {
+    flow handshake {
+      recv ServerHello { legacy_version: tls11, resumed: false }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}

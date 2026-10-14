@@ -1,0 +1,16 @@
+plzn tls "client/tls12-client-dhe-group-sweep" {
+  rfc 7919 section 3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  matrix {
+    group in [0x0100, 0x0101]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,12 @@
+plzn tls "client/tls12-server-ske-corrupt" {
+  rfc 5246 section 7.4.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ServerKeyExchange @ xor[handshake.signature, 20] = 0xff
+  }
+  expect alert fatal/decrypt_error
+}

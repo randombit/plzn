@@ -1,0 +1,129 @@
+# A DTLS 1.2 client answered with a HelloVerifyRequest or ServerHello whose
+# version fields claim stream TLS (TLS 1.0 = 0x0301, TLS 1.2 = 0x0303,
+# TLS 1.3 = 0x0304). The client offered DTLS 1.2 only, so a ServerHello
+# selecting any of these must be refused (RFC 6347 4.2.1 and RFC 5246
+# 7.4.1.3). RFC 6347 4.2.1 tells the client to use the HelloVerifyRequest
+# version only for packet formatting, never for version negotiation, so a
+# TLS number there is tolerable noise.
+
+plzn tls "dtls12/server-hello-tls-legacy-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    legacy_version in [0x0301, 0x0303]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: $legacy_version }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls12/server-hello-tls13-legacy-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ServerHello { legacy_version: 0x0304 }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls12/hello-verify-request-tls-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    legacy_version in [0x0303, 0x0304]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest { legacy_version: $legacy_version, cookie: [] }
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect any { ok, alert fatal/decode_error }
+  expect alert fatal/protocol_version if libressl
+}
+
+# A DTLS 1.2 ServerHello carrying supported_versions, which the client never
+# offered. RFC 8446 4.2: an extension the client did not offer draws
+# unsupported_extension. Botan reads any ServerHello with the extension as a
+# 1.3 ServerHello and refuses the version instead.
+plzn tls "dtls12/server-hello-unsolicited-supported-versions-tls12" {
+  rfc 8446 section 4.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ServerHello { +ext supported_versions = tls12 }
+  }
+  expect alert fatal/unsupported_extension
+  expect alert fatal/protocol_version if botan
+  expect alert fatal/illegal_parameter if libressl
+}
+
+# LibreSSL's client only checks that the selected version is numerically at
+# least 0x0304 and otherwise lets its DTLS 1.2 handshake continue, so these
+# three complete.
+plzn tls "dtls12/server-hello-unsolicited-supported-versions" {
+  rfc 8446 section 4.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  matrix {
+    version in [tls13, dtls12, dtls13]
+  }
+  xfail libressl "accepts an unsolicited supported_versions extension on a DTLS 1.2 ServerHello whose selected version is numerically at or above 0x0304"
+  flow handshake {
+    send ServerHello { +ext supported_versions = $version }
+  }
+  expect alert fatal/unsupported_extension
+  expect alert fatal/protocol_version if botan
+}
+
+# A datagram whose 13-byte record header claims TLS 1.2 (major 3) arrives
+# before the server's flight. RFC 6347 4.1.2.7: a DTLS implementation
+# silently discards records with a wrong version instead of alerting, so the
+# handshake must still complete on the following proper flight.
+plzn tls "dtls12/server-flight-tls-record-version-stray-before-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake until send ServerHello {
+    send raw "16 0303 0000 000000000000 000c 02 000000 0001 000000 000000"
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}

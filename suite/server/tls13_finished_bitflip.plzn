@@ -1,0 +1,31 @@
+plzn tls "server/tls13-finished-bitflip" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix {
+    pos in 0..31
+    val in [0x01, 0x80]
+  }
+  flow handshake {
+    send Finished @ xor[$pos] = $val
+  }
+  expect alert fatal/decrypt_error
+}
+
+plzn tls "server/tls13-finished-integrity-suite-group" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    send Finished @ xor[handshake.verify_data, 0] = 0xff
+  }
+  expect alert fatal/decrypt_error
+}

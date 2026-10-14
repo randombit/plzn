@@ -1,0 +1,14 @@
+plzn tls "client/tls12-double-server-hello" {
+  rfc 5246 section 7.4
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  flow {
+    recv ClientHello
+    send ServerHello
+    send ServerHello
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

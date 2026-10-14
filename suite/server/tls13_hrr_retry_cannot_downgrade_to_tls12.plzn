@@ -1,0 +1,80 @@
+plzn tls "server/tls13-hrr-retry-cannot-downgrade-to-tls12" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls13, tls12]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello { +ext key_share = [x25519] }
+    recv HelloRetryRequest
+    send ClientHello {
+      cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+      -ext supported_versions
+      -ext key_share
+    }
+    recv ServerHello { cipher_suite: ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 }
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect alert fatal
+  expect close if libressl
+}
+
+plzn tls "server/tls13-hrr-retry-cannot-resume-tls12-with-zero-secret" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server {
+    versions: [tls13, tls12]
+    curves: [secp256r1]
+    session_tickets: 1
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+
+  session initial {
+    flow {
+      send ClientHello { +ext key_share = [secp256r1] }
+      recv ServerHello
+      recv EncryptedExtensions
+      recv Certificate
+      recv CertificateVerify
+      recv Finished
+      send Finished
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session zero-secret-probe [resumes: initial] {
+    flow {
+      send ClientHello { +ext key_share = [x25519] }
+      recv HelloRetryRequest { key_share_group: secp256r1 }
+      send ClientHello {
+        legacy_session_id: 0xa5 * 32
+        cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+        -ext supported_versions
+        -ext key_share
+      }
+      recv ServerHello {
+        cipher_suite: ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        legacy_session_id_echo: 0xa5 * 32
+      }
+      recv ChangeCipherSpec
+      recv Finished
+      send ChangeCipherSpec
+      send Finished
+    }
+    expect alert fatal/{unexpected_message, protocol_version, illegal_parameter, internal_error, missing_extension}
+  }
+  skip libressl "its TLS 1.3 server issues no session tickets"
+}

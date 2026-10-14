@@ -1,0 +1,212 @@
+# A DTLS 1.2 server receiving a ClientHello whose version fields claim stream
+# TLS (TLS 1.0 = 0x0301, TLS 1.2 = 0x0303, TLS 1.3 = 0x0304). DTLS wire
+# versions are {254, x} and compare "backwards" (RFC 6347 4.2.1), so every
+# TLS version number is numerically lower than, hence "newer" than, DTLS 1.2.
+#
+# The DTLS ClientHello carries a cookie field after the session id. Botan
+# chooses the parse format from legacy_version, so a TLS legacy_version makes
+# it read the DTLS-format body as TLS and fail with decode_error. OpenSSL
+# treats any non-DTLS number as a future DTLS version and negotiates DTLS 1.2,
+# and ignores supported_versions over DTLS altogether. LibreSSL requires major
+# 0xfe in legacy_version but compares supported_versions entries against
+# TLS-space bounds, and its record layer frames by version number, so a TLS
+# number that reaches its version field flips it to 5-byte TLS framing.
+
+plzn tls "dtls12/clienthello-tls-legacy-version" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  matrix {
+    legacy_version in [0x0301, 0x0303, 0x0304]
+  }
+  xfail libressl "sends its protocol_version alert in a 5-byte stream-TLS record over UDP: the record layer frames by the version number it copied from the ClientHello for the alert"
+  flow handshake {
+    send ClientHello { legacy_version: $legacy_version }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/decode_error if botan
+  expect ok if openssl
+}
+
+# supported_versions listing only stream-TLS versions. A DTLS server that
+# honours the extension has no shared version.
+plzn tls "dtls12/clienthello-supported-versions-tls13-only" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13] }
+  }
+  expect alert fatal/protocol_version
+  expect ok if openssl
+}
+
+plzn tls "dtls12/clienthello-supported-versions-tls12-only" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "honours the stream-TLS version in supported_versions: it sets its version to 0x0303 and switches the record layer to 5-byte TLS framing, so plzn reads an undersized datagram"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls12] }
+  }
+  expect alert fatal/protocol_version
+  expect ok if openssl
+}
+
+plzn tls "dtls12/clienthello-supported-versions-tls13-and-tls12" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "honours the stream-TLS version in supported_versions: it sets its version to 0x0303 and switches the record layer to 5-byte TLS framing, so plzn reads an undersized datagram"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12] }
+  }
+  expect alert fatal/protocol_version
+  expect ok if openssl
+}
+
+# The correct DTLS form of the extension. Botan's DTLS 1.2 client sends
+# exactly this, so the LibreSSL rejection is a live interoperability failure.
+plzn tls "dtls12/clienthello-supported-versions-dtls12-only" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "rejects the DTLS 1.2 wire version 0xfefd in supported_versions with protocol_version: it compares entries against its TLS-space version bounds, so any DTLS 1.3-capable client offering [0xfefc, 0xfefd] is refused"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [dtls12] }
+    recv ServerHello { legacy_version: 0xfefd }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The offer a DTLS 1.3-capable client makes to a DTLS 1.2 server (RFC 9147 5.3).
+plzn tls "dtls12/clienthello-supported-versions-dtls13-then-dtls12" {
+  rfc 9147 section 5.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "rejects the DTLS 1.2 wire version 0xfefd in supported_versions with protocol_version: it compares entries against its TLS-space version bounds, so any DTLS 1.3-capable client offering [0xfefc, 0xfefd] is refused"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [dtls13, dtls12] }
+    recv ServerHello { legacy_version: 0xfefd }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/clienthello-supported-versions-tls-then-dtls12" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "honours the stream-TLS version in supported_versions: it sets its version to 0x0303 and switches the record layer to 5-byte TLS framing, so plzn reads an undersized datagram"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12, dtls12] }
+    recv ServerHello { legacy_version: 0xfefd }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/clienthello-supported-versions-dtls12-then-tls" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "honours the stream-TLS version in supported_versions: it sets its version to 0x0303 and switches the record layer to 5-byte TLS framing, so plzn reads an undersized datagram"
+  flow handshake {
+    send ClientHello { +ext supported_versions = [dtls12, tls13, tls12] }
+    recv ServerHello { legacy_version: 0xfefd }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# A TLS legacy_version with the correct DTLS supported_versions. The extension
+# governs negotiation; the legacy field still selects Botan's parse format and
+# LibreSSL's alert framing.
+plzn tls "dtls12/clienthello-tls-legacy-version-with-supported-versions-dtls12" {
+  rfc 8446 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail libressl "sends its protocol_version alert in a 5-byte stream-TLS record over UDP: the record layer frames by the version number it copied from the ClientHello for the alert"
+  flow handshake {
+    send ClientHello {
+      legacy_version: 0x0303
+      +ext supported_versions = [dtls12]
+    }
+  }
+  expect alert fatal/protocol_version
+  expect alert fatal/decode_error if botan
+  expect ok if openssl
+}
+
+# A datagram whose 13-byte record header claims TLS 1.2 (major 3) arrives
+# before the real ClientHello. RFC 6347 4.1.2.7: a DTLS implementation
+# silently discards records with a wrong version instead of alerting, so the
+# association must still come up on the following proper flight.
+plzn tls "dtls12/clienthello-tls-record-version-stray-before-flight" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until send ClientHello {
+    send raw "16 0303 0000 000000000000 000c 01 000000 0000 000000 000000"
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    wait 50ms
+  }
+  expect ok
+}
+
+# A ClientHello with a stream TLS legacy_version whose body is in the TLS
+# format, ie without the cookie field, so it parses. A DTLS server must not
+# take it as an offer of TLS 1.2: that would select a stream TLS version on
+# the datagram connection and skip the cookie exchange (RFC 6347 4.2.1).
+plzn tls "dtls12/clienthello-tls-legacy-version-tls-format" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow {
+    send raw "16 fefd 0000 000000000000 0056 01 00004a 0000 000000 00004a 0303 1111111111111111111111111111111111111111111111111111111111111111 00 0002 c02b 0100 001f 000a000400020017 000b00020100 000d000400020403 00170000 ff01000100"
+    wait 100ms
+  }
+  expect alert fatal/protocol_version
+  expect ok if openssl
+  expect alert fatal/decode_error if libressl
+}

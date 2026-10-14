@@ -1,0 +1,12 @@
+plzn tls "server/tls13-session-id-too-long" {
+  rfc 8446 section 4.1.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      legacy_session_id: 0x41 * 33
+    }
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if libressl
+}

@@ -1,0 +1,16 @@
+plzn tls "server/tls13-missing-key-share" {
+  rfc 8446 section 9.2
+  xfail go "sends HelloRetryRequest instead of the required missing_extension alert"
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      -ext key_share
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/missing_extension
+  expect alert fatal/handshake_failure if rustls
+}

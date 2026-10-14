@@ -1,0 +1,11 @@
+plzn tls "selftest/local-rejection/tls12-client-auth-expired-cert" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    client_cert: expired
+  }
+  peer { request_client_cert: true }
+  flow handshake {}
+  expect reject fatal/certificate_expired
+}

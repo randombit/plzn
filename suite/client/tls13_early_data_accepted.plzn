@@ -1,0 +1,34 @@
+plzn tls "client/tls13-early-data-accepted" {
+  rfc 8446 section 4.2.10
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [AES_256_GCM_SHA384]
+  }
+
+  session initial {
+    flow handshake after recv Finished {
+      send NewSessionTicket { +ext early_data = 1024 }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      recv ClientHello { has_ext: pre_shared_key, has_ext: early_data }
+      recv EarlyData { size: 32 }
+      send ServerHello
+      send EncryptedExtensions { +ext early_data }
+      send Finished
+      recv EndOfEarlyData
+      recv Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert negotiated.early_data_accepted == true
+  }
+}

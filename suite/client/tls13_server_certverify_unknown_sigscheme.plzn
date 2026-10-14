@@ -1,0 +1,10 @@
+plzn tls "client/tls13-server-certverify-unknown-sigscheme" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send CertificateVerify @ set[0] = 0xff
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if libressl
+}

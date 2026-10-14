@@ -1,0 +1,70 @@
+plzn tls "dtls12/ecdhe-psk-cke-point-zero" {
+  rfc 8422 section 5.11
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/ecdhe-psk-cke-point-truncated" {
+  rfc 8422 section 5.7
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: truncated }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/ecdhe-psk-cke-point-padded" {
+  rfc 8422 section 5.7
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: padded }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/ecdhe-psk-cke-point-compressed" {
+  rfc 8422 section 5.1.2
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_psk, secp256r1] }
+  skip boringssl "supports only the mandatory uncompressed point format and does not negotiate compressed points"
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: compressed }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

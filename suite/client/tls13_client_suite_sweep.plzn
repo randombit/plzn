@@ -1,0 +1,19 @@
+plzn tls "client/tls13-client-sweep" {
+  rfc 8446 section B.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  matrix {
+    suite in cipher_suites(tls13)
+    group in groups(tls13)
+  }
+  flow handshake {
+    recv ClientHello { cipher_suites: [$suite], supported_groups: [$group] }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

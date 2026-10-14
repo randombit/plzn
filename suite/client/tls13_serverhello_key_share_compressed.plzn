@@ -1,0 +1,16 @@
+plzn tls "client/tls13-serverhello-key-share-compressed" {
+  rfc 8446 section 4.2.8.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  flow handshake {
+    send ServerHello {
+      key_share_point: compressed
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if boringssl
+  xfail libressl "accepts a compressed EC point in a TLS 1.3 key share"
+}

@@ -1,0 +1,28 @@
+plzn tls "dtls12/client-reneg-client-hello-lost" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+    renegotiation: server
+  }
+  flow handshake after send Finished {
+    send HelloRequest
+    discard_flight
+    advance_clock 1ms
+    expect_retransmit no_ccs
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

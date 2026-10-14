@@ -1,0 +1,125 @@
+plzn tls "server/tls12-heartbeat-not-negotiated" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext heartbeat = peer_allowed_to_send }
+    recv ServerHello { lacks_ext: heartbeat }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-heartbeat-in-handshake-without-support" {
+  rfc 6520 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { +ext heartbeat = peer_allowed_to_send }
+    send Heartbeat "test heartbeat"
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "server/tls12-heartbleed-in-handshake-without-support" {
+  rfc 6520 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { +ext heartbeat = peer_allowed_to_send }
+    send Heartbeat "test heartbeat" { payload_length: 64 }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "server/tls12-heartbeat-after-handshake" {
+  rfc 6520 section 3
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send Heartbeat "test heartbeat"
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "server/tls12-heartbleed-after-handshake" {
+  rfc 6520 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send Heartbeat "test heartbeat" { payload_length: 64 }
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decode_error if rustls
+}
+
+plzn tls "server/tls12-heartbeat-invalid-mode-0-ignored" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext heartbeat = raw "00" }
+    recv ServerHello { lacks_ext: heartbeat }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-heartbeat-invalid-mode-3-ignored" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext heartbeat = raw "03" }
+    recv ServerHello { lacks_ext: heartbeat }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-heartbeat-invalid-mode-255-ignored" {
+  rfc 6520 section 2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send ClientHello { +ext heartbeat = raw "ff" }
+    recv ServerHello { lacks_ext: heartbeat }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -1,0 +1,12 @@
+plzn tls "server/tls13-ch-duplicate-extension" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello { +ext dup supported_versions = raw "0304" }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
+  expect alert fatal/decode_error if botan
+  expect alert fatal/protocol_version if libressl
+}

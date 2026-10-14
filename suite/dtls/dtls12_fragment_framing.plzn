@@ -1,0 +1,135 @@
+plzn tls "dtls12/reorder-overlap-small-dtls12-to-server" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ reorder_overlap 3 }
+  expect ok
+}
+
+plzn tls "dtls12/reorder-overlap-small-dtls12-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake { send ServerHello @ reorder_overlap 3 }
+  expect ok
+}
+
+plzn tls "dtls12/reorder-overlap-large" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ reorder_overlap 2048 }
+  expect ok
+}
+
+plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-server" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake { send ClientHello @ complete_and_fragments 3 }
+  expect ok
+}
+
+plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake { send ServerHello @ complete_and_fragments 3 }
+  expect ok
+}
+
+plzn tls "dtls12/send-empty-fragments-dtls12-to-server" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  xfail openssl "treats a zero-length fragment at offset 0 as the complete message and rejects the resulting empty message with decode_error"
+  flow handshake { send ClientHello @ empty_fragments }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/send-empty-fragments-dtls12-to-client" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  xfail openssl "treats a zero-length fragment at offset 0 as the complete message and rejects the resulting empty message with decode_error"
+  flow handshake { send ServerHello @ empty_fragments }
+  expect ok
+  expect alert fatal/decode_error if libressl
+}
+
+plzn tls "dtls12/split-fragment-header" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  # Offsets 2, 12, and 13 split inside the DTLS header, at its boundary, and after one body byte.
+  flow handshake { send HelloVerifyRequest @ split_fragment_record 2 }
+  expect alert fatal/{handshake_failure, unexpected_message}
+  expect alert fatal/decode_error if boringssl
+}
+
+plzn tls "dtls12/split-fragment-boundary" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake { send HelloVerifyRequest @ split_fragment_record 12 }
+  expect alert fatal/{decode_error, illegal_parameter}
+  xfail libressl "accepts a handshake fragment split across record boundaries"
+}
+
+plzn tls "dtls12/split-fragment-body" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake { send HelloVerifyRequest @ split_fragment_record 13 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls12/send-split-alert" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    # The record header and alert body are separate incomplete datagrams and must be ignored.
+    send raw "15 fefd 0000 000000000000 0002"
+    send raw "0250"
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect close if libressl
+}

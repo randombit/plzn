@@ -1,0 +1,18 @@
+plzn tls "server/tls12-ske-ecdsa-p384-scheme" {
+  rfc 8422 section 5.4
+  chain: [ecdsa_p384]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa, secp384r1] }
+  matrix {
+    sigalg in [ecdsa_secp384r1_sha384]
+  }
+  flow handshake {
+    recv ServerKeyExchange { signature_scheme: $sigalg }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

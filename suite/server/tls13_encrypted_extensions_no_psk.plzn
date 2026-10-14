@@ -1,0 +1,11 @@
+plzn tls "server/tls13-encrypted-extensions-no-psk" {
+  rfc 8446 section 4.2
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    recv EncryptedExtensions { lacks_ext: pre_shared_key }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

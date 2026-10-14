@@ -1,0 +1,13 @@
+plzn tls "dtls12/hello-verify-request-truncated" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send raw "16feff0000000000000000000e0300000200000000000000020101"
+    recv Alert
+  }
+  expect alert fatal/decode_error
+}

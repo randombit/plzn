@@ -1,0 +1,32 @@
+plzn tls "server/tls13-end-of-early-data-split-across-key-change" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail gnutls "sends its rejection under the handshake write key instead of the application write key"
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello
+      send EarlyData { size: 32 }
+      recv ServerHello
+      recv EncryptedExtensions { has_ext: early_data }
+      recv Finished
+      send EndOfEarlyData @ fragment 2 hold
+      flush_fragment
+      wait 300 ms
+    }
+    expect alert fatal/bad_record_mac
+  }
+}

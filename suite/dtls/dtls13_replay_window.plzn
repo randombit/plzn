@@ -1,0 +1,65 @@
+plzn tls "dtls13/client-replay-window" {
+  rfc 9147 section 4.5.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-replay-window" {
+  rfc 9147 section 4.5.1
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-replay-window-large-gaps" {
+  rfc 9147 section 4.2.2
+  rfc 9147 section 4.5.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    map_record_sequences multiply 1023
+    repeat 200 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-replay-window-non-monotonic" {
+  rfc 9147 section 4.5.1
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake until send ServerHello {
+    # Install the map before protected records allocate numbers, avoiding collision with an earlier ACK.
+    map_record_sequences xor 255
+    send ServerHello
+    send EncryptedExtensions
+    send Certificate
+    send CertificateVerify
+    send Finished
+    recv Finished
+    repeat 500 {
+      send AppData { size: 1 }
+      resend_flight
+      recv AppData { size: 1 }
+    }
+  }
+  expect ok
+}

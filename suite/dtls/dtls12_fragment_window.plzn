@@ -1,0 +1,53 @@
+plzn tls "dtls12/server-discards-fragment-at-window-upper-bound" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  flow handshake {
+    send ClientHello @ future_sequence 7
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail gnutls "keeps the future-sequence ClientHello fragment buffered after the handshake, then silently drops every application record"
+}
+
+plzn tls "dtls12/client-discards-fragment-at-window-upper-bound" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    send ServerHello @ future_sequence 7
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/server-processes-valid-fragment-packed-with-future-fragment" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  xfail gnutls "keeps the future-sequence ClientHello fragment buffered after the handshake, then silently drops every application record"
+  flow handshake {
+    send ClientHello @ future_sequence_packed 1000
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The client-role symmetric counterpart of the packed-future case above: a far
+# (message_seq + 1000) ServerHello fragment packed in the same datagram as the
+# valid ServerHello. The client must bound the far-future reassembly claim and
+# complete on the valid fragment.
+plzn tls "dtls12/client-processes-valid-fragment-packed-with-future-fragment" {
+  rfc 6347 section 4.2.3
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    send ServerHello @ future_sequence_packed 1000
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

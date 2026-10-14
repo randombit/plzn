@@ -1,0 +1,14 @@
+plzn tls "server/tls12-zero-length-data/zero-length-app-data" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send empty_record application_data
+    send AppData { size: 18 }
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect ok
+}

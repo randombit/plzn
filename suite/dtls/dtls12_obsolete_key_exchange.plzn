@@ -1,0 +1,93 @@
+plzn tls "dtls12/client-does-not-offer-obsolete-key-exchange" {
+  rfc 10015 section 2
+  rfc 10015 section 3
+  rfc 10015 section 4
+  chain: [default]
+  uut client { versions: [dtls12] }
+  xfail openssl "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail botan "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail gnutls "still offers finite-field DHE and RSA key-transport suites by default"
+  xfail boringssl "still offers RSA key-transport suites by default"
+  flow handshake {
+    recv ClientHello { lacks_obsolete_key_exchange: true }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "still offers finite-field DHE and RSA key-transport suites by default"
+}
+
+plzn tls "dtls12/server-does-not-select-finite-field-dhe" {
+  rfc 10015 section 3
+  chain: [rsa_2048]
+  uut server { versions: [dtls12] }
+  xfail openssl "selects finite-field DHE because the shim enables automatic DH parameters"
+  xfail botan "still selects finite-field DHE in DTLS 1.2"
+  xfail gnutls "still selects finite-field DHE in DTLS 1.2"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [DHE_RSA_WITH_AES_128_GCM_SHA256]
+    }
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+  xfail libressl "still selects finite-field DHE in DTLS 1.2"
+}
+
+plzn tls "dtls12/server-does-not-select-rsa-key-transport" {
+  rfc 10015 section 4
+  chain: [rsa_2048]
+  uut server { versions: [dtls12] }
+  xfail openssl "still selects RSA key transport in DTLS 1.2"
+  xfail botan "still selects RSA key transport in DTLS 1.2"
+  xfail gnutls "still selects RSA key transport in DTLS 1.2"
+  xfail boringssl "still selects RSA key transport in DTLS 1.2"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [RSA_WITH_AES_128_GCM_SHA256]
+    }
+  }
+  expect alert fatal/{handshake_failure,insufficient_security}
+  xfail libressl "still selects RSA key transport in DTLS 1.2"
+}
+
+plzn tls "dtls12/client-does-not-offer-rc4" {
+  rfc 7465 section 2
+  chain: [default]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    recv ClientHello {
+      lacks_cipher_suite: 0x0004
+      lacks_cipher_suite: 0x0005
+      lacks_cipher_suite: 0xc007
+      lacks_cipher_suite: 0xc011
+    }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/client-offers-extended-master-secret" {
+  rfc 9325 section 3.5
+  chain: [default]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    recv ClientHello { has_ext: extended_master_secret }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  skip libressl "does not implement extended_master_secret"
+}
+
+plzn tls "dtls12/client-signals-secure-renegotiation" {
+  rfc 5746 section 3.4
+  chain: [default]
+  uut client { versions: [dtls12] }
+  flow handshake {
+    recv ClientHello { secure_renegotiation_signal: true }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

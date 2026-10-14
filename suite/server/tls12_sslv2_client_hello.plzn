@@ -1,0 +1,94 @@
+plzn tls "server/tls12-sslv2-client-hello" {
+  rfc 5246 section E.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow {
+    send ClientHello { format: sslv2 }
+    recv ServerHello
+    recv Certificate
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect close if botan
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls12-sslv2-empty-record" {
+  rfc 5246 section E.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow {
+    send raw "8000"
+    send ClientHello { format: sslv2 }
+    recv ServerHello
+  }
+  expect close
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls12-sslv2-empty-record-type-0" {
+  rfc 5246 section E.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow {
+    send raw "800100"
+    send ClientHello { format: sslv2 }
+    recv ServerHello
+  }
+  expect close
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls12-sslv2-empty-record-type-1" {
+  rfc 5246 section E.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow {
+    send raw "800101"
+    send ClientHello { format: sslv2 }
+    recv ServerHello
+  }
+  expect close
+  expect alert fatal/decode_error if openssl
+  expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "server/tls12-sslv2-just-version" {
+  rfc 5246 section E.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [rsa] }
+  flow {
+    send raw "8003010303"
+    send ClientHello { format: sslv2 }
+    recv ServerHello
+  }
+  expect close
+  expect alert fatal/decode_error if openssl
+  skip libressl "reads the truncated SSLv2 header as a TLS record header of length 771 and waits for that body; the runner can only time out"
+}

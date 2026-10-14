@@ -1,0 +1,25 @@
+plzn tls "dtls12/resume-ticket" {
+  rfc 5077 section 3.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      recv ServerHello { has_ext: session_ticket }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

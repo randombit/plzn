@@ -1,0 +1,14 @@
+plzn tls "server/tls13-malformed-key-share" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = raw "00"
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/decode_error
+}

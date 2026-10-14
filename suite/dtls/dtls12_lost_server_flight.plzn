@@ -1,0 +1,22 @@
+plzn tls "dtls12/lost-server-flight" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  xfail openssl "does not answer a retransmitted cookie ClientHello with its flight; it re-sends only when its own retransmit timer fires (now reachable via advance_clock, which dtls12/retransmit exercises), not on receiving a duplicate ClientHello the way Botan does"
+  xfail boringssl "ignores the duplicate cookie ClientHello instead of using it to drive retransmission of the server flight"
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake until recv ServerHello {
+    discard_flight
+    retransmit_flight
+    recv ServerHello
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+  xfail libressl "does not answer a retransmitted cookie ClientHello with its flight; it re-sends only when its own retransmit timer fires"
+}

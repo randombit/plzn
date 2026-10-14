@@ -1,0 +1,14 @@
+plzn tls "client/tls12-certreq-sigalgs-unusable" {
+  rfc 5246 section 7.4.8
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest { signature_algorithms: [rsa_pkcs1_sha1] }
+    recv Certificate { entries: 0 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "selects its certificate without checking the CertificateRequest signature_algorithms, then aborts without an alert at CertificateVerify"
+}

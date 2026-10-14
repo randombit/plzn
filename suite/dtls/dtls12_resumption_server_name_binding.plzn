@@ -1,0 +1,136 @@
+# The DTLS 1.2 server shares its TLS 1.2 resumption path, so RFC 6066 3 binds
+# a DTLS session to its server_name the same way: a resumption request naming
+# a different server "MUST NOT" be accepted and gets a full handshake instead,
+# and a resumed ServerHello "MUST NOT" carry the server_name acknowledgement.
+# Ticket resumption only (no session_id capability over DTLS); the DTLS client
+# reports the outcome through `assert resumed`.
+
+plzn tls "dtls12/resumption-server-name-binding/same-name-resumes" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello { lacks_ext: server_name }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == true
+  }
+}
+
+plzn tls "dtls12/resumption-server-name-binding/different-name-full-handshake" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "other.invalid" }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail libressl "aborts a resumption under a different server_name with unrecognized_name instead of falling back to a full handshake"
+}
+
+plzn tls "dtls12/resumption-server-name-binding/name-omitted-resumes" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == true
+  }
+}
+
+plzn tls "dtls12/resumption-server-name-binding/name-added-full-handshake" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      send ClientHello { -ext server_name }
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+  xfail openssl "resumes under a different server_name (RFC 6066 3 MUST NOT): without a servername callback it never compares the hello's name with the session's"
+  xfail libressl "aborts with unrecognized_name when the resumption request names a server and the session had none, instead of falling back to a full handshake"
+}
+
+plzn tls "dtls12/resumption-server-name-binding/case-only-difference-resumes" {
+  rfc 6066 section 3
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+
+  session initial {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello { +ext server_name = "LOCALHOST" }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == true
+  }
+  xfail libressl "aborts with unrecognized_name on a case-only server_name difference (RFC 6066 3: DNS hostnames are case-insensitive)"
+}

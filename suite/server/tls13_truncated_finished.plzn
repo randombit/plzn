@@ -1,0 +1,10 @@
+plzn tls "server/tls13-truncated-finished" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send Finished @ truncate 31
+    recv AppData
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+}

@@ -1,0 +1,14 @@
+plzn tls "client/tls12-ske-unoffered-group" {
+  rfc 8422 section 5.4
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    curves: [x25519]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    recv ClientHello { supported_groups: [x25519] }
+    send ServerKeyExchange { named_group: secp256r1 }
+  }
+  expect alert fatal/illegal_parameter
+}

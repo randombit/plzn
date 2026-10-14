@@ -1,0 +1,12 @@
+plzn tls "client/tls12-certreq-odd-signature-algorithms-length" {
+  rfc 5246 section 7.4.4
+  chain: [default]
+  uut client { versions: [tls12] }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ add[handshake.signature_algorithms_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error, internal_error}
+  expect close if wolfssl
+}

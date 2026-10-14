@@ -1,0 +1,55 @@
+plzn tls "server/tls13-hrr-conformant-retry-keeps-negotiated-cipher-suite" {
+  rfc 9846 section 4.2.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake until send ClientHello {
+    send ClientHello {
+      cipher_suites: [TLS_AES_128_GCM_SHA256, TLS_CHACHA20_POLY1305_SHA256]
+      +ext key_share = [x25519]
+    }
+    recv HelloRetryRequest { key_share_group: secp256r1 }
+    send ClientHello {
+      cipher_suites: [TLS_AES_128_GCM_SHA256, TLS_CHACHA20_POLY1305_SHA256]
+    }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-hrr-retry-keeps-negotiated-cipher-suite-offered" {
+  rfc 9846 section 4.2.4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    curves: [secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  xfail boringssl "continues with the HRR-selected suite after ClientHello2 removes it"
+  xfail gnutls "continues with the HRR-selected suite after ClientHello2 removes it"
+  flow handshake until send ClientHello {
+    send ClientHello {
+      cipher_suites: [TLS_AES_128_GCM_SHA256]
+      +ext key_share = [x25519]
+    }
+    recv HelloRetryRequest {
+      cipher_suite: TLS_AES_128_GCM_SHA256
+      key_share_group: secp256r1
+    }
+    send ClientHello {
+      cipher_suites: [TLS_AES_256_GCM_SHA384]
+    }
+    wait 300 ms
+  }
+  expect alert fatal/{illegal_parameter,handshake_failure}
+}

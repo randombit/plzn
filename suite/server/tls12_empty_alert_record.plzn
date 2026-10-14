@@ -1,0 +1,15 @@
+plzn tls "server/tls12-empty-alert-record" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send empty_record alert
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/unexpected_message if openssl
+  expect alert fatal/unexpected_message if libressl
+}

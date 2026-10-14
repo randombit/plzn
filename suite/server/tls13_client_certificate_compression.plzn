@@ -1,0 +1,193 @@
+plzn tls "server/tls13-client-cert-compression-cr-extensions" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    compress_certificate: true
+  }
+  peer { capabilities: [compress_cert] }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until recv CertificateRequest {
+    recv CertificateRequest { has_ext: compress_certificate, has_ext: signature_algorithms }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send CompressedCertificate
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-cert-compression-without-client-offer" {
+  rfc 8879 section 3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+    compress_certificate: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until recv CertificateRequest {
+    recv CertificateRequest { has_ext: compress_certificate }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send CompressedCertificate
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-cert-compression-empty-certificate" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    request_client_cert: true
+    compress_certificate: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until send Certificate {
+    send CompressedCertificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-client-cert-compression-empty-message" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until send Certificate {
+    send CompressedCertificate { payload: [], uncompressed_length: 4095 }
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/bad_certificate if rustls
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-client-cert-compression-wrong-uncompressed-length" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  matrix { len in [10, 0, 16777215] }
+  flow handshake until send Certificate {
+    send CompressedCertificate { uncompressed_length: $len }
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/bad_certificate
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-client-cert-compression-mislabelled-brotli" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until send Certificate {
+    send CompressedCertificate { algorithm: brotli }
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/bad_certificate
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-client-cert-compression-unsupported-algorithm" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  matrix { alg in [0x0000, 0x000a, 0x0100, 0x0302, 0x3fff, 0x4000, 0x4001, 0xfffe, 0xffff] }
+  flow handshake until send Certificate {
+    send CompressedCertificate { algorithm: $alg }
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/bad_certificate if rustls
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-client-cert-compression-twice" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  flow handshake until send Certificate {
+    send CompressedCertificate
+    send CompressedCertificate
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "server/tls13-client-cert-compression-bomb" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  flow handshake until send Certificate {
+    # bomb: 64 expands to 64 MiB behind the claimed 4095-byte length.
+    send CompressedCertificate { bomb: 64, uncompressed_length: 4095 } @ fragment 16384
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/bad_certificate
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "server/tls13-client-cert-compression-garbage" {
+  rfc 8879 section 4
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    require_client_cert: true
+  }
+  skip botan "no RFC 8879 certificate compression"
+  matrix { n in [1, 4096] }
+  flow handshake until send Certificate {
+    send CompressedCertificate { payload_zeros: $n, uncompressed_length: 4095 }
+    send CertificateVerify
+    recv AppData
+  }
+  expect alert fatal/bad_certificate
+  expect alert fatal/unexpected_message if boringssl
+  expect alert fatal/unexpected_message if libressl
+}

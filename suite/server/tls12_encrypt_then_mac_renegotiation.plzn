@@ -1,0 +1,30 @@
+plzn tls "server/tls12-encrypt-then-mac-renegotiation/valid-handshake" {
+  rfc 7366
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-encrypt-then-mac-renegotiation/crash" {
+  rfc 7366
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [cbc] }
+  flow handshake {
+    send AppData
+    recv AppData
+    renegotiate { +ext encrypt_then_mac }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

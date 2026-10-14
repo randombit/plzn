@@ -1,0 +1,75 @@
+plzn tls "client/tls12-rejects-grease-version-selection" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { legacy_version: $grease }
+  }
+  expect any { alert fatal, close, reset }
+}
+
+plzn tls "client/tls12-rejects-grease-cipher-selection" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { cipher_suite: $grease }
+  }
+  expect alert fatal
+  expect any { alert fatal, close, reset } if go
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-rejects-grease-serverhello-extension" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  xfail go "accepts an unsolicited GREASE ServerHello extension"
+  xfail openssl "accepts any unknown unsolicited ServerHello extension, GREASE or not"
+  xfail gnutls "accepts an unsolicited GREASE ServerHello extension"
+  xfail wolfssl "accepts an unsolicited GREASE ServerHello extension"
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerHello { +ext $grease = zeros 25 }
+  }
+  expect alert fatal
+  xfail libressl "accepts an unsolicited GREASE ServerHello extension"
+}
+
+plzn tls "client/tls12-rejects-grease-server-key-exchange-group" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerKeyExchange { named_group: $grease }
+  }
+  expect alert fatal
+  expect close if wolfssl
+}
+
+plzn tls "client/tls12-rejects-grease-server-key-exchange-signature" {
+  rfc 8701
+  chain: [rsa_2048]
+  uut client { versions: [tls12] }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  matrix {
+    grease in grease
+  }
+  flow handshake {
+    send ServerKeyExchange { signature_scheme: $grease }
+  }
+  expect alert fatal
+  expect close if wolfssl
+}

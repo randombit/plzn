@@ -1,0 +1,84 @@
+plzn tls "server/tls12-interleaved-app-data-fragmented-renegotiation/inside-client-hello" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    begin_renegotiation
+    send ClientHello @ fragment 40 hold
+    send AppData
+    flush_fragment
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/no_renegotiation if boringssl
+}
+
+plzn tls "server/tls12-interleaved-app-data-fragmented-renegotiation/inside-client-key-exchange" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    begin_renegotiation
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange @ fragment 30 hold
+    send AppData
+    flush_fragment
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/no_renegotiation if boringssl
+}
+
+plzn tls "server/tls12-interleaved-app-data-fragmented-renegotiation/inside-finished" {
+  rfc 5246 section 7.4.1.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    begin_renegotiation
+    send ClientHello
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished @ fragment 10 hold
+    send AppData
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/no_renegotiation if boringssl
+}

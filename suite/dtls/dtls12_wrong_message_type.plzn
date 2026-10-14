@@ -1,0 +1,183 @@
+plzn tls "dtls12/wrong-type-client-hello" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send ClientHello @ set[handshake.msg_type, 0] = 43
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/handshake_failure if libressl
+}
+
+plzn tls "dtls12/wrong-type-hello-verify-request" {
+  rfc 6347 section 4.2.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send HelloVerifyRequest @ set[handshake.msg_type, 0] = 45
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-server-hello" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send ServerHello @ set[handshake.msg_type, 0] = 44
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-server-certificate" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send Certificate @ set[handshake.msg_type, 0] = 53
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-certificate-status" {
+  rfc 6066 section 8
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  skip openssl "the OpenSSL client shim does not enable status_request"
+  flow {
+    recv ClientHello { has_ext: status_request }
+    send HelloVerifyRequest
+    recv ClientHello { has_ext: status_request }
+    send ServerHello { +ext status_request }
+    send Certificate
+    send CertificateStatus @ set[handshake.msg_type, 0] = 64
+    wait 300ms
+  }
+  expect alert fatal/unexpected_message
+  skip libressl "does not offer status_request unless configured (no shim knob yet)"
+}
+
+plzn tls "dtls12/wrong-type-server-key-exchange" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ServerKeyExchange @ set[handshake.msg_type, 0] = 54
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-certificate-request" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { request_client_cert: true }
+  flow handshake {
+    send CertificateRequest @ set[handshake.msg_type, 0] = 55
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-server-hello-done" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send ServerHelloDone @ set[handshake.msg_type, 0] = 56
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-client-certificate" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake {
+    send Certificate @ set[handshake.msg_type, 0] = 53
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-certificate-verify" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  flow handshake {
+    send CertificateVerify @ set[handshake.msg_type, 0] = 57
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-client-key-exchange" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send ClientKeyExchange @ set[handshake.msg_type, 0] = 58
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/decrypt_error if libressl
+}
+
+plzn tls "dtls12/wrong-type-client-finished" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send Finished @ set[handshake.msg_type, 0] = 62
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-new-session-ticket" {
+  rfc 5077 section 3.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  peer { capabilities: [session_ticket] }
+  flow handshake {
+    send NewSessionTicket @ set[handshake.msg_type, 0] = 46
+  }
+  expect alert fatal/unexpected_message
+}
+
+plzn tls "dtls12/wrong-type-server-finished" {
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12],
+  }
+  flow handshake {
+    send Finished @ set[handshake.msg_type, 0] = 62
+  }
+  expect alert fatal/unexpected_message
+  xfail libressl "accepts a server Finished carrying an unknown handshake type"
+}

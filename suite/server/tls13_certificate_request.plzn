@@ -1,0 +1,96 @@
+plzn tls "server/tls13-certificate-request/valid-handshake" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-request/with-certificate" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: rsa }
+    send CertificateVerify
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-request/check-sigalgs-in-cert-request" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest { signature_algorithms: [rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512, ecdsa_secp256r1_sha256, ecdsa_secp384r1_sha384] }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-certificate-request/verify-extensions-in-certificate-request" {
+  rfc 8446 section 4.3.2
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    request_client_cert: true
+  }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pss_rsae_sha256, rsa_pss_pss_sha256, ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv EncryptedExtensions
+    recv CertificateRequest { has_ext: signature_algorithms }
+    recv Certificate
+    recv CertificateVerify
+    recv Finished
+    send Certificate { credential: none }
+    send Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

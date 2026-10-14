@@ -1,0 +1,15 @@
+plzn tls "server/tls12-ec-point-formats-without-uncompressed" {
+  rfc 8422 section 5.1.2
+  chain: [default]
+  xfail openssl "ignores an ec_point_formats list without uncompressed and completes (RFC 8422 5.1.2 MUST abort)"
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake {
+    send ClientHello {
+      +ext ec_point_formats = [ansix962_compressed_prime]
+    }
+  }
+  expect alert fatal/illegal_parameter
+}

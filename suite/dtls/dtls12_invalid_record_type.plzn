@@ -1,0 +1,62 @@
+plzn tls "dtls12/invalid-record-type-to-server" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send record 42 "invalid record"
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "dtls12/invalid-record-type-to-client" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send record 42 "invalid record"
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "dtls12/invalid-client-hello-record-type" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
+  uut server {
+    versions: [dtls12]
+  }
+  flow {
+    send ClientHello @ set[record.content_type, 0] = 42
+    wait 100ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+}
+
+plzn tls "dtls12/invalid-server-hello-record-type" {
+  rfc 6347 section 4.1
+  chain: [ecdsa_p256]
+  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send ServerHello @ set[record.content_type, 0] = 42
+    wait 100ms
+  }
+  expect ok
+  expect alert fatal/unexpected_message if libressl
+}

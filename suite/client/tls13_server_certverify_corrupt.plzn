@@ -1,0 +1,9 @@
+plzn tls "client/tls13-server-certverify-corrupt" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake {
+    send CertificateVerify @ xor[handshake.signature, 20] = 0xff
+  }
+  expect alert fatal/decrypt_error
+}

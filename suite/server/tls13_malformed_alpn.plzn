@@ -1,0 +1,11 @@
+plzn tls "server/tls13-malformed-alpn" {
+  rfc 7301 section 3.1
+  chain: [default]
+  uut server { versions: [tls13], alpn_select: "foo" }
+  flow handshake {
+    send ClientHello {
+      +ext alpn = raw "00"
+    }
+  }
+  expect alert fatal/decode_error
+}

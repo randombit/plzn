@@ -1,0 +1,16 @@
+plzn tls "dtls12/epoch0-inject-server" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake {
+    send raw "16 fefd 0000 ffffffffffff 0001 aa"
+    send raw "14 fefd 0000 000000000007 0001 02"
+    send raw "16 fefd 0000 000000000008 000c ff0000000000000000000000"
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

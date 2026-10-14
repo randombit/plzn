@@ -1,0 +1,25 @@
+plzn tls "client/tls12-nst-without-extension" {
+  rfc 5077 section 3.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+  }
+  peer { capabilities: [session_ticket] }
+  flow {
+    recv ClientHello { has_ext: session_ticket }
+    send ServerHello {
+      -ext session_ticket
+    }
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send NewSessionTicket
+    send ChangeCipherSpec
+    send Finished
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

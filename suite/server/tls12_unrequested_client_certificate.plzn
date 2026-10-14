@@ -1,0 +1,12 @@
+plzn tls "server/tls12-unrequested-client-certificate" {
+  rfc 5246 section 7.4.6
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after recv ServerHelloDone {
+    send raw "16030300070b000003000000"
+    wait 300 ms
+  }
+  expect alert fatal/unexpected_message
+}

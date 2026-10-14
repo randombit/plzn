@@ -1,0 +1,12 @@
+plzn tls "server/tls12-ccs/two-bytes-long-ccs" {
+  rfc 5246 section 7.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake after send ClientKeyExchange {
+    send record 20 raw "0101"
+    recv ChangeCipherSpec
+  }
+  expect alert fatal/{unexpected_message,decode_error,illegal_parameter}
+}

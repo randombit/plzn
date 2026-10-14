@@ -1,0 +1,16 @@
+plzn tls "dtls12/psk-unknown-identity" {
+  rfc 4279 section 2
+  chain: []
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [psk] }
+  psk {
+    identity: "plzn-dtls-id"
+    secret: "6f6c6f6c6f6c6f6c"
+  }
+  flow handshake {
+    send ClientKeyExchange { psk_identity: "not-an-identity" }
+  }
+  expect alert fatal/unknown_psk_identity
+}

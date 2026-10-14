@@ -1,0 +1,23 @@
+plzn tls "dtls13/client-ignores-records-after-close-notify" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send alert warning/close_notify
+    send AppData
+    recv alert warning/close_notify
+  }
+  expect ok
+}
+
+plzn tls "dtls13/server-ignores-records-after-close-notify" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send alert warning/close_notify
+    send AppData
+    recv alert warning/close_notify
+  }
+  expect ok
+}

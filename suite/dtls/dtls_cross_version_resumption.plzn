@@ -1,0 +1,149 @@
+plzn tls "dtls13/server-cross-version-resumption/dtls12-ticket-is-not-a-dtls13-psk" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls12, dtls13] }
+  peer { capabilities: [session_ticket] }
+
+  session initial [version: dtls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session dtls13 [resumes: initial, version: dtls13] {
+    flow handshake {
+      recv ServerHello { lacks_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "dtls13/server-cross-version-resumption/dtls13-ticket-is-not-a-dtls12-session" {
+  rfc 6347 section 4.2.1
+  rfc 9147 section 5.10
+  chain: [default]
+  uut server { versions: [dtls13, dtls12] }
+  peer { capabilities: [session_ticket] }
+
+  session initial [version: dtls13] {
+    flow handshake {
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session dtls12 [resumes: initial, version: dtls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "dtls13/client-cross-version-resumption/dtls12-session-is-not-offered-in-dtls13" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls12, dtls13] }
+
+  session initial [version: dtls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session dtls13 [resumes: initial, version: dtls13] {
+    flow handshake {
+      recv ClientHello { lacks_ext: pre_shared_key }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "dtls13/client-cross-version-resumption/dtls13-session-is-not-offered-in-dtls12" {
+  rfc 6347 section 4.2.1
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13, dtls12] }
+
+  session initial [version: dtls13] {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session dtls12 [resumes: initial, version: dtls12] {
+    flow handshake {
+      send AppData
+      recv AppData
+    }
+    expect ok
+    assert resumed == false
+  }
+}
+
+plzn tls "dtls13/client-cross-version-resumption/reject-dtls12-session-as-dtls13-psk" {
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls12, dtls13] }
+
+  session initial [version: dtls12] {
+    flow handshake {
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session dtls13 [resumes: initial, version: dtls13, force_resume: true] {
+    flow {
+      recv ClientHello { lacks_ext: pre_shared_key }
+      send ServerHello
+    }
+    expect alert fatal/{unsupported_extension, illegal_parameter}
+  }
+}
+
+plzn tls "dtls13/client-cross-version-resumption/dtls13-session-cannot-be-claimed-as-dtls12" {
+  rfc 6347 section 4.2.1
+  rfc 9147 section 5.10
+  chain: [default]
+  uut client { versions: [dtls13, dtls12] }
+
+  session initial [version: dtls13] {
+    flow handshake after recv Finished {
+      send NewSessionTicket
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session dtls12 [resumes: initial, version: dtls12] {
+    flow {
+      recv ClientHello { legacy_session_id: [] }
+      close
+    }
+    expect ok
+  }
+}

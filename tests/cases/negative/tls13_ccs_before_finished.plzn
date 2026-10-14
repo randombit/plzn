@@ -1,0 +1,16 @@
+# TLS 1.3 middlebox compatibility: CCS is allowed but only at
+# specific points (RFC 8446 §D.4). Send CCS after receiving
+# server Finished but before sending client Finished.
+# Most servers tolerate this (middlebox compat), so expect ok.
+plzn tls "negative/tls13-ccs-before-finished" {
+  rfc 8446 section D.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send raw "140303000101"
+    send Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

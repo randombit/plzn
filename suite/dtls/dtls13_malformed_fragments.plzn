@@ -1,0 +1,64 @@
+plzn tls "dtls13/server-rejects-fragment-type-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ type_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/client-rejects-fragment-type-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ type_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/server-rejects-fragment-total-length-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/client-rejects-fragment-total-length-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/server-rejects-fragment-body-length-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ fragment_length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/client-rejects-fragment-body-length-mismatch" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake { send ServerHello @ fragment_length_mismatch 16 }
+  expect alert fatal/{decode_error, illegal_parameter}
+}
+
+plzn tls "dtls13/server-rejects-conflicting-fragment-overlap" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ overlap_mismatch 16 }
+  expect alert fatal/{decode_error, decrypt_error, illegal_parameter}
+  xfail boringssl "conformantly omits RFC 9147's optional fragment byte-identity check; this is a stricter hardening test"
+}
+
+plzn tls "dtls13/server-rejects-fragment-past-message-end" {
+  rfc 9147 section 5.5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake { send ClientHello @ offset_overflow }
+  expect alert fatal/{decode_error, illegal_parameter}
+}

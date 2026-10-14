@@ -1,0 +1,10 @@
+plzn tls "client/tls13-hrr-secp256r1" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1] }
+  flow handshake { }
+  expect ok
+}

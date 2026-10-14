@@ -1,0 +1,12 @@
+plzn tls "server/tls13-empty-record-before-finished" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake until send Finished {
+    send raw 0x1703030000
+    send Finished
+  }
+  expect alert fatal/bad_record_mac
+  expect alert fatal/decode_error if botan
+  xfail libressl "aborts on the empty record without sending an alert"
+}

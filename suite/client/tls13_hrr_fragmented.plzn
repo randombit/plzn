@@ -1,0 +1,18 @@
+plzn tls "client/tls13-hrr-fragmented" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  matrix {
+    size in [1, 16, 64]
+  }
+  flow handshake {
+    send HelloRetryRequest @ fragment $size
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

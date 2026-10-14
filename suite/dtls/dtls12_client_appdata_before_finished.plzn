@@ -1,0 +1,25 @@
+plzn tls "dtls12/client-appdata-before-finished" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  xfail openssl "buffers application data received before Finished and delivers it afterwards (RFC 6347 4.2.4 permits buffering); this flow asserts the discard alternative"
+  uut client {
+    versions: [dtls12]
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send AppData
+    send Finished
+    wait 200ms
+  }
+  expect ok
+}

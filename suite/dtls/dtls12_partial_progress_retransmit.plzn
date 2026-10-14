@@ -1,0 +1,28 @@
+plzn tls "dtls12/retransmit-partial-progress-client" {
+  rfc 6347 section 4.2.4.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    initial_timeout_ms: 1
+  }
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest @ fragment 2
+    hold_flight
+    release_flight [0]
+    advance_clock 1ms
+    expect_retransmit
+    release_flight
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect ok
+}

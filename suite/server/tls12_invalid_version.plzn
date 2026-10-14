@@ -1,0 +1,12 @@
+plzn tls "server/tls12-invalid-version/version-below-3-0" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake until send ClientHello {
+    send ClientHello { legacy_version: 0x0103 }
+    recv ServerHello
+  }
+  expect alert fatal/protocol_version
+}

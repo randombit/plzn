@@ -1,0 +1,20 @@
+plzn tls "server/tls13-hrr-for-preferred-group-over-available-share" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  skip botan "uses the offered share in 1-RTT; see the sibling case"
+  skip openssl "with the shim's single group tuple OpenSSL uses any offered share in 1-RTT; see the sibling case"
+  uut server {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+  }
+  peer { capabilities: [x25519, secp256r1, hrr] }
+  flow handshake {
+    send ClientHello {
+      +ext key_share = [secp256r1]
+    }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

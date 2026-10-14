@@ -1,0 +1,25 @@
+plzn tls "server/tls12-ske-group-sweep" {
+  rfc 8422 section 5.4
+  uut server {
+    versions: [tls12]
+    cipher_suites: [$suite]
+    curves: [$group]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  chain: [rsa_2048]
+  matrix {
+    suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+              ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+              ECDHE_RSA_WITH_AES_128_CBC_SHA, ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+              ECDHE_RSA_WITH_AES_256_CBC_SHA, ECDHE_RSA_WITH_AES_256_CBC_SHA384]
+    group in [x25519, x448, secp256r1, secp384r1, secp521r1]
+  }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    recv ServerKeyExchange { named_group: $group }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

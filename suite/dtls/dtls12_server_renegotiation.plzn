@@ -1,0 +1,16 @@
+plzn tls "dtls12/server-renegotiation" {
+  rfc 5746 section 3.7
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+  }
+  flow handshake {
+    # Botan PR #5783's DTLS_Renegotiation_Test checks traffic under both epochs.
+    send AppData
+    recv AppData
+    renegotiate
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

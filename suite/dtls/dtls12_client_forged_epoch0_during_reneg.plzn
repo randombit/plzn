@@ -1,0 +1,21 @@
+plzn tls "dtls12/client-forged-epoch0-during-reneg" {
+  rfc 6347 section 4.1.2.7
+  chain: [ecdsa_p256]
+  xfail openssl "delivers the data at once, but its echo SSL_write drives the pending renegotiation first, so the reply waits for the handshake"
+  uut client {
+    versions: [dtls12]
+    renegotiation: server
+  }
+  flow handshake after send Finished {
+    send HelloRequest
+    recv ClientHello
+    send raw "16 fefd 0000 000000000009 000c 02 000000 0000 000000 000000"
+    send raw "16 fefd 0000 00000000000a 000c 0b 000000 0001 000000 000000"
+    send raw "17 fefd 0000 000000000032 0004 deadbeef"
+    wait 200ms
+    send AppData
+    recv AppData
+  }
+  expect ok
+  xfail libressl "defers application data received under the established epoch until the pending renegotiation completes; Botan delivers it at once"
+}

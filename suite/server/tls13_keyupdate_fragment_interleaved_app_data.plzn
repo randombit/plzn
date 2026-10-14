@@ -1,0 +1,13 @@
+plzn tls "server/tls13-keyupdate-fragment-interleaved-app-data" {
+  rfc 8446 section 5.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  flow handshake {
+    send KeyUpdate { request_update: update_not_requested } @ fragment 3 hold
+    send AppData
+    flush_fragment
+    wait 300 ms
+  }
+  expect alert fatal/bad_record_mac
+  expect close if libressl
+}

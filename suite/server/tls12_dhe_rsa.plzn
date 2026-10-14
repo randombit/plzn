@@ -1,0 +1,14 @@
+plzn tls "server/tls12-dhe-rsa" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}

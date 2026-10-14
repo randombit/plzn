@@ -1,0 +1,315 @@
+plzn tls "server/tls12-invalid-cipher-suites/null-null" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/fortezza" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x001c..0x001d] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0047" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0047..0x005f] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/export1024" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0060..0x0065] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/dhe-dss-rc4" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0066] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x006e" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x006e..0x007f] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/gost" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0080..0x0083] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x00c6" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x00c6..0x00fe] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/empty-renegotiation-info-scsv" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [EMPTY_RENEGOTIATION_INFO_SCSV] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0100" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x0100..0x1000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x2000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x2000..0x3000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x3000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x3000..0x4000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x4000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x4000..0x5000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x5000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x5000..0x6000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x6000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x6000..0x7000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x7000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x7000..0x8000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x8000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x8000..0x9000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0x9000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0x9000..0xa000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xa000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xa000..0xb000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xb000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xb000..0xc000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xc0b0" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xc0b0..0xcca7] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xccaf" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xccaf..0xcfff] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xd000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xd000, 0xd006..0xe000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xe000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xe000..0xf000] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/unknown-0xf000" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow {
+    send ClientHello { cipher_suites: [0xf000..0xffc2, 0xffc4, 0xffc6, 0xffc8..0xffca, 0xffcc..0xfffe] }
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "server/tls12-invalid-cipher-suites/valid-handshake" {
+  rfc 5246 section 7.4.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send alert warning/close_notify
+    recv alert warning/close_notify
+    close
+  }
+  expect ok
+}

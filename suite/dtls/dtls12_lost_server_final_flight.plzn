@@ -1,0 +1,14 @@
+plzn tls "dtls12/lost-server-final-flight" {
+  rfc 6347 section 4.2.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  flow handshake after send Finished {
+    discard_flight
+    retransmit_flight
+    recv ChangeCipherSpec
+    recv Finished
+  }
+  expect ok
+}

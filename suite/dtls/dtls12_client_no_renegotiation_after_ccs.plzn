@@ -1,0 +1,25 @@
+plzn tls "dtls12/client-no-renegotiation-after-ccs" {
+  rfc 5246 section 7.4.1.1
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [dtls12]
+    renegotiation: server
+  }
+  flow handshake after send Finished {
+    send HelloRequest
+    recv ClientHello
+    send ServerHello
+    send Certificate
+    send ServerKeyExchange
+    send ServerHelloDone
+    recv ClientKeyExchange
+    recv ChangeCipherSpec
+    recv Finished
+    send alert warning/no_renegotiation
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/unexpected_message
+  expect alert fatal/handshake_failure if openssl
+  expect alert fatal/handshake_failure if libressl
+}

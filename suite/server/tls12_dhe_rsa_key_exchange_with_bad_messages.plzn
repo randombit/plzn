@@ -1,0 +1,120 @@
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-zero" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-one" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: one }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: p }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p-minus-1" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: p_minus_1 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-truncated" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange @ pad -1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-padded" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange @ pad +1
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-missing" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { dh_Yc: [] }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter if libressl
+}
+
+plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-oversized" {
+  rfc 5246 section 7.4.7.2
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { dh_Yc: 0x01 * 1025 }
+    send ChangeCipherSpec
+    send Finished
+  }
+  expect alert fatal/illegal_parameter
+}

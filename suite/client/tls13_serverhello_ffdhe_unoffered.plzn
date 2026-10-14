@@ -1,0 +1,15 @@
+plzn tls "client/tls13-serverhello-ffdhe-unoffered" {
+  rfc 8446 section 4.2.8
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp256r1]
+  }
+  flow handshake {
+    send ServerHello {
+      key_share_group: ffdhe2048
+    }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/internal_error if libressl
+}

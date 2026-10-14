@@ -1,0 +1,21 @@
+plzn tls "dtls13/server-basic-connection" {
+  rfc 9147 section 5
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls13/client-basic-connection" {
+  rfc 9147 section 5
+  chain: [default]
+  uut client { versions: [dtls13] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

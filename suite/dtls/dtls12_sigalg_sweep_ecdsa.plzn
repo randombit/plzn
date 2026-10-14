@@ -1,0 +1,47 @@
+plzn tls "dtls12/sigalg-ecdsa-sha256" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp256r1_sha256 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-ecdsa-sha384" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp384r1_sha384] }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp384r1_sha384 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "dtls12/sigalg-ecdsa-sha512" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp521r1_sha512] }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp521r1_sha512 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

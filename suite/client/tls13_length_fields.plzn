@@ -1,0 +1,137 @@
+plzn tls "client/tls13-length/server-hello-message" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send ServerHello {
+    send ServerHello @ sub[handshake.length] = 1
+  }
+  expect alert fatal/{decode_error,unexpected_message}
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "client/tls13-length/server-hello-session-id" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send ServerHello {
+    send ServerHello @ add[handshake.session_id_length] = 1
+  }
+  expect alert fatal/{decode_error,illegal_parameter}
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "client/tls13-length/server-hello-extensions" {
+  rfc 8446 section 4.1.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send ServerHello {
+    send ServerHello @ sub[handshake.extensions_length] = 1
+  }
+  expect alert fatal/decode_error
+  expect alert fatal/protocol_version if libressl
+}
+
+plzn tls "client/tls13-length/encrypted-extensions-message" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send EncryptedExtensions {
+    send EncryptedExtensions @ sub[handshake.length] = 1
+  }
+  expect alert fatal/{decode_error,unexpected_message}
+}
+
+plzn tls "client/tls13-length/encrypted-extensions-list" {
+  rfc 8446 section 4.3.1
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send EncryptedExtensions {
+    send EncryptedExtensions @ add[handshake.extensions_length] = 1
+  }
+  expect alert fatal/decode_error
+}
+
+plzn tls "client/tls13-length/server-certificate-message" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,unexpected_message,bad_certificate,certificate_unknown}
+  expect close if libressl
+}
+
+plzn tls "client/tls13-length/server-certificate-request-context" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Certificate {
+    send Certificate @ add[handshake.request_context_length] = 1
+    wait 300 ms
+  }
+  expect alert fatal/{decode_error,illegal_parameter,bad_certificate,certificate_unknown}
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "client/tls13-length/server-certificate-list" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.certificate_list_length] = 1
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "client/tls13-length/server-certificate-entry" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.first_certificate_length] = 1
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "client/tls13-length/server-certificate-entry-extensions" {
+  rfc 8446 section 4.4.2
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Certificate {
+    send Certificate @ sub[handshake.first_certificate_extensions_length] = 1
+  }
+  expect alert fatal/{decode_error,bad_certificate,certificate_unknown}
+}
+
+plzn tls "client/tls13-length/server-certificate-verify-message" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ sub[handshake.length] = 1
+  }
+  expect alert fatal/{decode_error,unexpected_message,decrypt_error,internal_error}
+}
+
+plzn tls "client/tls13-length/server-certificate-verify-signature" {
+  rfc 8446 section 4.4.3
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ sub[handshake.signature_length] = 1
+  }
+  expect alert fatal/{decode_error,decrypt_error}
+}
+
+plzn tls "client/tls13-length/server-finished-message" {
+  rfc 8446 section 4.4.4
+  chain: [default]
+  uut client { versions: [tls13] }
+  flow handshake until send Finished {
+    send Finished @ sub[handshake.length] = 1
+  }
+  expect alert fatal/{decode_error,decrypt_error,unexpected_message}
+}

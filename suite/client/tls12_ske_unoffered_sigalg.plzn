@@ -1,0 +1,15 @@
+plzn tls "client/tls12-ske-unoffered-sigalg" {
+  rfc 5246 section 7.4.3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    verify_prefs: [rsa_pss_rsae_sha256]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    recv ClientHello { signature_algorithms: [rsa_pss_rsae_sha256] }
+    send ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if openssl
+}

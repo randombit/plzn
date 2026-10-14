@@ -1,0 +1,15 @@
+plzn tls "server/tls12-md5-only-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pkcs1_md5]
+    }
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/decode_error if libressl
+}

@@ -1,0 +1,55 @@
+plzn tls "server/tls12-interleaved-cke-with-ccs/single-interleaved-fragment" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake until send ClientKeyExchange {
+    atomic {
+      send ClientKeyExchange @ fragment 2 hold
+      send record 20 raw "01"
+      flush_fragment
+    }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect alert fatal/unexpected_message
+  expect close if rustls
+}
+
+plzn tls "server/tls12-interleaved-cke-with-ccs/multiple-interleaved-fragments" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe, secp256r1] }
+  flow handshake until send ClientKeyExchange {
+    atomic {
+      send ClientKeyExchange @ fragment 16 hold_all
+      send record 20 raw "01"
+      flush_fragment
+      send record 20 raw "01"
+      flush_fragment
+      send record 20 raw "01"
+      flush_fragment
+      send record 20 raw "01"
+      flush_fragment
+    }
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close alert warning/close_notify
+  }
+  expect alert fatal/unexpected_message
+  expect close if rustls
+}

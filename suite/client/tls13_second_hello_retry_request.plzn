@@ -1,0 +1,15 @@
+plzn tls "client/tls13-second-hello-retry-request" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+  }
+  peer { capabilities: [secp256r1, second_hrr] }
+  flow handshake {
+    recv ClientHello {
+      legacy_version: 0x0303
+    }
+  }
+  expect alert fatal/{unexpected_message, illegal_parameter}
+  expect alert fatal/illegal_parameter if boringssl
+}

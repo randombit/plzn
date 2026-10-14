@@ -1,0 +1,46 @@
+# Encrypted records too short for their explicit nonce or for a CBC
+# encrypt-then-MAC ciphertext block are rejected by length alone, always with
+# bad_record_mac.
+plzn tls "client/tls12-encrypted-record-shorter-than-explicit-nonce" {
+  rfc 5246 section 6.2.3.3
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256]
+  }
+  xfail libressl "ignores an AEAD record shorter than its explicit nonce"
+  flow handshake {
+    send record 23 raw 0x00 * 7 @ plaintext
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "client/tls12-cbc-record-shorter-than-iv" {
+  rfc 5246 section 7.2.2
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: false
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send record 23 raw 0x00 * 15 @ plaintext
+  }
+  expect alert fatal/bad_record_mac
+}
+
+plzn tls "client/tls12-etm-authenticated-empty-ciphertext" {
+  rfc 7366 section 3
+  chain: [rsa_2048]
+  uut client {
+    versions: [tls12]
+    cipher_suites: [ECDHE_RSA_WITH_AES_128_CBC_SHA]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send AppData { size: 16 } @ plaintext = 0x00 * 0
+  }
+  expect alert fatal/bad_record_mac
+}

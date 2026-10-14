@@ -1,0 +1,139 @@
+plzn tls "server/tls12-multi-chain-ecdsa-scheme-does-not-constrain-curve" {
+  rfc 5246 section 7.4.1.4.1
+  xfail rustls "its signing keys bind the TLS 1.2 ECDSA scheme to the certificate curve"
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [ecdsa_secp384r1_sha384]
+      +ext supported_groups = [secp384r1, secp256r1, x25519]
+    }
+    recv ServerHello
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp384r1_sha384 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-multi-chain-picks-p256" {
+  rfc 5246 section 7.4.1.4.1
+  xfail botan "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
+  xfail gnutls "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  chain: [rsa_2048, ecdsa_p384, ecdsa_p256]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp256r1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-multi-chain-picks-rsa" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [rsa_pkcs1_sha256] }
+    recv ServerHello
+    recv Certificate { entries: 1, leaf_key: rsa_2048 }
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-multi-chain-both-families-ecdsa-only-sigalgs" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  chain: [rsa_2048, ecdsa_p256]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ecdsa_secp256r1_sha256] }
+    recv ServerHello
+    recv Certificate { entries: 1, leaf_key: ecdsa_p256 }
+    recv ServerKeyExchange { signature_scheme: ecdsa_secp256r1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+  xfail openssl "picks the client's first suite (ECDHE_RSA) although signature_algorithms allows only ECDSA, then aborts with handshake_failure"
+  xfail libressl "picks the client's first suite (ECDHE_RSA) without consulting signature_algorithms, then fails ServerKeyExchange"
+}
+
+plzn tls "server/tls12-multi-chain-none-fits" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [ed25519] }
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange
+    recv ServerHelloDone
+  }
+  expect alert fatal/handshake_failure
+  expect close if rustls
+}
+
+plzn tls "server/tls12-no-chain-certificate-suite" {
+  rfc 5246 section 7.4.2
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  chain: []
+  flow handshake {
+    send ClientHello
+    recv ServerHello
+  }
+  expect alert fatal/handshake_failure
+  expect alert fatal/access_denied if rustls
+}

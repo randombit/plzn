@@ -1,0 +1,31 @@
+# RFC 7366 3.1: a session negotiated with encrypt-then-MAC must not be resumed
+# with MAC-then-encrypt.
+plzn tls "client/tls12-client-rejects-resumption-dropping-etm" {
+  rfc 7366 section 3.1
+  chain: [default]
+  uut client {
+    versions: [tls12]
+    encrypt_then_mac: true
+  }
+  peer { capabilities: [cbc] }
+
+  session initial {
+    flow handshake {
+      recv ClientHello { has_ext: encrypt_then_mac }
+      send AppData
+      recv AppData
+      close alert warning/close_notify
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ClientHello { has_ext: encrypt_then_mac }
+      send ServerHello { -ext encrypt_then_mac }
+    }
+    expect alert fatal/{handshake_failure, illegal_parameter}
+    # keeps encrypt-then-MAC from the session, so the server's records fail
+    expect alert fatal/bad_record_mac if openssl
+  }
+}

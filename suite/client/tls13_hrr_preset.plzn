@@ -1,0 +1,15 @@
+plzn tls "client/tls13-hrr-preset" {
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, secp384r1, secp256r1]
+  }
+  peer { capabilities: [secp256r1, hrr] }
+  flow handshake {
+    recv ClientHello {
+      legacy_version: 0x0303
+    }
+  }
+  expect ok
+}

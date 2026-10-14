@@ -1,0 +1,38 @@
+plzn tls "dtls12/dhe-client-yc-zero" {
+  rfc 7919 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: zero }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/dhe-client-yc-one" {
+  rfc 7919 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: one }
+  }
+  expect alert fatal/illegal_parameter
+}
+
+plzn tls "dtls12/dhe-client-yc-p-minus-1" {
+  rfc 7919 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [dhe_rsa] }
+  flow handshake {
+    send ClientKeyExchange { key_share_point: p_minus_1 }
+  }
+  expect alert fatal/illegal_parameter
+}

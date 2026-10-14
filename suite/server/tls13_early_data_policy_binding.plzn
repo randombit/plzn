@@ -1,0 +1,75 @@
+plzn tls "server/tls13-early-data-rejected-after-cipher-suite-change" {
+  rfc 8446 section 4.2.10
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail openssl "accepts 0-RTT across a same-hash cipher-suite change"
+  xfail gnutls "accepts 0-RTT across a same-hash cipher-suite change"
+  skip rustls "legally declines the changed-suite PSK entirely; this linear flow tests the permitted resume-without-0-RTT path"
+
+  session initial {
+    flow handshake {
+      send ClientHello { cipher_suites: [AES_128_GCM_SHA256] }
+      recv ServerHello { cipher_suite: AES_128_GCM_SHA256 }
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello { cipher_suites: [CHACHA20_POLY1305_SHA256] }
+      send EarlyData { size: 32 }
+      recv ServerHello {
+        cipher_suite: CHACHA20_POLY1305_SHA256
+        has_ext: pre_shared_key
+      }
+      recv EncryptedExtensions { lacks_ext: early_data }
+      recv Finished
+      send Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+plzn tls "server/tls13-early-data-rejected-for-skewed-ticket-age" {
+  rfc 8446 section 4.2.10
+  rfc 8446 section 8.3
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    cipher_suites: [AES_128_GCM_SHA256]
+    session_tickets: 1
+    max_early_data: 1024
+  }
+  xfail openssl "decodes an obfuscated_ticket_age below its ticket_age_add as age 0 and accepts the 0-RTT (fixed in OpenSSL 4.1)"
+  skip gnutls "legally declines the skewed-age PSK entirely; this linear flow tests the permitted resume-without-0-RTT path"
+
+  session initial {
+    flow handshake {
+      recv NewSessionTicket { has_ext: early_data }
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow {
+      send ClientHello { obfuscated_ticket_age: 0 }
+      send EarlyData { size: 32 }
+      recv ServerHello { has_ext: pre_shared_key }
+      recv EncryptedExtensions { lacks_ext: early_data }
+      recv Finished
+      send Finished
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}

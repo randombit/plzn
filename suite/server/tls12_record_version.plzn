@@ -1,0 +1,38 @@
+plzn tls "server/tls12-rejects-wrong-post-clienthello-record-version" {
+  rfc 5246 section 6.2.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send Finished @ record_version 0x03ff
+  }
+  xfail rustls "accepts a post-ClientHello record with the wrong version"
+  expect alert fatal/protocol_version
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-allows-loose-initial-record-version" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello @ record_version 0x03ff
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-rejects-garbage-initial-record-version" {
+  rfc 5246 section E.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello @ record_version 0xffff
+  }
+  xfail wolfssl "accepts a ClientHello with record version 0xffff"
+  expect any {
+    alert fatal/{protocol_version,decode_error,illegal_parameter},
+    close,
+    reset
+  }
+}
