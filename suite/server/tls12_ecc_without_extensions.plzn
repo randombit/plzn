@@ -1,0 +1,191 @@
+# RFC 8422 section 4 (RFC 4492 section 4): a client proposing ECC cipher
+# suites SHOULD send supported_groups and ec_point_formats, but "may choose not
+# to include these extensions. In this case, the server is free to choose any
+# one of the elliptic curves or point formats listed in Section 5." The server
+# is permitted, not required, to proceed; RFC 8422 5.1 adds that a server which
+# will not do ECDHE under these conditions MUST NOT negotiate an ECC suite,
+# which "may result in a fatal handshake failure alert" depending on the other
+# suites offered. Both outcomes are compliant and the libraries split: Botan,
+# OpenSSL, LibreSSL, rustls and Go decline ECDHE without supported_groups
+# (handshake_failure with nothing else offered, the other key exchange when
+# there is one), while GnuTLS and wolfSSL take the permission and run ECDHE on
+# secp256r1. The cases pin each, check that a chosen curve is one RFC 8422
+# 5.1.1 still lists, cover ec_point_formats alone being absent (RFC 8422 5.1.2:
+# absent means uncompressed, so ECDHE must proceed) and resumption (RFC 8422
+# 4: the server "simply ignores" both extensions then).
+
+plzn tls "server/tls12-ecc-without-extensions/ecdhe-rsa-no-supported-groups" {
+  rfc 8422 section 4
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa] }
+  flow handshake {
+    send ClientHello { -ext supported_groups }
+    recv ServerHello
+    recv ServerKeyExchange { named_group: [secp256r1, secp384r1, secp521r1, x25519, x448] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/handshake_failure
+  expect ok if gnutls
+  expect ok if wolfssl
+}
+
+plzn tls "server/tls12-ecc-without-extensions/ecdhe-ecdsa-no-supported-groups" {
+  rfc 8422 section 4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_ecdsa] }
+  flow handshake {
+    send ClientHello { -ext supported_groups }
+    recv ServerHello
+    recv ServerKeyExchange { named_group: [secp256r1, secp384r1, secp521r1, x25519, x448] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/handshake_failure
+  expect ok if gnutls
+  expect ok if wolfssl
+}
+
+plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-no-ec-point-formats" {
+  rfc 8422 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      -ext supported_groups
+      -ext ec_point_formats
+    }
+    recv ServerHello { lacks_ext: ec_point_formats }
+    recv ServerKeyExchange { named_group: [secp256r1, secp384r1, secp521r1, x25519, x448] }
+    send AppData
+    recv AppData
+    close
+  }
+  expect alert fatal/handshake_failure
+  expect ok if gnutls
+  expect ok if wolfssl
+}
+
+# Only ec_point_formats is missing: RFC 8422 5.1.2 says that means the client
+# takes uncompressed points, so ECDHE must still be negotiated. The ServerHello
+# must not answer an extension the client did not send (RFC 5246 7.4.1.4).
+plzn tls "server/tls12-ecc-without-extensions/no-ec-point-formats-still-ecdhe" {
+  rfc 8422 section 5.1.2
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { -ext ec_point_formats }
+    recv ServerHello { lacks_ext: ec_point_formats }
+    recv ServerKeyExchange
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+# With another key exchange on offer, a server that declines ECDHE without
+# supported_groups has a non-ECC suite to fall back to, so there must be no
+# handshake_failure. GnuTLS and wolfSSL take the other branch RFC 8422 4
+# allows (ECDHE on a curve of their choice, pinned above), so there is no
+# fallback to observe on them.
+plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-static-rsa" {
+  rfc 8422 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  skip rustls "no static RSA suite to fall back to"
+  skip gnutls "negotiates ECDHE on secp256r1 without supported_groups (RFC 8422 4 allows it), so never falls back"
+  skip wolfssl "negotiates ECDHE on secp256r1 without supported_groups (RFC 8422 4 allows it), so never falls back"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, RSA_WITH_AES_128_GCM_SHA256]
+      -ext supported_groups
+    }
+    recv ServerHello { cipher_suite: RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-dhe" {
+  rfc 8422 section 5.1
+  chain: [rsa_2048]
+  uut server {
+    versions: [tls12]
+  }
+  skip rustls "no DHE_RSA suite to fall back to"
+  skip go "no DHE_RSA suite to fall back to"
+  skip gnutls "negotiates ECDHE on secp256r1 without supported_groups (RFC 8422 4 allows it), so never falls back"
+  skip wolfssl "negotiates ECDHE on secp256r1 without supported_groups (RFC 8422 4 allows it), so never falls back"
+  flow handshake {
+    send ClientHello {
+      cipher_suites: [ECDHE_RSA_WITH_AES_128_GCM_SHA256, DHE_RSA_WITH_AES_128_GCM_SHA256]
+      -ext supported_groups
+    }
+    recv ServerHello { cipher_suite: DHE_RSA_WITH_AES_128_GCM_SHA256 }
+    send AppData
+    recv AppData
+    close
+  }
+  expect ok
+}
+
+# RFC 8422 4: "In the case of session resumption, the server simply ignores
+# the Supported Elliptic Curves Extension and the Supported Point Formats
+# Extension appearing in the current ClientHello message." An ECDHE session
+# established with both extensions is resumed by a ClientHello carrying
+# neither; the abbreviated preset the resumed session runs (no Certificate, no
+# ServerKeyExchange) only completes if the server really resumed. rustls
+# requires a usable key-exchange group before it looks at the ticket
+# (server/hs.rs, NoKxGroupsInCommon) and Go's checkForResumption re-applies
+# its ECDHE check (supportsECDHE over the new hello's curves) to the session's
+# suite, so both fall through to a full handshake that then has no suite;
+# neither sentence of RFC 8422 4 is a MUST, so this is pinned, not xfailed.
+plzn tls "server/tls12-ecc-without-extensions/resumption-ignores-missing-extensions" {
+  rfc 8422 section 4
+  chain: [default]
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe] }
+
+  session initial {
+    flow handshake {
+      close
+    }
+    expect ok
+    assert resumed == false
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      send ClientHello {
+        -ext supported_groups
+        -ext ec_point_formats
+      }
+      send AppData
+      recv AppData
+    }
+    expect ok
+    expect alert fatal/handshake_failure if rustls
+    expect alert fatal/handshake_failure if go
+  }
+}

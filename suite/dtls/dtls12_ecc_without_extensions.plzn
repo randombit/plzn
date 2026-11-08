@@ -1,0 +1,64 @@
+# RFC 8422 section 4: a client proposing ECC cipher suites may omit
+# supported_groups and ec_point_formats, in which case the server "is free to
+# choose any one of the elliptic curves or point formats listed in Section 5".
+# DTLS 1.2 counterpart of suite/server/tls12_ecc_without_extensions.plzn:
+# Botan, OpenSSL and LibreSSL decline ECDHE without supported_groups, GnuTLS
+# runs it on secp256r1.
+
+plzn tls "dtls12/ecc-without-extensions/no-supported-groups" {
+  rfc 8422 section 4
+  chain: [default]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { -ext supported_groups }
+    recv ServerKeyExchange { named_group: [secp256r1, secp384r1, secp521r1, x25519, x448] }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/handshake_failure
+  expect ok if gnutls
+}
+
+plzn tls "dtls12/ecc-without-extensions/no-supported-groups-no-ec-point-formats" {
+  rfc 8422 section 4
+  chain: [default]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello {
+      -ext supported_groups
+      -ext ec_point_formats
+    }
+    recv ServerHello { lacks_ext: ec_point_formats }
+    recv ServerKeyExchange { named_group: [secp256r1, secp384r1, secp521r1, x25519, x448] }
+    send AppData
+    recv AppData
+  }
+  expect alert fatal/handshake_failure
+  expect ok if gnutls
+}
+
+# Only ec_point_formats is missing: absent means uncompressed (RFC 8422 5.1.2),
+# so ECDHE proceeds, and the ServerHello must not answer an extension the
+# client did not send (RFC 5246 7.4.1.4).
+plzn tls "dtls12/ecc-without-extensions/no-ec-point-formats-still-ecdhe" {
+  rfc 8422 section 5.1.2
+  chain: [default]
+  uut server {
+    versions: [dtls12]
+  }
+  peer { capabilities: [ecdhe] }
+  flow handshake {
+    send ClientHello { -ext ec_point_formats }
+    recv ServerHello { lacks_ext: ec_point_formats }
+    recv ServerKeyExchange
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
