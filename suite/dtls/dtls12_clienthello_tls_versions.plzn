@@ -209,4 +209,5 @@ plzn tls "dtls12/clienthello-tls-legacy-version-tls-format" {
   expect alert fatal/protocol_version
   expect ok if openssl
   expect alert fatal/decode_error if libressl
+  expect alert fatal/decode_error if botan
 }
