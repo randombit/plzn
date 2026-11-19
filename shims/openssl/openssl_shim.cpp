@@ -378,7 +378,7 @@ const char* iana_group_to_name(uint16_t id) {
       case 0x11ed:
          return "SecP384r1MLKEM1024";
       case 0x11ee:
-         return "X448MLKEM1024";
+         return "curveSM2MLKEM768";  // draft-yang-tls-hybrid-sm2-mlkem; OpenSSL 4.0 and later
       default:
          return "";
    }
@@ -409,7 +409,7 @@ bool openssl_has_group(uint16_t id, bool dtls) {
 const char* EXTRA_GROUPS_AFTER_DEFAULT =
    "DEFAULT/?brainpoolP256r1tls13:?brainpoolP384r1tls13:?brainpoolP512r1tls13:"
    "?brainpoolP256r1:?brainpoolP384r1:?brainpoolP512r1:"
-   "?MLKEM512:?MLKEM768:?MLKEM1024:?SecP256r1MLKEM768:?SecP384r1MLKEM1024:?X448MLKEM1024";
+   "?MLKEM512:?MLKEM768:?MLKEM1024:?SecP256r1MLKEM768:?SecP384r1MLKEM1024";
 
 // Map a 16-bit IANA SignatureScheme code (RFC 8446 4.2.3) to the OpenSSL name
 // used by SSL_CTX_set1_sigalgs_list. Throws on an unmapped code.

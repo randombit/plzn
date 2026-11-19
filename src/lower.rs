@@ -832,7 +832,7 @@ fn lower_with_binding(
                          brainpoolP256r1tls13, brainpoolP384r1tls13, curveSM2, ffdhe2048, ffdhe3072, \
                          ffdhe4096, ffdhe6144, ffdhe8192, \
                          mlkem512/768/1024, x25519mlkem768, x448mlkem1024, secp256r1mlkem768, \
-                         secp384r1mlkem1024) or use `+ext key_share = [...]` to choose \
+                         secp384r1mlkem1024, curvesm2mlkem768) or use `+ext key_share = [...]` to choose \
                          the shared groups",
                         schema_group_name(first)
                     ),
@@ -4879,8 +4879,8 @@ fn lower_key_share_entries(
                         message: format!(
                             "plzn's client cannot generate a key share for `{}`; implemented: \
                              x25519, x448, secp256r1, secp384r1, secp521r1, ffdhe2048, ffdhe3072, \
-                             ffdhe4096, ffdhe6144, ffdhe8192, \
-                             x448mlkem1024 -- \
+                             ffdhe4096, ffdhe6144, ffdhe8192, curvesm2, \
+                             x448mlkem1024, curvesm2mlkem768 -- \
                              give an opaque key instead: `{} : 0xab * 32`",
                             name, name
                         ),

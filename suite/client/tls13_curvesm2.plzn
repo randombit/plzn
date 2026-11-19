@@ -18,6 +18,24 @@ plzn tls "client/tls13-curvesm2-group" {
   expect ok
 }
 
+# The curveSM2MLKEM768 hybrid (draft-yang-tls-hybrid-sm2-mlkem): plzn's server
+# takes the client's SM2 share and ML-KEM-768 encapsulation key and answers
+# with its own SM2 share and the ciphertext.
+plzn tls "client/tls13-curvesm2mlkem768-group" {
+  rfc 8998 section 3.3.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [curvesm2mlkem768]
+  }
+  peer { capabilities: [curvesm2mlkem768] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
 # The client key-shares x25519 only and lists curveSM2 second; plzn's server
 # retries for curveSM2 and the client answers with a fresh SM2 share.
 plzn tls "client/tls13-curvesm2-after-hrr" {

@@ -46,6 +46,36 @@ plzn tls "server/tls13-curvesm2/point-outside-curve" {
   expect alert fatal/illegal_parameter
 }
 
+# draft-yang-tls-hybrid-sm2-mlkem: curveSM2MLKEM768 (0x11ee) is curveSM2
+# ECDHE first, then ML-KEM-768, in both the shares and the 64-byte secret.
+plzn tls "server/tls13-curvesm2/hybrid-key-share-negotiated" {
+  rfc 8998 section 3.3.1
+  chain: [default]
+  uut server { versions: [tls13] }
+  peer { capabilities: [curvesm2mlkem768] }
+  flow handshake {
+    recv ServerHello { key_share_group: curveSM2MLKEM768 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+plzn tls "server/tls13-curvesm2/hrr-to-hybrid" {
+  rfc 8998 section 3.3.1
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut server { versions: [tls13] }
+  peer { capabilities: [hrr, curvesm2mlkem768] }
+  flow handshake {
+    send ClientHello { +ext key_share = raw "0000" }
+    recv HelloRetryRequest { key_share_group: curveSM2MLKEM768 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
 # RFC 8998 3.1: the group exists only in TLS 1.3, so a TLS 1.2 server offered
 # nothing else has no curve to use.
 plzn tls "server/tls12-ignores-curvesm2" {
