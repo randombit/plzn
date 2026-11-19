@@ -240,7 +240,8 @@ deadline.
 Botan, OpenSSL, and LibreSSL are the fully corpus-enabled DTLS 1.2 backends
 (LibreSSL's retransmit schedule is fixed, so it skips cases that set another
 one or rescale a live timer). BoringSSL is
-the oracle for the focused DTLS 1.3 corpus. GnuTLS supports
+the oracle for the focused DTLS 1.3 corpus; the OpenSSL shim also runs DTLS 1.3
+when built against OpenSSL 4.1 or later (see [DTLS 1.3](#dtls-13)). GnuTLS supports
 baseline DTLS 1.2 in both roles, but currently skips virtual-clock, timeout-
 policy, datagram-rewrite, PSK, and renegotiation cases. The wolfSSL shim skips
 DTLS until its datagram framing is wired (and an installed wolfSSL build may
@@ -1346,6 +1347,24 @@ make -C shims boringssl PLZN_BORINGSSL_ROOT=/path/to/boringssl
 plzn run --shim shims/build/boringssl_shim suite/dtls/dtls13_*.plzn
 ```
 
+An OpenSSL shim built against OpenSSL 4.1 or later (the first release with
+RFC 9147) runs DTLS 1.3 too, but it is not yet a corpus backend for it: about
+a quarter of the `dtls13_*` cases differ from BoringSSL and are untriaged.
+Two things to know when running them by hand. OpenSSL drives the RFC 9147 5.1
+cookie exchange (a HelloRetryRequest carrying `cookie`) from the same
+`SSL_OP_COOKIE_EXCHANGE` setup as its DTLS 1.2 HelloVerifyRequest; the shim
+leaves it off for DTLS 1.3 unless a case sets `dtls_require_cookie: true`,
+because plzn's DTLS 1.3 client preset has no optional cookie step and fails on
+the HelloRetryRequest. And OpenSSL 4.1.0's server answers an ACK that arrives
+before the client's Finished with a fatal `unexpected_message` (fixed on its
+master); `suite/dtls/dtls13_early_ack.plzn` sends such ACKs on purpose and
+carries the `xfail openssl`.
+
+plzn's own ACK policy follows RFC 9147 7.1: it acknowledges received handshake
+records automatically only once it holds application write keys, so the
+server's flight, which the client's Finished implicitly acknowledges, is not
+ACKed, while the client's final flight and every post-handshake message are.
+
 The implemented surface includes all three TLS 1.3 AEAD suites, X25519,
 P-256/P-384 and X25519MLKEM768, HRR, RSA-PSS and ECDSA signatures, client
 authentication, adversarial handshake fragmentation/reassembly, both unified
@@ -1501,8 +1520,8 @@ resume DTLS inside their multi-session loop, so no knob is needed.
 
 Cross-version DTLS sequences use the same per-session `version: dtls12|dtls13`,
 `assert resumed`, and adversarial `force_resume` controls described above.
-Only BoringSSL currently runs the DTLS 1.3 half; the other shims report the
-mixed-version tests unsupported before connecting.
+BoringSSL and an OpenSSL 4.1+ shim run the DTLS 1.3 half; the other shims
+report the mixed-version tests unsupported before connecting.
 
 DTLS-only steps:
 
@@ -1523,7 +1542,7 @@ ignored.
 | `set_timeout 250ms` | rescale the UUT's live timeout schedule, preserving the current backoff level; OpenSSL and BoringSSL (Botan has no live setter API and SKIPs) |
 | `set_mtu 512` | DTLS 1.3: change the UUT's live path MTU before a retransmission |
 | `expect_retransmit` | read one datagram and require the peer's resent flight |
-| `suppress_ack` | DTLS 1.3: stop plzn's automatic ACKs and capture the received flight's record numbers for explicit ACK tests |
+| `suppress_ack` | DTLS 1.3: stop plzn's automatic ACKs (sent, per RFC 9147 7.1, only for records read once plzn holds application write keys) and capture the received flight's record numbers for explicit ACK tests |
 | `send_ack all \| first \| last \| even \| odd` | DTLS 1.3: ACK the selected captured records; optional `outer_epoch N` and `overflow_epoch` encode bad-epoch negatives |
 | `expect_ack` | DTLS 1.3: read, authenticate, and require one ACK record |
 | `send_previous_epoch Finished` | DTLS 1.3: send a fresh message_seq copy of the prior Finished under the retained previous write epoch |
@@ -1594,7 +1613,7 @@ reachable through `uut`:
 | `initial_timeout_ms`, `dtls_max_timeout_ms` | `dtls_initial_timeout`, `dtls_maximum_timeout` | the virtual-clock retransmit schedule (`DTLS_set_timer_cb`, doubling, capped) |
 | `dtls_max_retransmissions` | `dtls_maximum_retransmissions` (the handshake gives up past it) | the budget the timer callback enforces before it stops re-sending |
 | `dtls_max_hello_verify_requests` | `dtls_maximum_hello_verify_requests` | unsupported (SKIPs) |
-| `dtls_require_cookie` | `dtls_server_require_cookie_exchange` | `SSL_OP_COOKIE_EXCHANGE` |
+| `dtls_require_cookie` | `dtls_server_require_cookie_exchange` | `SSL_OP_COOKIE_EXCHANGE` (DTLS 1.3: the HelloRetryRequest cookie; the shim defaults it off there) |
 | `dtls_epoch0_restart` | `allow_dtls_epoch0_restart` | unsupported (SKIPs) |
 
 Inside a non-anchored `flow handshake { ... }` body, `send`/`recv` of handshake

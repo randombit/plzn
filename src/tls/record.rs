@@ -1779,7 +1779,23 @@ impl RecordLayer {
                 {
                     state.pending_acks.push((epoch, sequence));
                 }
-                if epoch > 0 && self.write_keys.is_some() && state.auto_ack {
+                // RFC 9147 7.1: a flight that the next flight answers is
+                // implicitly acknowledged, and ACKs "SHOULD NOT be sent for
+                // these flights unless the responding flight cannot be
+                // generated immediately". plzn always answers at once, so a
+                // client reading the server's flight (write epoch 2) sends no
+                // ACK. Once it holds application write keys (epoch 3) what it
+                // reads are post-handshake messages, which MUST be ACKed. The
+                // server role reaches epoch 3 before the client's Finished
+                // arrives, so that final flight, which nothing else
+                // acknowledges, is still ACKed. (OpenSSL 4.1.0 answers an ACK
+                // that arrives before the client's Finished with a fatal
+                // unexpected_message; fixed on its master by 9a4ce25036.)
+                if epoch > 0
+                    && self.write_keys.is_some()
+                    && state.auto_ack
+                    && state.write_epoch >= 3
+                {
                     self.send_dtls13_ack(epoch, sequence)?;
                 }
             }

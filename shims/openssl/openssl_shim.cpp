@@ -469,6 +469,10 @@ int openssl_version(uint16_t code) {
       case 0xfefd:
          return DTLS1_2_VERSION;
 #endif
+#ifdef DTLS1_3_VERSION
+      case 0xfefc:
+         return DTLS1_3_VERSION;
+#endif
       default:
          return 0;
    }
@@ -1163,9 +1167,12 @@ int rpk_verify_cb(int preverify_ok, X509_STORE_CTX* store) {
 }  // namespace
 
 void configure_ctx(SSL_CTX* ctx, const ShimConfig& cfg) {
+#ifndef DTLS1_3_VERSION
+   // OpenSSL 4.1 added RFC 9147; older headers have no DTLS 1.3 version code.
    if(cfg.requests_dtls13()) {
-      plzn::report_unsupported("versions", "OpenSSL does not currently implement DTLS 1.3");
+      plzn::report_unsupported("versions", "this OpenSSL does not implement DTLS 1.3 (OpenSSL 4.1 or later does)");
    }
+#endif
    if(cfg.record_size_limit.has_value()) {
       plzn::report_unsupported("record_size_limit", "OpenSSL exposes no RFC 8449 record_size_limit policy");
    }
@@ -1306,10 +1313,15 @@ void configure_ctx(SSL_CTX* ctx, const ShimConfig& cfg) {
          report_unsupported("dtls_max_hello_verify_requests", "OpenSSL does not bound the HelloVerifyRequests a client answers");
       }
    }
-   // DTLS server: perform the HelloVerifyRequest cookie exchange (RFC 6347 4.2.1)
-   // during SSL_accept, matching the Botan shim. This makes the second ClientHello
-   // (CH2) exist, which the reorder/retransmit tests fragment and reorder.
-   if(cfg.is_dtls() && cfg.is_server() && cfg.dtls_require_cookie.value_or(true)) {
+   // DTLS server: perform the cookie exchange during SSL_accept, matching the
+   // Botan shim: the HelloVerifyRequest of RFC 6347 4.2.1 in DTLS 1.2, which
+   // makes the second ClientHello (CH2) exist for the reorder/retransmit tests.
+   // In DTLS 1.3 OpenSSL turns the same option and callbacks into the RFC 9147
+   // 5.1 HelloRetryRequest cookie. That exchange defaults to off here, although
+   // RFC 9147 5.1 recommends it, because plzn's DTLS 1.3 client preset has no
+   // optional cookie step yet and fails on the HelloRetryRequest; a case that
+   // wants it sets `dtls_require_cookie: true`.
+   if(cfg.is_dtls() && cfg.is_server() && cfg.dtls_require_cookie.value_or(!cfg.requests_dtls13())) {
       SSL_CTX_set_options(ctx, SSL_OP_COOKIE_EXCHANGE);
       SSL_CTX_set_cookie_generate_cb(ctx, dtls_cookie_generate);
       SSL_CTX_set_cookie_verify_cb(ctx, dtls_cookie_verify);

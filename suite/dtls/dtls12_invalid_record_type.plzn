@@ -1,7 +1,6 @@
 plzn tls "dtls12/invalid-record-type-to-server" {
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
-  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
   uut server {
     versions: [dtls12]
   }
@@ -17,7 +16,6 @@ plzn tls "dtls12/invalid-record-type-to-server" {
 plzn tls "dtls12/invalid-record-type-to-client" {
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
-  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
   uut client {
     versions: [dtls12]
   }
@@ -33,7 +31,6 @@ plzn tls "dtls12/invalid-record-type-to-client" {
 plzn tls "dtls12/invalid-client-hello-record-type" {
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
-  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
   uut server {
     versions: [dtls12]
   }
@@ -48,7 +45,6 @@ plzn tls "dtls12/invalid-client-hello-record-type" {
 plzn tls "dtls12/invalid-server-hello-record-type" {
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
-  xfail openssl "sends unexpected_message instead of silently discarding the invalid DTLS record"
   uut client {
     versions: [dtls12]
   }

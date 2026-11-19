@@ -171,9 +171,21 @@ fn forward_rewritten(
     runner: &mut TcpStream,
     rewriter: &mut Rewriter,
 ) -> io::Result<()> {
+    // The runner closes as soon as its flow is done, and the backend may still
+    // have a datagram to send after that: OpenSSL 4.1 answers the resulting
+    // EOF with a close_notify. Like the production shims, drop what the runner
+    // can no longer receive instead of failing the case.
+    let runner_gone = |error: &io::Error| {
+        matches!(
+            error.kind(),
+            io::ErrorKind::BrokenPipe
+                | io::ErrorKind::ConnectionReset
+                | io::ErrorKind::NotConnected
+        )
+    };
     let mut opcode = [0];
     while backend.read(&mut opcode)? != 0 {
-        match opcode[0] {
+        let forwarded = match opcode[0] {
             b'P' => {
                 let mut length = [0; 4];
                 backend.read_exact(&mut length)?;
@@ -184,16 +196,22 @@ fn forward_rewritten(
                 let mut packet = vec![0; length];
                 backend.read_exact(&mut packet)?;
                 let packet = rewriter.rewrite(&packet)?;
-                runner.write_all(b"P")?;
-                runner.write_all(&(packet.len() as u32).to_be_bytes())?;
-                runner.write_all(&packet)?;
+                runner
+                    .write_all(b"P")
+                    .and_then(|()| runner.write_all(&(packet.len() as u32).to_be_bytes()))
+                    .and_then(|()| runner.write_all(&packet))
             }
-            b't' | b'e' | b'u' | b'm' | b'X' => runner.write_all(&opcode)?,
+            b't' | b'e' | b'u' | b'm' | b'X' => runner.write_all(&opcode),
             other => {
                 return Err(io::Error::other(format!(
                     "unexpected backend DTLS opcode {other}"
                 )));
             }
+        };
+        match forwarded {
+            Ok(()) => {}
+            Err(error) if runner_gone(&error) => return Ok(()),
+            Err(error) => return Err(error),
         }
     }
     Ok(())
