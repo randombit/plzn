@@ -1,5 +1,7 @@
+# OpenSSL 4.0 implements RFC 7919 negotiated FFDHE groups (e23b33a995), and
+# advertises/honours them in TLS 1.2 as well (e9e0480e5d); 3.6 served its
+# automatic MODP parameters instead.
 plzn tls "server/tls12-ffdhe-negotiation/dhe-preferred" {
-  xfail openssl "selects DHE but serves the RFC 3526 2048-bit MODP group instead of the offered ffdhe2048 (its automatic DH parameters ignore supported_groups in TLS 1.2)"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -27,7 +29,6 @@ plzn tls "server/tls12-ffdhe-negotiation/dhe-preferred" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-negotiation" {
-  xfail openssl "uses a legacy 2048-bit DH group instead of the offered ffdhe2048 group"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -54,7 +55,6 @@ plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-negotiation" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe3072-negotiation" {
-  xfail openssl "uses a legacy 2048-bit DH group instead of the offered ffdhe3072 group"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -81,7 +81,6 @@ plzn tls "server/tls12-ffdhe-negotiation/ffdhe3072-negotiation" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/unassigned-tolerance" {
-  xfail openssl "uses a legacy DH group instead of the offered ffdhe2048 group"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -108,7 +107,6 @@ plzn tls "server/tls12-ffdhe-negotiation/unassigned-tolerance" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ecc-curve-tolerated-without-ecc-cipher" {
-  xfail openssl "uses a legacy DH group instead of the offered ffdhe2048 group"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -135,7 +133,6 @@ plzn tls "server/tls12-ffdhe-negotiation/ecc-curve-tolerated-without-ecc-cipher"
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-or-ffdhe3072" {
-  xfail openssl "uses a legacy DH group instead of either offered FFDHE group"
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {

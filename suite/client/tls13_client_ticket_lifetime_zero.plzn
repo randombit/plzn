@@ -2,7 +2,6 @@ plzn tls "client/tls13-ticket-lifetime-zero" {
   rfc 8446 section 4.6.1
   chain: [default]
   uut client { versions: [tls13] }
-  xfail openssl "offers a ticket_lifetime = 0 ticket on the next connection (RFC 8446 4.6.1: discard immediately)"
   xfail rustls "offers a ticket_lifetime = 0 ticket on the next connection (RFC 8446 4.6.1: discard immediately)"
 
   session initial {

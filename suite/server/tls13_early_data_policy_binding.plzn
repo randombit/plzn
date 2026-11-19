@@ -6,7 +6,6 @@ plzn tls "server/tls13-early-data-rejected-after-cipher-suite-change" {
     session_tickets: 1
     max_early_data: 1024
   }
-  xfail openssl "accepts 0-RTT across a same-hash cipher-suite change"
   xfail gnutls "accepts 0-RTT across a same-hash cipher-suite change"
   skip rustls "legally declines the changed-suite PSK entirely; this linear flow tests the permitted resume-without-0-RTT path"
 
@@ -48,7 +47,6 @@ plzn tls "server/tls13-early-data-rejected-for-skewed-ticket-age" {
     session_tickets: 1
     max_early_data: 1024
   }
-  xfail openssl "decodes an obfuscated_ticket_age below its ticket_age_add as age 0 and accepts the 0-RTT (fixed in OpenSSL 4.1)"
   skip gnutls "legally declines the skewed-age PSK entirely; this linear flow tests the permitted resume-without-0-RTT path"
 
   session initial {

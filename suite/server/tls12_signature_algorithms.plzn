@@ -79,6 +79,11 @@ plzn tls "server/tls12-signature-algorithms/tolerance-one-unknown" {
   expect ok
 }
 
+# OpenSSL (since 4.0, 447426a06c) keeps only the first 128 entries of
+# signature_algorithms and signature_algorithms_cert, so the real algorithm
+# listed after the unknown ones is dropped and no signature scheme is shared:
+# handshake_failure. LibreSSL caps the list too (32 entries before 4.4.1, 256
+# since) and answers decode_error when it is exceeded.
 plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
   rfc 5246 section 7.4.1.4.1
   uut server {
@@ -86,7 +91,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
   }
   peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
   chain: [rsa_2048]
-  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  matrix { n in [2355, 8132, 23754, 32000] }
   flow handshake {
     send ClientHello { +ext signature_algorithms = [0x0a00..$n + 0x09ff, rsa_pkcs1_sha256] } @ fragment 16384
     recv ServerHello
@@ -103,6 +108,34 @@ plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
   }
   expect ok
   expect alert fatal/decode_error if libressl
+  expect alert fatal/handshake_failure if openssl
+}
+
+# 215 unknown entries: above OpenSSL's 128-entry truncation, below LibreSSL
+# 4.4.1's 256-entry cap.
+plzn tls "server/tls12-signature-algorithms/tolerance-215-unknown" {
+  rfc 5246 section 7.4.1.4.1
+  uut server {
+    versions: [tls12]
+  }
+  peer { capabilities: [ecdhe_rsa, aes128_gcm_sha256] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello { +ext signature_algorithms = [0x0a00..0x0ad6, rsa_pkcs1_sha256] } @ fragment 16384
+    recv ServerHello
+    recv Certificate
+    recv ServerKeyExchange { signature_scheme: rsa_pkcs1_sha256 }
+    recv ServerHelloDone
+    send ClientKeyExchange
+    send ChangeCipherSpec
+    send Finished
+    recv ChangeCipherSpec
+    recv Finished
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cert" {
@@ -131,6 +164,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cer
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls12-signature-algorithms/empty-list" {

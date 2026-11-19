@@ -1,3 +1,12 @@
+# The "unknown" ranges skip 0x0029: that is curveSM2 (RFC 8998), which OpenSSL
+# implements since 4.0 and keeps in its default group list, so a bogus key share
+# for it drew illegal_parameter (BAD_KEY_SHARE) instead of being ignored.
+#
+# OpenSSL (since 4.0, 447426a06c and c577864b9b) also keeps only the first 128
+# supported_groups entries and the first 16 key_share entries and ignores the
+# rest, so a known group listed after 221 or 246 unknown ones is never seen:
+# no shared group, handshake_failure, where the other backends negotiate it.
+
 plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-secp256r1-listed" {
   rfc 8446 section 4.2.8
   chain: [default]
@@ -8,8 +17,8 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-secp256r1-
   matrix { size in [64, 128, 256] }
   flow handshake {
     send ClientHello {
-      +ext supported_groups = [secp256r1, 0x0022..0x00fe]
-      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+      +ext supported_groups = [secp256r1, 0x0022..0x0028, 0x002a..0x00fe]
+      +ext key_share = [0x0022..0x0028 : 0xab * $size, 0x002a..0x00fe : 0xab * $size]
     } @ fragment 16384
     recv HelloRetryRequest { key_share_group: secp256r1, has_ext: supported_versions }
     send AppData
@@ -29,14 +38,15 @@ plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-e
   matrix { size in [64, 128, 256] }
   flow handshake {
     send ClientHello {
-      +ext supported_groups = [0x0022..0x00fe, secp256r1]
-      +ext key_share = [0x0022..0x00fe : 0xab * $size, secp256r1]
+      +ext supported_groups = [0x0022..0x0028, 0x002a..0x00fe, secp256r1]
+      +ext key_share = [0x0022..0x0028 : 0xab * $size, 0x002a..0x00fe : 0xab * $size, secp256r1]
     } @ fragment 16384
     recv ServerHello { key_share_group: secp256r1 }
     send AppData
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
   expect alert fatal/decode_error if libressl
 }
 
@@ -51,8 +61,8 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-ffdhe2048-
   matrix { size in [64, 128, 256] }
   flow handshake {
     send ClientHello {
-      +ext supported_groups = [ffdhe2048, 0x0022..0x00fe]
-      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+      +ext supported_groups = [ffdhe2048, 0x0022..0x0028, 0x002a..0x00fe]
+      +ext key_share = [0x0022..0x0028 : 0xab * $size, 0x002a..0x00fe : 0xab * $size]
     } @ fragment 16384
     recv HelloRetryRequest { key_share_group: ffdhe2048, has_ext: supported_versions }
     send AppData
@@ -72,14 +82,15 @@ plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-e
   matrix { size in [64, 128, 256] }
   flow handshake {
     send ClientHello {
-      +ext supported_groups = [0x0022..0x00fe, ffdhe2048]
-      +ext key_share = [0x0022..0x00fe : 0xab * $size, ffdhe2048]
+      +ext supported_groups = [0x0022..0x0028, 0x002a..0x00fe, ffdhe2048]
+      +ext key_share = [0x0022..0x0028 : 0xab * $size, 0x002a..0x00fe : 0xab * $size, ffdhe2048]
     } @ fragment 16384
     recv ServerHello { key_share_group: ffdhe2048 }
     send AppData
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ec" {
@@ -91,8 +102,8 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ec" {
   matrix { size in [64, 128, 256] }
   flow {
     send ClientHello {
-      +ext supported_groups = [0x0022..0x00fe]
-      +ext key_share = [0x0022..0x00fe : 0xab * $size]
+      +ext supported_groups = [0x0022..0x0028, 0x002a..0x00fe]
+      +ext key_share = [0x0022..0x0028 : 0xab * $size, 0x002a..0x00fe : 0xab * $size]
     } @ fragment 16384
   }
   expect alert fatal/handshake_failure
@@ -139,6 +150,7 @@ plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-f
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
   expect alert fatal/decode_error if libressl
 }
 
@@ -182,6 +194,7 @@ plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-f
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ffdhe" {

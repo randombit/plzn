@@ -1,3 +1,9 @@
+# The long "unknown" lists skip 41 (0x0029): curveSM2 (RFC 8998), which
+# OpenSSL implements since 4.0 and would otherwise select. OpenSSL also keeps
+# only the first 128 supported_groups entries (447426a06c), so secp256r1 after
+# 244 unknown groups is never seen and it answers handshake_failure instead of
+# retrying.
+
 plzn tls "server/tls13-no-unknown-groups/valid-handshake" {
   rfc 8446 section 4.2.7
   chain: [default]
@@ -23,7 +29,7 @@ plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown-plus-recognised" {
   peer { capabilities: [hrr, secp256r1] }
   flow handshake {
     send ClientHello {
-      +ext supported_groups = [1..22, 34..255, secp256r1]
+      +ext supported_groups = [1..22, 34..40, 42..255, secp256r1]
       +ext key_share = raw "0000"
     }
     recv HelloRetryRequest { has_ext: key_share }
@@ -32,6 +38,7 @@ plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown-plus-recognised" {
   }
   expect ok
   expect alert fatal/decode_error if libressl
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown" {
@@ -42,7 +49,7 @@ plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown" {
   }
   flow {
     send ClientHello {
-      +ext supported_groups = [1..22, 34..255]
+      +ext supported_groups = [1..22, 34..40, 42..255]
       +ext key_share = raw "0000"
     }
   }
