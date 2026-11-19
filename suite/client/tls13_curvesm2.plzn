@@ -1,0 +1,37 @@
+# RFC 8998 curveSM2 (named group 41) from the client side: plzn's server
+# accepts only curveSM2, so the handshake completes only if the client offers a
+# valid SM2 share and agrees on the x-coordinate secret. Only OpenSSL 4
+# implements the group; the other shims skip the configuration.
+
+plzn tls "client/tls13-curvesm2-group" {
+  rfc 8998 section 3.3.1
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [curvesm2]
+  }
+  peer { capabilities: [curvesm2] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The client key-shares x25519 only and lists curveSM2 second; plzn's server
+# retries for curveSM2 and the client answers with a fresh SM2 share.
+plzn tls "client/tls13-curvesm2-after-hrr" {
+  rfc 8998 section 3.3.1
+  rfc 8446 section 4.1.4
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    curves: [x25519, curvesm2]
+  }
+  peer { capabilities: [hrr, curvesm2] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

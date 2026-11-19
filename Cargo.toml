@@ -58,6 +58,7 @@ p521 = { version = "0.13", features = ["ecdsa", "ecdh"] }
 rand_chacha = "0.3"
 rand_core = "0.6"
 rsa = { version = "0.9", features = ["sha2", "hazmat"] }
+sm2 = { version = "0.14.0", default-features = false, features = ["arithmetic"] }
 sha1 = "0.10"
 sha2 = "0.10"
 x25519-dalek = { version = "2", features = ["static_secrets"] }

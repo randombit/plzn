@@ -353,6 +353,8 @@ const char* iana_group_to_name(uint16_t id) {
          return "brainpoolP384r1tls13";
       case 0x0021:
          return "brainpoolP512r1tls13";
+      case 0x0029:
+         return "curveSM2";  // RFC 8998, OpenSSL 4.0 and later
       case 0x0100:
          return "ffdhe2048";
       case 0x0101:

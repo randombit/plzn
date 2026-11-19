@@ -894,6 +894,9 @@ pub enum EcdheGroup {
     Bp384,
     Bp256Tls13,
     Bp384Tls13,
+    /// curveSM2 (RFC 8998): ECDHE on the SM2 curve of GB/T 32918.5-2017,
+    /// defined for TLS 1.3 only.
+    CurveSm2,
     Ffdhe2048,
     Ffdhe3072,
     Ffdhe4096,
@@ -965,6 +968,7 @@ impl EcdheGroup {
             0x001b => EcdheGroup::Bp384,
             0x001f => EcdheGroup::Bp256Tls13,
             0x0020 => EcdheGroup::Bp384Tls13,
+            0x0029 => EcdheGroup::CurveSm2,
             0x0100 => EcdheGroup::Ffdhe2048,
             0x0101 => EcdheGroup::Ffdhe3072,
             0x0102 => EcdheGroup::Ffdhe4096,
@@ -992,6 +996,7 @@ impl EcdheGroup {
             EcdheGroup::Bp384 => 0x001b,
             EcdheGroup::Bp256Tls13 => 0x001f,
             EcdheGroup::Bp384Tls13 => 0x0020,
+            EcdheGroup::CurveSm2 => 0x0029,
             EcdheGroup::Ffdhe2048 => 0x0100,
             EcdheGroup::Ffdhe3072 => 0x0101,
             EcdheGroup::Ffdhe4096 => 0x0102,
@@ -1018,6 +1023,7 @@ impl EcdheGroup {
         EcdheGroup::Bp384,
         EcdheGroup::Bp256Tls13,
         EcdheGroup::Bp384Tls13,
+        EcdheGroup::CurveSm2,
         EcdheGroup::Ffdhe2048,
         EcdheGroup::Ffdhe3072,
         EcdheGroup::Ffdhe4096,
@@ -1044,6 +1050,7 @@ impl EcdheGroup {
             EcdheGroup::Bp384 => "brainpoolP384r1",
             EcdheGroup::Bp256Tls13 => "brainpoolP256r1tls13",
             EcdheGroup::Bp384Tls13 => "brainpoolP384r1tls13",
+            EcdheGroup::CurveSm2 => "curveSM2",
             EcdheGroup::Ffdhe2048 => "ffdhe2048",
             EcdheGroup::Ffdhe3072 => "ffdhe3072",
             EcdheGroup::Ffdhe4096 => "ffdhe4096",
@@ -1070,7 +1077,7 @@ impl EcdheGroup {
         )
     }
 
-    /// A prime-order Weierstrass curve (NIST or brainpool): SEC1 points.
+    /// A prime-order Weierstrass curve (NIST, brainpool or SM2): SEC1 points.
     pub fn is_weierstrass(self) -> bool {
         matches!(
             self,
@@ -1081,6 +1088,7 @@ impl EcdheGroup {
                 | EcdheGroup::Bp384
                 | EcdheGroup::Bp256Tls13
                 | EcdheGroup::Bp384Tls13
+                | EcdheGroup::CurveSm2
         )
     }
 
@@ -1110,10 +1118,14 @@ impl EcdheGroup {
         self.is_pure_kem() || self.is_hybrid()
     }
 
-    /// Groups defined for TLS 1.3 only (RFC 8734 brainpool codepoints, every
-    /// KEM group): a TLS 1.2 server never selects them.
+    /// Groups defined for TLS 1.3 only (RFC 8734 brainpool codepoints, RFC
+    /// 8998 curveSM2, every KEM group): a TLS 1.2 server never selects them.
     pub fn is_tls13_only(self) -> bool {
-        self.is_kem() || matches!(self, EcdheGroup::Bp256Tls13 | EcdheGroup::Bp384Tls13)
+        self.is_kem()
+            || matches!(
+                self,
+                EcdheGroup::Bp256Tls13 | EcdheGroup::Bp384Tls13 | EcdheGroup::CurveSm2
+            )
     }
 
     /// The RFC 7027 brainpool codepoints, defined for TLS 1.2 only (RFC 8734 2).
@@ -1157,7 +1169,10 @@ impl EcdheGroup {
         match self {
             EcdheGroup::X25519 => 32,
             EcdheGroup::X448 => 56,
-            EcdheGroup::P256 | EcdheGroup::Bp256 | EcdheGroup::Bp256Tls13 => 65,
+            EcdheGroup::P256
+            | EcdheGroup::Bp256
+            | EcdheGroup::Bp256Tls13
+            | EcdheGroup::CurveSm2 => 65,
             EcdheGroup::P384 | EcdheGroup::Bp384 | EcdheGroup::Bp384Tls13 => 97,
             EcdheGroup::P521 => 133,
             EcdheGroup::Ffdhe2048 => 256,
@@ -1287,6 +1302,8 @@ pub enum EcdhePrivate {
         sk: bp384::r1::SecretKey,
         group: EcdheGroup,
     },
+    /// curveSM2 (RFC 8998), one codepoint.
+    Sm2(sm2::SecretKey),
     /// RFC 7919 finite-field group: the exponent bound to its prime.
     Ffdhe {
         key: FfdhePrivate,
@@ -1411,6 +1428,15 @@ fn bp256_secret(rng: &mut Rng) -> bp256::r1::SecretKey {
     }
 }
 
+fn sm2_secret(rng: &mut Rng) -> sm2::SecretKey {
+    loop {
+        let bytes: [u8; 32] = rng.random_array();
+        if let Ok(sk) = sm2::SecretKey::from_slice(&bytes) {
+            return sk;
+        }
+    }
+}
+
 fn bp384_secret(rng: &mut Rng) -> bp384::r1::SecretKey {
     loop {
         let bytes: [u8; 48] = rng.random_array();
@@ -1516,6 +1542,7 @@ impl EcdhePrivate {
                 sk: bp384_secret(rng),
                 group,
             },
+            EcdheGroup::CurveSm2 => EcdhePrivate::Sm2(sm2_secret(rng)),
             EcdheGroup::Ffdhe2048
             | EcdheGroup::Ffdhe3072
             | EcdheGroup::Ffdhe4096
@@ -1606,6 +1633,7 @@ impl EcdhePrivate {
             EcdhePrivate::P256(_) => EcdheGroup::P256,
             EcdhePrivate::P384(_) => EcdheGroup::P384,
             EcdhePrivate::P521(_) => EcdheGroup::P521,
+            EcdhePrivate::Sm2(_) => EcdheGroup::CurveSm2,
             EcdhePrivate::Bp256 { group, .. }
             | EcdhePrivate::Bp384 { group, .. }
             | EcdhePrivate::Ffdhe { group, .. }
@@ -1652,6 +1680,10 @@ impl EcdhePrivate {
                 use ec14::sec1::ToSec1Point;
                 sk.public_key().to_sec1_point(false).as_bytes().to_vec()
             }
+            EcdhePrivate::Sm2(sk) => {
+                use ec14::sec1::ToSec1Point;
+                sk.public_key().to_sec1_point(false).as_bytes().to_vec()
+            }
             // RFC 8446 4.2.8.1: Y = g^x mod p, left-padded to the prime's length.
             EcdhePrivate::Ffdhe { key, .. } => key.public_bytes(&FFDHE_G),
             EcdhePrivate::MlKem { dk, .. } => match dk {
@@ -1690,6 +1722,10 @@ impl EcdhePrivate {
                 Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
             }
             EcdhePrivate::Bp384 { sk, .. } => {
+                use ec14::sec1::ToSec1Point;
+                Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
+            }
+            EcdhePrivate::Sm2(sk) => {
                 use ec14::sec1::ToSec1Point;
                 Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
             }
@@ -1790,6 +1826,14 @@ impl EcdhePrivate {
             }
             EcdhePrivate::Bp384 { sk, .. } => {
                 let pk = ec14::PublicKey::<bp384::BrainpoolP384r1>::from_sec1_bytes(peer_public)
+                    .map_err(|_| CryptoError::BadPublicKey)?;
+                let shared = ec14::ecdh::diffie_hellman(sk.to_nonzero_scalar(), pk.as_affine());
+                Ok(shared.raw_secret_bytes().to_vec())
+            }
+            // RFC 8998 3.3: an ordinary ECDHE on curveSM2, the shared secret is
+            // the x-coordinate; `from_sec1_bytes` rejects a point off the curve.
+            EcdhePrivate::Sm2(sk) => {
+                let pk = ec14::PublicKey::<sm2::Sm2>::from_sec1_bytes(peer_public)
                     .map_err(|_| CryptoError::BadPublicKey)?;
                 let shared = ec14::ecdh::diffie_hellman(sk.to_nonzero_scalar(), pk.as_affine());
                 Ok(shared.raw_secret_bytes().to_vec())
@@ -4423,7 +4467,10 @@ mod tests {
             let expect_len = match group {
                 EcdheGroup::X25519 => 32,
                 EcdheGroup::X448 => 56,
-                EcdheGroup::P256 | EcdheGroup::Bp256 | EcdheGroup::Bp256Tls13 => 32,
+                EcdheGroup::P256
+                | EcdheGroup::Bp256
+                | EcdheGroup::Bp256Tls13
+                | EcdheGroup::CurveSm2 => 32,
                 EcdheGroup::P384 | EcdheGroup::Bp384 | EcdheGroup::Bp384Tls13 => 48,
                 EcdheGroup::P521 => 66,
                 EcdheGroup::Ffdhe2048 => 256,
@@ -4518,6 +4565,57 @@ mod tests {
         );
         let c = EcdhePrivate::generate(EcdheGroup::Bp384, &mut rng);
         assert_eq!(c.public_bytes().len(), 97);
+    }
+
+    /// curveSM2 against an independent implementation: a key pair and shared
+    /// secret produced by Botan (ECDH on sm2p256v1, raw x-coordinate KDF), and
+    /// the generator of RFC 8998 3.2.1 as the public key of scalar 1.
+    #[test]
+    fn curvesm2_matches_botan_known_answer() {
+        let a_scalar =
+            hex_to_bytes("e9e802805283b05c672dc89ccf1371fe32d72e373b516ead1a9b4492b1b7a770");
+        let a_pub = hex_to_bytes(
+            "04a15ea26e7eaf71dd30a5a2a01310545a9170e65dcdcc5fb89f1d97b01be42bbb\
+             af27eb42d6abf8d003caee4de6b04e41aaa1cfe6b037abab2490dd414bca23c4",
+        );
+        let b_scalar =
+            hex_to_bytes("82295c520b9ccdc5ad43a4b4b23153cdcbd2b511a036c7ea36bfbc23d51dd9fc");
+        let b_pub = hex_to_bytes(
+            "04d4f1a75d7eb6d7c31d11c7517154a1fd30125d09116fa21350ec7ffcbe3bcfae\
+             6b438204790cd73104abe2779fdbc05701bac233a992fea1de37b5761e169746",
+        );
+        let shared =
+            hex_to_bytes("8a81f3dff5cbcc2e2b7348b6fdaee45b41073ffe5e101a0364b022c5fee801f5");
+        // `agree` consumes the key, so build each side as needed.
+        let key = |scalar: &[u8]| EcdhePrivate::Sm2(sm2::SecretKey::from_slice(scalar).unwrap());
+        let a = key(&a_scalar);
+        assert_eq!(a.group(), EcdheGroup::CurveSm2);
+        assert_eq!(a.public_bytes(), a_pub);
+        assert_eq!(a.public_bytes_compressed().unwrap().len(), 33);
+        assert_eq!(key(&b_scalar).public_bytes(), b_pub);
+        assert_eq!(a.agree(&b_pub).unwrap(), shared);
+        assert_eq!(key(&b_scalar).agree(&a_pub).unwrap(), shared);
+
+        let mut one = [0u8; 32];
+        one[31] = 1;
+        let g = EcdhePrivate::Sm2(sm2::SecretKey::from_slice(&one).unwrap());
+        assert_eq!(
+            g.public_bytes(),
+            hex_to_bytes(
+                "0432c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7\
+                 bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
+            )
+        );
+
+        let mut off_curve = b_pub.clone();
+        off_curve[64] ^= 1;
+        assert!(
+            key(&a_scalar).agree(&off_curve).is_err(),
+            "off-curve SM2 point must be rejected"
+        );
+        assert!(EcdheGroup::CurveSm2.is_tls13_only());
+        assert!(EcdheGroup::CurveSm2.is_weierstrass());
+        assert_eq!(EcdheGroup::from_wire(0x0029), Some(EcdheGroup::CurveSm2));
     }
 
     #[test]

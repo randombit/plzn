@@ -61,6 +61,8 @@ pub const GROUPS: &[&str] = &[
     "secp256r1mlkem768",
     "secp384r1mlkem1024",
     "x448mlkem1024",
+    // RFC 8998 curveSM2 (TLS 1.3 only).
+    "curvesm2",
 ];
 
 pub const SIG_ALGS: &[&str] = &[
@@ -646,6 +648,7 @@ pub fn group_wire_value(name: &str) -> Option<u16> {
             "x25519mlkem768" => 0x11ec,
             "secp384r1mlkem1024" => 0x11ed,
             "x448mlkem1024" => 0x11ee,
+            "curvesm2" => 0x0029,
             _ => return None,
         },
     })
@@ -1352,6 +1355,7 @@ const GROUP_NAMES: &[(&str, u16)] = &[
     ("X25519MLKEM768", 0x11ec),
     ("SecP384r1MLKEM1024", 0x11ed),
     ("X448MLKEM1024", 0x11ee),
+    ("curveSM2", 0x0029),
 ];
 
 /// The canonical name of a named-group wire value.

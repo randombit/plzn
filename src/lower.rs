@@ -825,7 +825,7 @@ fn lower_with_binding(
                     message: format!(
                         "plzn's client cannot generate a key share for `{}`; list an \
                          implemented group first (x25519, x448, secp256r1, secp384r1, secp521r1, \
-                         brainpoolP256r1tls13, brainpoolP384r1tls13, ffdhe2048, ffdhe3072, \
+                         brainpoolP256r1tls13, brainpoolP384r1tls13, curveSM2, ffdhe2048, ffdhe3072, \
                          ffdhe4096, ffdhe6144, ffdhe8192, \
                          mlkem512/768/1024, x25519mlkem768, x448mlkem1024, secp256r1mlkem768, \
                          secp384r1mlkem1024) or use `+ext key_share = [...]` to choose \
