@@ -206,6 +206,8 @@ pub fn aead_alg_for(cipher: crate::ir::BulkCipher) -> Option<AeadAlg> {
         B::Aria256Gcm => AeadAlg::Aria256Gcm,
         B::Camellia128Gcm => AeadAlg::Camellia128Gcm,
         B::Camellia256Gcm => AeadAlg::Camellia256Gcm,
+        B::Sm4Gcm => AeadAlg::Sm4Gcm,
+        B::Sm4Ccm => AeadAlg::Sm4Ccm,
         B::ChaCha20Poly1305 => AeadAlg::ChaCha20Poly1305,
         B::Aes128Cbc | B::Aes256Cbc | B::TripleDesCbc | B::Null => return None,
     })

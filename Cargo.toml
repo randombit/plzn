@@ -59,6 +59,10 @@ rand_chacha = "0.3"
 rand_core = "0.6"
 rsa = { version = "0.9", features = ["sha2", "hazmat"] }
 sm2 = { version = "0.14.0", default-features = false, features = ["arithmetic"] }
+# SM3 / SM4 for the RFC 8998 suites, on the digest 0.10 / cipher 0.4 generation the
+# other hashes and block ciphers use (0.5 / 0.6 moved to digest 0.11 / cipher 0.5).
+sm3 = "0.4"
+sm4 = "0.5"
 sha1 = "0.10"
 sha2 = "0.10"
 x25519-dalek = { version = "2", features = ["static_secrets"] }

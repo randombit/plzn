@@ -493,9 +493,35 @@ const char* tls13_suite_name(uint16_t id) {
          return "TLS_AES_128_CCM_SHA256";
       case 0x1305:
          return "TLS_AES_128_CCM_8_SHA256";
+      case 0x00C6:
+         return "TLS_SM4_GCM_SM3";  // RFC 8998; OpenSSL keeps them out of its default list
+      case 0x00C7:
+         return "TLS_SM4_CCM_SM3";
       default:
          return nullptr;
    }
+}
+
+// Every TLS 1.3 suite this build implements, for the permissive default
+// context and the capability probe. OpenSSL's own default list omits the
+// RFC 8998 SM4 suites (and a no-sm4 build lacks them), so they are appended
+// only when a scratch context accepts the names.
+const char* tls13_all_ciphersuites() {
+   static const std::string list = [] {
+      std::string base =
+         "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:"
+         "TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256";
+      SSL_CTX* probe = SSL_CTX_new(TLS_method());
+      if(probe != nullptr) {
+         if(SSL_CTX_set_ciphersuites(probe, "TLS_SM4_GCM_SM3:TLS_SM4_CCM_SM3") == 1) {
+            base += ":TLS_SM4_GCM_SM3:TLS_SM4_CCM_SM3";
+         }
+         ERR_clear_error();
+         SSL_CTX_free(probe);
+      }
+      return base;
+   }();
+   return list.c_str();
 }
 
 // Map a 16-bit TLS 1.2 (and DTLS 1.2) cipher-suite ID to its OpenSSL cipher name
@@ -1476,9 +1502,7 @@ void configure_ctx(SSL_CTX* ctx, const ShimConfig& cfg) {
       if(SSL_CTX_set_cipher_list(ctx, "ALL:COMPLEMENTOFALL") != 1) {
          throw std::runtime_error("failed to set the permissive cipher list: " + openssl_errors());
       }
-      if(SSL_CTX_set_ciphersuites(ctx,
-                                  "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:"
-                                  "TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256") != 1) {
+      if(SSL_CTX_set_ciphersuites(ctx, tls13_all_ciphersuites()) != 1) {
          throw std::runtime_error("failed to set the TLS 1.3 ciphersuites: " + openssl_errors());
       }
    } else {
@@ -1536,9 +1560,7 @@ void configure_ctx(SSL_CTX* ctx, const ShimConfig& cfg) {
       if(probe != nullptr) {
          SSL_CTX_set_security_level(probe, 0);
          SSL_CTX_set_cipher_list(probe, "ALL:COMPLEMENTOFALL");
-         SSL_CTX_set_ciphersuites(probe,
-                                  "TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256:"
-                                  "TLS_AES_128_CCM_SHA256:TLS_AES_128_CCM_8_SHA256");
+         SSL_CTX_set_ciphersuites(probe, tls13_all_ciphersuites());
          STACK_OF(SSL_CIPHER)* have = SSL_CTX_get_ciphers(probe);
          for(const uint16_t id : cfg.requires_any_suite) {
             for(int i = 0; have != nullptr && i < sk_SSL_CIPHER_num(have); ++i) {

@@ -37,6 +37,7 @@ use rsa::pss::VerifyingKey as RsaPssVerifyingKey;
 use rsa::signature::Verifier as _;
 use sha1::Sha1;
 use sha2::{Digest, Sha256, Sha384, Sha512};
+use sm3::Sm3;
 use x509_cert::Certificate;
 use x509_cert::der::Decode;
 use x509_cert::der::asn1::ObjectIdentifier;
@@ -130,6 +131,9 @@ pub enum HashAlg {
     Sha1,
     Sha256,
     Sha384,
+    /// SM3 (GB/T 32905-2016, ISO/IEC 10118-3): the hash of the RFC 8998
+    /// TLS 1.3 suites, 256-bit output.
+    Sm3,
 }
 
 impl HashAlg {
@@ -138,6 +142,7 @@ impl HashAlg {
             HashAlg::Sha1 => 20,
             HashAlg::Sha256 => 32,
             HashAlg::Sha384 => 48,
+            HashAlg::Sm3 => 32,
         }
     }
 }
@@ -148,6 +153,7 @@ impl HashAlg {
 pub enum TranscriptHash {
     Sha256(Sha256),
     Sha384(Sha384),
+    Sm3(Sm3),
 }
 
 impl TranscriptHash {
@@ -155,6 +161,7 @@ impl TranscriptHash {
         match alg {
             HashAlg::Sha256 => TranscriptHash::Sha256(Sha256::new()),
             HashAlg::Sha384 => TranscriptHash::Sha384(Sha384::new()),
+            HashAlg::Sm3 => TranscriptHash::Sm3(Sm3::new()),
             HashAlg::Sha1 => panic!("SHA-1 is not used for transcript hashing"),
         }
     }
@@ -163,6 +170,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(h) => h.update(bytes),
             TranscriptHash::Sha384(h) => h.update(bytes),
+            TranscriptHash::Sm3(h) => h.update(bytes),
         }
     }
 
@@ -171,6 +179,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(h) => h.clone().finalize().to_vec(),
             TranscriptHash::Sha384(h) => h.clone().finalize().to_vec(),
+            TranscriptHash::Sm3(h) => h.clone().finalize().to_vec(),
         }
     }
 
@@ -178,6 +187,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(_) => HashAlg::Sha256,
             TranscriptHash::Sha384(_) => HashAlg::Sha384,
+            TranscriptHash::Sm3(_) => HashAlg::Sm3,
         }
     }
 }
@@ -188,6 +198,7 @@ pub fn hash(alg: HashAlg, data: &[u8]) -> Vec<u8> {
         HashAlg::Sha1 => Sha1::digest(data).to_vec(),
         HashAlg::Sha256 => Sha256::digest(data).to_vec(),
         HashAlg::Sha384 => Sha384::digest(data).to_vec(),
+        HashAlg::Sm3 => Sm3::digest(data).to_vec(),
     }
 }
 
@@ -212,6 +223,12 @@ pub fn hmac(alg: HashAlg, key: &[u8], data: &[u8]) -> Vec<u8> {
         HashAlg::Sha384 => {
             let mut m = <Hmac<Sha384> as Mac>::new_from_slice(key)
                 .expect("HMAC-SHA384 accepts any key length");
+            m.update(data);
+            m.finalize().into_bytes().to_vec()
+        }
+        HashAlg::Sm3 => {
+            let mut m =
+                <Hmac<Sm3> as Mac>::new_from_slice(key).expect("HMAC-SM3 accepts any key length");
             m.update(data);
             m.finalize().into_bytes().to_vec()
         }
@@ -263,6 +280,11 @@ pub fn hkdf_expand_label_with_prefix(
         }
         HashAlg::Sha384 => {
             let hkdf = Hkdf::<Sha384>::from_prk(secret).expect("secret >= hash output len");
+            hkdf.expand(&info, &mut out)
+                .expect("length fits HKDF-Expand output");
+        }
+        HashAlg::Sm3 => {
+            let hkdf = Hkdf::<Sm3>::from_prk(secret).expect("secret >= hash output len");
             hkdf.expand(&info, &mut out)
                 .expect("length fits HKDF-Expand output");
         }
@@ -361,6 +383,10 @@ pub fn hkdf_extract(alg: HashAlg, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
         }
         HashAlg::Sha384 => {
             let (prk, _) = Hkdf::<Sha384>::extract(Some(salt), ikm);
+            prk.to_vec()
+        }
+        HashAlg::Sm3 => {
+            let (prk, _) = Hkdf::<Sm3>::extract(Some(salt), ikm);
             prk.to_vec()
         }
         HashAlg::Sha1 => panic!("HKDF not supported with SHA-1"),
@@ -486,6 +512,10 @@ pub enum AeadAlg {
     /// RFC 6367 Camellia-GCM.
     Camellia128Gcm,
     Camellia256Gcm,
+    /// RFC 8998 3.5 AEAD_SM4_GCM / AEAD_SM4_CCM: SM4 (GB/T 32907-2016) in GCM
+    /// or CCM, 16-byte key, 12-byte nonce, 16-byte tag.
+    Sm4Gcm,
+    Sm4Ccm,
 }
 
 impl AeadAlg {
@@ -495,7 +525,9 @@ impl AeadAlg {
             | AeadAlg::Aes128Ccm
             | AeadAlg::Aes128Ccm8
             | AeadAlg::Aria128Gcm
-            | AeadAlg::Camellia128Gcm => 16,
+            | AeadAlg::Camellia128Gcm
+            | AeadAlg::Sm4Gcm
+            | AeadAlg::Sm4Ccm => 16,
             AeadAlg::Aes256Gcm
             | AeadAlg::Aes256Ccm
             | AeadAlg::Aes256Ccm8
@@ -526,6 +558,8 @@ type Aes128Ccm = ccm::Ccm<aes::Aes128, U16, U12>;
 type Aes256Ccm = ccm::Ccm<aes::Aes256, U16, U12>;
 type Aes128Ccm8 = ccm::Ccm<aes::Aes128, U8, U12>;
 type Aes256Ccm8 = ccm::Ccm<aes::Aes256, U8, U12>;
+type Sm4Gcm = AesGcm<sm4::Sm4, U12>;
+type Sm4Ccm = ccm::Ccm<sm4::Sm4, U16, U12>;
 
 fn aead_seal<A: KeyInit + Aead>(
     key: &[u8],
@@ -593,6 +627,8 @@ impl AeadKey {
             AeadAlg::Aria256Gcm => aead_seal::<Aria256Gcm>(k, nonce, payload),
             AeadAlg::Camellia128Gcm => aead_seal::<Camellia128Gcm>(k, nonce, payload),
             AeadAlg::Camellia256Gcm => aead_seal::<Camellia256Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Gcm => aead_seal::<Sm4Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Ccm => aead_seal::<Sm4Ccm>(k, nonce, payload),
         }
     }
 
@@ -624,6 +660,8 @@ impl AeadKey {
             AeadAlg::Aria256Gcm => aead_open::<Aria256Gcm>(k, nonce, payload),
             AeadAlg::Camellia128Gcm => aead_open::<Camellia128Gcm>(k, nonce, payload),
             AeadAlg::Camellia256Gcm => aead_open::<Camellia256Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Gcm => aead_open::<Sm4Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Ccm => aead_open::<Sm4Ccm>(k, nonce, payload),
         }
     }
 }
@@ -4616,6 +4654,61 @@ mod tests {
         assert!(EcdheGroup::CurveSm2.is_tls13_only());
         assert!(EcdheGroup::CurveSm2.is_weierstrass());
         assert_eq!(EcdheGroup::from_wire(0x0029), Some(EcdheGroup::CurveSm2));
+    }
+
+    /// SM3 against the GB/T 32905-2016 example ("abc"), through both the
+    /// one-shot and the transcript wrappers; HMAC/HKDF-SM3 have no published
+    /// vectors and are covered by the OpenSSL interop of the SM4 suites.
+    #[test]
+    fn sm3_matches_the_gbt_32905_example() {
+        let expected =
+            hex_to_bytes("66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0");
+        assert_eq!(hash(HashAlg::Sm3, b"abc"), expected);
+        let mut t = TranscriptHash::new(HashAlg::Sm3);
+        t.update(b"a");
+        t.update(b"bc");
+        assert_eq!(t.digest(), expected);
+        assert_eq!(t.alg(), HashAlg::Sm3);
+        assert_eq!(HashAlg::Sm3.output_len(), 32);
+        assert_eq!(hmac(HashAlg::Sm3, b"key", b"data").len(), 32);
+        assert_eq!(hkdf_extract(HashAlg::Sm3, b"salt", b"ikm").len(), 32);
+    }
+
+    /// RFC 8998 Appendix A: the SM4-GCM and SM4-CCM test vectors.
+    #[test]
+    fn sm4_aeads_match_rfc8998_appendix_a() {
+        let key = hex_to_bytes("0123456789ABCDEFFEDCBA9876543210");
+        let nonce = hex_to_bytes("00001234567800000000ABCD");
+        let aad = hex_to_bytes("FEEDFACEDEADBEEFFEEDFACEDEADBEEFABADDAD2");
+        let plaintext = hex_to_bytes(
+            "AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDD\
+             EEEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEAAAAAAAAAAAAAAAA",
+        );
+        let gcm_expected = hex_to_bytes(
+            "17F399F08C67D5EE19D0DC9969C4BB7D5FD46FD3756489069157B282BB200735\
+             D82710CA5C22F0CCFA7CBF93D496AC15A56834CBCF98C397B4024A2691233B8D\
+             83DE3541E4C2B58177E065A9BF7B62EC",
+        );
+        let ccm_expected = hex_to_bytes(
+            "48AF93501FA62ADBCD414CCE6034D895DDA1BF8F132F042098661572E7483094\
+             FD12E518CE062C98ACEE28D95DF4416BED31A2F04476C18BB40C84A74B97DC5B\
+             16842D4FA186F56AB33256971FA110F4",
+        );
+        for (alg, expected) in [
+            (AeadAlg::Sm4Gcm, gcm_expected),
+            (AeadAlg::Sm4Ccm, ccm_expected),
+        ] {
+            assert_eq!(alg.key_len(), 16);
+            assert_eq!(alg.nonce_len(), 12);
+            assert_eq!(alg.tag_len(), 16);
+            let k = AeadKey::new(alg, &key).unwrap();
+            let sealed = k.seal(&nonce, &aad, &plaintext).unwrap();
+            assert_eq!(sealed, expected, "{alg:?}");
+            assert_eq!(k.open(&nonce, &aad, &sealed).unwrap(), plaintext, "{alg:?}");
+            let mut tampered = sealed.clone();
+            tampered[0] ^= 1;
+            assert!(k.open(&nonce, &aad, &tampered).is_err(), "{alg:?}");
+        }
     }
 
     #[test]

@@ -32,6 +32,9 @@ pub const CIPHER_SUITES: &[&str] = &[
     "aes128_ccm_sha256",
     "aes128_ccm_8_sha256",
     // TLS 1.3 uses the same names; mapping is context-dependent.
+    // RFC 8998 ShangMi suites (TLS 1.3 only).
+    "sm4_gcm_sm3",
+    "sm4_ccm_sm3",
 ];
 
 pub const GROUPS: &[&str] = &[
@@ -105,9 +108,11 @@ pub const CIPHER_MODES: &[&str] = &[
     "ccm8",
     "aria",
     "camellia",
+    "sm4",
     "des3",
     "null",
     "sha384",
+    "sm3",
     "chacha20_poly1305",
 ];
 
@@ -666,6 +671,8 @@ pub fn tls13_suite_wire_value(name: &str) -> Option<u16> {
         "chacha20_poly1305_sha256" => 0x1303,
         "aes128_ccm_sha256" => 0x1304,
         "aes128_ccm_8_sha256" => 0x1305,
+        "sm4_gcm_sm3" => 0x00c6,
+        "sm4_ccm_sm3" => 0x00c7,
         _ => return None,
     })
 }

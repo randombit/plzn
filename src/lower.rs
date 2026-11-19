@@ -690,15 +690,19 @@ fn lower_with_binding(
             "aes128_ccm_8_sha256" => {
                 suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Aes128Ccm8))
             }
+            "sm4_gcm_sm3" => suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Sm4Gcm)),
+            "sm4_ccm_sm3" => suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Sm4Ccm)),
             "ccm" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Ccm)),
             "ccm8" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Ccm8)),
             "aria" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Aria)),
             "camellia" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Camellia)),
+            "sm4" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Sm4)),
             "des3" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::TripleDes)),
             "null" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Null)),
             "sha384" => {
                 suite_filters.push(ir::SuiteFilter::Prf(crate::tls::crypto::HashAlg::Sha384))
             }
+            "sm3" => suite_filters.push(ir::SuiteFilter::Prf(crate::tls::crypto::HashAlg::Sm3)),
             "session_ticket" => session_ticket = true,
             "session_id" => resume_by_session_id = true,
             "hrr" => hrr = true,

@@ -255,7 +255,8 @@ fn group_axis_pins_supported_groups_and_key_share() {
         vec![0x0201],
         vec![0x0202],
     ];
-    assert_eq!(programs.len(), 5 * expected_groups.len());
+    // Seven TLS 1.3 suites: the five of RFC 8446 plus the two RFC 8998 SM4 suites.
+    assert_eq!(programs.len(), 7 * expected_groups.len());
     for suite_cases in programs.chunks(expected_groups.len()) {
         let groups: Vec<Vec<u16>> = suite_cases
             .iter()

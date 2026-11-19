@@ -1198,6 +1198,8 @@ dependencies = [
  "sha1",
  "sha2",
  "sm2",
+ "sm3",
+ "sm4",
  "tempfile",
  "x25519-dalek",
  "x509-cert",
@@ -1639,6 +1641,24 @@ dependencies = [
  "primefield",
  "primeorder 0.14.0",
  "rand_core 0.10.1",
+]
+
+[[package]]
+name = "sm3"
+version = "0.4.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ebb9a3b702d0a7e33bc4d85a14456633d2b165c2ad839c5fd9a8417c1ab15860"
+dependencies = [
+ "digest 0.10.7",
+]
+
+[[package]]
+name = "sm4"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d7abf5135ffd68fb4b438e1fb246923b80d25eda386d8b798bb4ad3ed00f75f"
+dependencies = [
+ "cipher",
 ]
 
 [[package]]

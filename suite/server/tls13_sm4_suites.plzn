@@ -1,0 +1,82 @@
+# RFC 8998 ShangMi suites TLS_SM4_GCM_SM3 (0x00c6) and TLS_SM4_CCM_SM3
+# (0x00c7): SM4 in GCM or CCM with SM3 as the handshake hash, so the whole key
+# schedule, the transcript, Finished and the resumption binder run on SM3.
+# The suites negotiate independently of the signature scheme (RFC 8998 wants
+# sm2sig_sm3 for profile conformance, but nothing in TLS 1.3 ties them
+# together), and OpenSSL 4, the only backend that implements them, runs them
+# under an RSA or ECDSA certificate; the other shims skip the offer.
+
+plzn tls "server/tls13-sm4-suites/negotiated" {
+  rfc 8998 section 3.5
+  chain: [default]
+  uut server { versions: [tls13] }
+  matrix { suite in [SM4_GCM_SM3, SM4_CCM_SM3] }
+  flow handshake {
+    recv ServerHello { cipher_suite: $suite }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# An ECDSA chain instead of the default: authentication stays independent of
+# the SM suite.
+plzn tls "server/tls13-sm4-suites/ecdsa-chain" {
+  rfc 8998 section 3.3.1.2
+  chain: [ecdsa_p256]
+  uut server { versions: [tls13] }
+  peer { capabilities: [sm4_gcm_sm3] }
+  flow handshake {
+    recv ServerHello { cipher_suite: SM4_GCM_SM3 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# Resumption keeps the SM3 key schedule: the ticket's PSK binder and the
+# resumed handshake are computed over SM3 (RFC 8446 4.2.11).
+plzn tls "server/tls13-sm4-suites/resumption" {
+  rfc 8998 section 3.4
+  rfc 8446 section 4.2.11
+  chain: [default]
+  uut server {
+    versions: [tls13]
+    session_tickets: 1
+  }
+  peer { capabilities: [sm4_gcm_sm3] }
+
+  session initial {
+    flow handshake {
+      recv ServerHello { cipher_suite: SM4_GCM_SM3 }
+      recv NewSessionTicket
+      close
+    }
+    expect ok
+  }
+
+  session resumed [resumes: initial] {
+    flow handshake {
+      recv ServerHello {
+        cipher_suite: SM4_GCM_SM3
+        has_ext: pre_shared_key
+      }
+      send AppData
+      recv AppData
+    }
+    expect ok
+  }
+}
+
+# RFC 8998 3.1: the suites exist only in TLS 1.3. Offered alone to a server
+# that also speaks TLS 1.2, the TLS 1.3 handshake still runs; a TLS 1.2-only
+# server has nothing to pick.
+plzn tls "server/tls12-ignores-sm4-suites" {
+  rfc 8998 section 3.1
+  chain: [default]
+  uut server { versions: [tls12] }
+  flow handshake {
+    send ClientHello { cipher_suites: [SM4_GCM_SM3, SM4_CCM_SM3] }
+  }
+  expect alert fatal/handshake_failure
+}

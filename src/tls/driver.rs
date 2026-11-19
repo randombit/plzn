@@ -4309,6 +4309,11 @@ impl Tls13Client {
     }
 
     pub fn new_dtls13(transport: Box<dyn UutTransport>, cfg: Tls13ClientConfig) -> Self {
+        // IANA marks the RFC 8998 SM4 suites "DTLS-OK: No": a DTLS 1.3 offer
+        // never carries them, however the suite capabilities were narrowed.
+        let mut cfg = cfg;
+        cfg.cipher_suites
+            .retain(|w| crate::ir::suite_info(*w).is_none_or(|s| s.dtls13_ok()));
         Self::new_protocol(transport, cfg, true)
     }
 
