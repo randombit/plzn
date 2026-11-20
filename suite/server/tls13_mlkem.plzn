@@ -6,7 +6,7 @@ plzn tls "server/tls13-mlkem/basic-connection-with-hrr" {
   }
   peer { capabilities: [hrr] }
   matrix {
-    group in [X25519MLKEM768, X448MLKEM1024, SecP256r1MLKEM768, SecP384r1MLKEM1024, curveSM2MLKEM768, MLKEM512, MLKEM768, MLKEM1024]
+    group in [X25519MLKEM768, MLKEM1024X448, SecP256r1MLKEM768, SecP384r1MLKEM1024, curveSM2MLKEM768, MLKEM512, MLKEM768, MLKEM1024]
   }
   flow handshake {
     send ClientHello { +ext key_share = raw "0000" }
@@ -148,7 +148,7 @@ plzn tls "server/tls13-mlkem/truncated-key-share" {
     versions: [tls13]
   }
   matrix {
-    group in [0x11ec, 0xfe1e, 0x11eb, 0x11ed, 0x11ee, 0x0200, 0x0201, 0x0202]
+    group in [0x11ec, 0x11ef, 0x11eb, 0x11ed, 0x11ee, 0x0200, 0x0201, 0x0202]
   }
   flow handshake {
     send ClientHello { key_share_point: truncated }
@@ -165,7 +165,7 @@ plzn tls "server/tls13-mlkem/padded-key-share" {
     versions: [tls13]
   }
   matrix {
-    group in [0x11ec, 0xfe1e, 0x11eb, 0x11ed, 0x11ee, 0x0200, 0x0201, 0x0202]
+    group in [0x11ec, 0x11ef, 0x11eb, 0x11ed, 0x11ee, 0x0200, 0x0201, 0x0202]
   }
   flow handshake {
     send ClientHello { key_share_point: padded }

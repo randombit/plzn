@@ -2988,9 +2988,9 @@ plzn tls "lint/pq-groups" {
   uut server {
     versions: [tls13],
   }
-  peer { capabilities: [x448mlkem1024] }
+  peer { capabilities: [mlkem1024x448] }
   flow handshake {
-    recv ServerHello { key_share_group: X448MLKEM1024 }
+    recv ServerHello { key_share_group: MLKEM1024X448 }
     send AppData
     recv AppData
   }

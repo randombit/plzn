@@ -248,7 +248,7 @@ fn group_axis_pins_supported_groups_and_key_share() {
         vec![0x0103],
         vec![0x0104],
         vec![0x11ec],
-        vec![0xfe1e],
+        vec![0x11ef],
         vec![0x11eb],
         vec![0x11ed],
         vec![0x0200],

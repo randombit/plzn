@@ -946,14 +946,14 @@ pub enum EcdheGroup {
     MlKem512,
     MlKem768,
     MlKem1024,
-    /// ECDH + ML-KEM hybrids: the three draft-ietf-tls-ecdhe-mlkem groups,
-    /// draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (IANA 0x11ee), and
-    /// plzn's experimental X448MLKEM1024, which has no registry codepoint and
-    /// rides on the private-use value 0xfe1e. Shares and shared secrets are
-    /// plain concatenations, ML-KEM first for the historically reversed
-    /// X25519MLKEM768 name and ECDH first otherwise.
+    /// ECDH + ML-KEM hybrids: the three RFC 10024 groups,
+    /// draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (IANA 0x11ee) and
+    /// draft-preussmattsson-tls-mlkem1024-x448's MLKEM1024X448 (IANA 0x11ef).
+    /// Shares and shared secrets are plain concatenations in name order:
+    /// ML-KEM first for X25519MLKEM768 and MLKEM1024X448, ECDH first for the
+    /// rest.
     X25519MlKem768,
-    X448MlKem1024,
+    MlKem1024X448,
     Secp256r1MlKem768,
     Secp384r1MlKem1024,
     CurveSm2MlKem768,
@@ -1019,7 +1019,7 @@ impl EcdheGroup {
             0x0201 => EcdheGroup::MlKem768,
             0x0202 => EcdheGroup::MlKem1024,
             0x11ec => EcdheGroup::X25519MlKem768,
-            0xfe1e => EcdheGroup::X448MlKem1024,
+            0x11ef => EcdheGroup::MlKem1024X448,
             0x11eb => EcdheGroup::Secp256r1MlKem768,
             0x11ed => EcdheGroup::Secp384r1MlKem1024,
             0x11ee => EcdheGroup::CurveSm2MlKem768,
@@ -1048,7 +1048,7 @@ impl EcdheGroup {
             EcdheGroup::MlKem768 => 0x0201,
             EcdheGroup::MlKem1024 => 0x0202,
             EcdheGroup::X25519MlKem768 => 0x11ec,
-            EcdheGroup::X448MlKem1024 => 0xfe1e,
+            EcdheGroup::MlKem1024X448 => 0x11ef,
             EcdheGroup::Secp256r1MlKem768 => 0x11eb,
             EcdheGroup::Secp384r1MlKem1024 => 0x11ed,
             EcdheGroup::CurveSm2MlKem768 => 0x11ee,
@@ -1076,7 +1076,7 @@ impl EcdheGroup {
         EcdheGroup::MlKem768,
         EcdheGroup::MlKem1024,
         EcdheGroup::X25519MlKem768,
-        EcdheGroup::X448MlKem1024,
+        EcdheGroup::MlKem1024X448,
         EcdheGroup::Secp256r1MlKem768,
         EcdheGroup::Secp384r1MlKem1024,
         EcdheGroup::CurveSm2MlKem768,
@@ -1104,7 +1104,7 @@ impl EcdheGroup {
             EcdheGroup::MlKem768 => "MLKEM768",
             EcdheGroup::MlKem1024 => "MLKEM1024",
             EcdheGroup::X25519MlKem768 => "X25519MLKEM768",
-            EcdheGroup::X448MlKem1024 => "X448MLKEM1024",
+            EcdheGroup::MlKem1024X448 => "MLKEM1024X448",
             EcdheGroup::Secp256r1MlKem768 => "SecP256r1MLKEM768",
             EcdheGroup::Secp384r1MlKem1024 => "SecP384r1MLKEM1024",
             EcdheGroup::CurveSm2MlKem768 => "curveSM2MLKEM768",
@@ -1150,7 +1150,7 @@ impl EcdheGroup {
         matches!(
             self,
             EcdheGroup::X25519MlKem768
-                | EcdheGroup::X448MlKem1024
+                | EcdheGroup::MlKem1024X448
                 | EcdheGroup::Secp256r1MlKem768
                 | EcdheGroup::Secp384r1MlKem1024
                 | EcdheGroup::CurveSm2MlKem768
@@ -1187,7 +1187,7 @@ impl EcdheGroup {
             | EcdheGroup::X25519MlKem768
             | EcdheGroup::Secp256r1MlKem768
             | EcdheGroup::CurveSm2MlKem768 => MlKemParam::M768,
-            EcdheGroup::MlKem1024 | EcdheGroup::X448MlKem1024 | EcdheGroup::Secp384r1MlKem1024 => {
+            EcdheGroup::MlKem1024 | EcdheGroup::MlKem1024X448 | EcdheGroup::Secp384r1MlKem1024 => {
                 MlKemParam::M1024
             }
             _ => return None,
@@ -1198,7 +1198,7 @@ impl EcdheGroup {
     pub fn ecdh_component(self) -> Option<EcdheGroup> {
         Some(match self {
             EcdheGroup::X25519MlKem768 => EcdheGroup::X25519,
-            EcdheGroup::X448MlKem1024 => EcdheGroup::X448,
+            EcdheGroup::MlKem1024X448 => EcdheGroup::X448,
             EcdheGroup::Secp256r1MlKem768 => EcdheGroup::P256,
             EcdheGroup::Secp384r1MlKem1024 => EcdheGroup::P384,
             EcdheGroup::CurveSm2MlKem768 => EcdheGroup::CurveSm2,
@@ -1206,10 +1206,11 @@ impl EcdheGroup {
         })
     }
 
-    /// Whether a hybrid's shares and secret put the ML-KEM half first. Only
-    /// X25519MLKEM768 has the historical reverse-of-name ordering.
+    /// Whether a hybrid's shares and secret put the ML-KEM half first: the
+    /// two whose names lead with ML-KEM (RFC 10024 3.1.2 and
+    /// draft-preussmattsson-tls-mlkem1024-x448 3).
     pub fn kem_first(self) -> bool {
-        self == EcdheGroup::X25519MlKem768
+        matches!(self, EcdheGroup::X25519MlKem768 | EcdheGroup::MlKem1024X448)
     }
 
     /// Length of the share the INITIATOR (client) sends for this group.
@@ -1232,7 +1233,7 @@ impl EcdheGroup {
                 self.kem_param().expect("kem").ek_len()
             }
             EcdheGroup::X25519MlKem768
-            | EcdheGroup::X448MlKem1024
+            | EcdheGroup::MlKem1024X448
             | EcdheGroup::Secp256r1MlKem768
             | EcdheGroup::Secp384r1MlKem1024
             | EcdheGroup::CurveSm2MlKem768 => {
@@ -1616,7 +1617,7 @@ impl EcdhePrivate {
                 group,
             },
             EcdheGroup::X25519MlKem768
-            | EcdheGroup::X448MlKem1024
+            | EcdheGroup::MlKem1024X448
             | EcdheGroup::Secp256r1MlKem768
             | EcdheGroup::Secp384r1MlKem1024
             | EcdheGroup::CurveSm2MlKem768 => {
@@ -4532,7 +4533,7 @@ mod tests {
                 EcdheGroup::X25519MlKem768
                 | EcdheGroup::Secp256r1MlKem768
                 | EcdheGroup::CurveSm2MlKem768 => 64,
-                EcdheGroup::X448MlKem1024 => 88,
+                EcdheGroup::MlKem1024X448 => 88,
                 EcdheGroup::Secp384r1MlKem1024 => 80,
             };
             assert_eq!(ss_c.len(), expect_len, "{}", group.name());
@@ -4540,8 +4541,8 @@ mod tests {
         }
     }
 
-    /// X25519MLKEM768 puts the ML-KEM half first in both shares and in the
-    /// secret; all other hybrids follow their names and put ECDH first.
+    /// X25519MLKEM768 and MLKEM1024X448 put the ML-KEM half first in both
+    /// shares and in the secret; the other hybrids put ECDH first.
     #[test]
     fn hybrid_shares_follow_their_defined_order() {
         let mut rng_c = Rng::from_seed([31u8; 32]);
@@ -4559,25 +4560,39 @@ mod tests {
         let server = EcdhePrivate::respond(EcdheGroup::X25519MlKem768, &share, &mut rng_s).unwrap();
         assert_eq!(server.public_bytes().len(), 1120);
 
-        // X448MLKEM1024 follows the normal name order: x448(56) || ek(1568).
-        let client = EcdhePrivate::generate(EcdheGroup::X448MlKem1024, &mut rng_c);
+        // MLKEM1024X448 (draft-preussmattsson-tls-mlkem1024-x448 3): ek(1568) ||
+        // x448(56); server: ct(1568) || x448(56); secret ML-KEM(32) || X448(56).
+        let client = EcdhePrivate::generate(EcdheGroup::MlKem1024X448, &mut rng_c);
         let share = client.public_bytes();
         assert_eq!(share.len(), 1624);
-        let (ecdh, kem) = match &client {
-            EcdhePrivate::Hybrid { ecdh, kem, .. } => (ecdh.public_bytes(), kem.public_bytes()),
+        let (ecdh_client, kem_client) = match client {
+            EcdhePrivate::Hybrid { ecdh, kem, .. } => (*ecdh, *kem),
             _ => panic!("hybrid"),
         };
-        assert_eq!(&share[..56], &ecdh[..]);
-        assert_eq!(&share[56..], &kem[..]);
-        let server = EcdhePrivate::respond(EcdheGroup::X448MlKem1024, &share, &mut rng_s).unwrap();
-        assert_eq!(server.public_bytes().len(), 1624);
+        assert_eq!(&share[..1568], &kem_client.public_bytes()[..]);
+        assert_eq!(&share[1568..], &ecdh_client.public_bytes()[..]);
+        let server = EcdhePrivate::respond(EcdheGroup::MlKem1024X448, &share, &mut rng_s).unwrap();
+        let sshare = server.public_bytes();
+        assert_eq!(sshare.len(), 1624);
+        let ss_server = server.agree(&share).unwrap();
+        assert_eq!(ss_server.len(), 88);
+        assert_eq!(
+            &ss_server[..32],
+            &kem_client.agree(&sshare[..1568]).unwrap()[..],
+            "ML-KEM secret leads"
+        );
+        assert_eq!(
+            &ss_server[32..],
+            &ecdh_client.agree(&sshare[1568..]).unwrap()[..],
+            "X448 secret trails"
+        );
 
         // The hybrid fails if its classical component has a low-order point.
-        let client = EcdhePrivate::generate(EcdheGroup::X448MlKem1024, &mut rng_c);
+        let client = EcdhePrivate::generate(EcdheGroup::MlKem1024X448, &mut rng_c);
         let mut client_share = client.public_bytes();
-        client_share[..56].fill(0);
+        client_share[1568..].fill(0);
         let server =
-            EcdhePrivate::respond(EcdheGroup::X448MlKem1024, &client_share, &mut rng_s).unwrap();
+            EcdhePrivate::respond(EcdheGroup::MlKem1024X448, &client_share, &mut rng_s).unwrap();
         assert_eq!(server.agree(&client_share), Err(CryptoError::BadPublicKey));
 
         // SecP256r1MLKEM768: p256(65) || ek(1184); server p256(65) || ct(1088).
@@ -4734,8 +4749,8 @@ mod tests {
         let g = EcdheGroup::CurveSm2MlKem768;
         assert_eq!(EcdheGroup::from_wire(0x11ee), Some(g));
         assert_eq!(
-            EcdheGroup::from_wire(0xfe1e),
-            Some(EcdheGroup::X448MlKem1024)
+            EcdheGroup::from_wire(0x11ef),
+            Some(EcdheGroup::MlKem1024X448)
         );
         assert!(g.is_hybrid() && !g.kem_first() && g.is_tls13_only());
         assert_eq!(g.ecdh_component(), Some(EcdheGroup::CurveSm2));

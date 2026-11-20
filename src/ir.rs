@@ -3466,19 +3466,19 @@ pub struct RfcRef {
 
 /// Named groups the TLS 1.3 client can generate a key share for: x25519, x448,
 /// secp256r1, secp384r1, secp521r1, brainpoolP256r1tls13 / P384r1tls13
-/// (RFC 8734 codepoints), all five RFC 7919 FFDHE groups, ML-KEM-512/768/1024 and the
-/// X25519MLKEM768 / X448MLKEM1024 / SecP256r1MLKEM768 /
-/// SecP384r1MLKEM1024 hybrids, RFC 8998 curveSM2 (TLS 1.3 only, ECDHE on the
-/// SM2 curve) and draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (0x11ee).
-/// X448MLKEM1024 has no registry codepoint and lives on the private-use value
-/// 0xfe1e. brainpoolP512r1tls13 can be advertised in supported_groups but not
+/// (RFC 8734 codepoints), all five RFC 7919 FFDHE groups, ML-KEM-512/768/1024, the
+/// RFC 10024 X25519MLKEM768 / SecP256r1MLKEM768 / SecP384r1MLKEM1024 hybrids,
+/// RFC 8998 curveSM2 (TLS 1.3 only, ECDHE on the SM2 curve),
+/// draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (0x11ee) and
+/// draft-preussmattsson-tls-mlkem1024-x448's MLKEM1024X448 (0x11ef).
+/// brainpoolP512r1tls13 can be advertised in supported_groups but not
 /// key-shared, and the RFC 7027 brainpool codepoints are TLS 1.2-only. Not
 /// every backend implements all of these (rustls has neither P-521, brainpool
 /// nor FFDHE; only OpenSSL 4 has the SM2 groups), which is why the
 /// `groups(tls13)` matrix set is narrower.
 pub const CLIENT_KEY_SHARE_GROUPS: &[u16] = &[
     0x001d, 0x001e, 0x0017, 0x0018, 0x0019, 0x001f, 0x0020, 0x0029, 0x0100, 0x0101, 0x0102, 0x0103,
-    0x0104, 0x0200, 0x0201, 0x0202, 0x11eb, 0x11ec, 0x11ed, 0x11ee, 0xfe1e,
+    0x0104, 0x0200, 0x0201, 0x0202, 0x11eb, 0x11ec, 0x11ed, 0x11ee, 0x11ef,
 ];
 
 #[cfg(test)]
