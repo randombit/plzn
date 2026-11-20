@@ -15,6 +15,7 @@
 # number that reaches its version field flips it to 5-byte TLS framing.
 
 plzn tls "dtls12/clienthello-tls-legacy-version" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -35,6 +36,7 @@ plzn tls "dtls12/clienthello-tls-legacy-version" {
 # supported_versions listing only stream-TLS versions. A DTLS server that
 # honours the extension has no shared version.
 plzn tls "dtls12/clienthello-supported-versions-tls13-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -47,6 +49,7 @@ plzn tls "dtls12/clienthello-supported-versions-tls13-only" {
 }
 
 plzn tls "dtls12/clienthello-supported-versions-tls12-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -60,6 +63,7 @@ plzn tls "dtls12/clienthello-supported-versions-tls12-only" {
 }
 
 plzn tls "dtls12/clienthello-supported-versions-tls13-and-tls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -75,6 +79,7 @@ plzn tls "dtls12/clienthello-supported-versions-tls13-and-tls12" {
 # The correct DTLS form of the extension. Botan's DTLS 1.2 client sends
 # exactly this, so the LibreSSL rejection is a live interoperability failure.
 plzn tls "dtls12/clienthello-supported-versions-dtls12-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -92,6 +97,7 @@ plzn tls "dtls12/clienthello-supported-versions-dtls12-only" {
 
 # The offer a DTLS 1.3-capable client makes to a DTLS 1.2 server (RFC 9147 5.3).
 plzn tls "dtls12/clienthello-supported-versions-dtls13-then-dtls12" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [ecdsa_p256]
   uut server {
@@ -108,6 +114,7 @@ plzn tls "dtls12/clienthello-supported-versions-dtls13-then-dtls12" {
 }
 
 plzn tls "dtls12/clienthello-supported-versions-tls-then-dtls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -124,6 +131,7 @@ plzn tls "dtls12/clienthello-supported-versions-tls-then-dtls12" {
 }
 
 plzn tls "dtls12/clienthello-supported-versions-dtls12-then-tls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -143,6 +151,7 @@ plzn tls "dtls12/clienthello-supported-versions-dtls12-then-tls" {
 # governs negotiation; the legacy field still selects Botan's parse format and
 # LibreSSL's alert framing.
 plzn tls "dtls12/clienthello-tls-legacy-version-with-supported-versions-dtls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -165,6 +174,7 @@ plzn tls "dtls12/clienthello-tls-legacy-version-with-supported-versions-dtls12" 
 # silently discards records with a wrong version instead of alerting, so the
 # association must still come up on the following proper flight.
 plzn tls "dtls12/clienthello-tls-record-version-stray-before-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -196,6 +206,7 @@ plzn tls "dtls12/clienthello-tls-record-version-stray-before-flight" {
 # take it as an offer of TLS 1.2: that would select a stream TLS version on
 # the datagram connection and skip the cookie exchange (RFC 6347 4.2.1).
 plzn tls "dtls12/clienthello-tls-legacy-version-tls-format" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {

@@ -6,6 +6,7 @@
 # length=0x0106 (262 bytes). Handshake header: type=0x10 (CKE),
 # length=0x000102 (258 bytes). Body: 258 bytes of 0xff.
 plzn tls "negative/skip-clienthello" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }

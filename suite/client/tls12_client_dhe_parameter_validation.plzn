@@ -1,4 +1,5 @@
 plzn tls "client/tls12-dhe-ffdhe8192" {
+  syntax 1.0
   rfc 7919 section A.5
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -14,6 +15,7 @@ plzn tls "client/tls12-dhe-ffdhe8192" {
 }
 
 plzn tls "client/tls12-dhe-modulus-below-three" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   matrix { value in [0, 1, 2] }
@@ -26,6 +28,7 @@ plzn tls "client/tls12-dhe-modulus-below-three" {
 }
 
 plzn tls "client/tls12-dhe-one-byte-prime" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -37,6 +40,7 @@ plzn tls "client/tls12-dhe-one-byte-prime" {
 }
 
 plzn tls "client/tls12-dhe-composite-modulus" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail gnutls "accepts the composite DH modulus"
@@ -52,6 +56,7 @@ plzn tls "client/tls12-dhe-composite-modulus" {
 }
 
 plzn tls "client/tls12-dhe-even-modulus" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail gnutls "accepts the even composite DH modulus"
@@ -66,6 +71,7 @@ plzn tls "client/tls12-dhe-even-modulus" {
 }
 
 plzn tls "client/tls12-dhe-empty-modulus" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -86,6 +92,7 @@ plzn tls "client/tls12-dhe-empty-modulus" {
 # exponent, which OpenSSL rightly refuses: one run in 2549 (order 7 failed one
 # in seven).
 plzn tls "client/tls12-dhe-small-order-public-value" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -99,6 +106,7 @@ plzn tls "client/tls12-dhe-small-order-public-value" {
 }
 
 plzn tls "client/tls12-dhe-generator-zero" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail wolfssl "accepts a zero DH generator"
@@ -112,6 +120,7 @@ plzn tls "client/tls12-dhe-generator-zero" {
 }
 
 plzn tls "client/tls12-dhe-generator-one" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail wolfssl "accepts a DH generator of one"
@@ -128,6 +137,7 @@ plzn tls "client/tls12-dhe-generator-one" {
 }
 
 plzn tls "client/tls12-dhe-generator-p-minus-one" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail gnutls "accepts g = p - 1 and answers Yc = p - 1; when both of its two keygen draws give 1 it fails instead with GNUTLS_E_RANDOM_FAILED"
@@ -142,6 +152,7 @@ plzn tls "client/tls12-dhe-generator-p-minus-one" {
 }
 
 plzn tls "client/tls12-dhe-generator-equal-p" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail gnutls "accepts a DH generator equal to p"
@@ -156,6 +167,7 @@ plzn tls "client/tls12-dhe-generator-equal-p" {
 }
 
 plzn tls "client/tls12-dhe-generator-greater-than-p" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   xfail wolfssl "accepts a DH generator greater than p"
@@ -172,6 +184,7 @@ plzn tls "client/tls12-dhe-generator-greater-than-p" {
 }
 
 plzn tls "client/tls12-dhe-empty-generator" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -185,6 +198,7 @@ plzn tls "client/tls12-dhe-empty-generator" {
 }
 
 plzn tls "client/tls12-dhe-public-zero" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -197,6 +211,7 @@ plzn tls "client/tls12-dhe-public-zero" {
 }
 
 plzn tls "client/tls12-dhe-public-one" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -209,6 +224,7 @@ plzn tls "client/tls12-dhe-public-one" {
 }
 
 plzn tls "client/tls12-dhe-public-p-minus-one" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -221,6 +237,7 @@ plzn tls "client/tls12-dhe-public-p-minus-one" {
 }
 
 plzn tls "client/tls12-dhe-public-equal-p" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -233,6 +250,7 @@ plzn tls "client/tls12-dhe-public-equal-p" {
 }
 
 plzn tls "client/tls12-dhe-public-greater-than-p" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -245,6 +263,7 @@ plzn tls "client/tls12-dhe-public-greater-than-p" {
 }
 
 plzn tls "client/tls12-dhe-empty-public-value" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls12] }

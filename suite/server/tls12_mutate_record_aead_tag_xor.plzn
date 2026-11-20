@@ -1,4 +1,5 @@
 plzn tls "server/record-aead-tag-xor" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   chain: [default]
   uut server { versions: [tls12] }

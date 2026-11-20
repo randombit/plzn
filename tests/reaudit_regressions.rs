@@ -3,7 +3,8 @@ use plzn::tls::codec::{CONTENT_TYPE_APP_DATA, CONTENT_TYPE_HANDSHAKE, encode_han
 use plzn::tls::record::{RecordError, RecordLayer, TlsVersion};
 use plzn::transport::MockTransport;
 
-const HEADER: &str = "plzn tls \"reaudit\" {\nchain: [default]\nuut server { versions: [tls13] }\n";
+const HEADER: &str =
+    "plzn tls \"reaudit\" {\nsyntax 1.0\nchain: [default]\nuut server { versions: [tls13] }\n";
 
 fn programs(body: &str) -> Vec<Program> {
     let source = format!("{HEADER}{body}\n}}\n");

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-ecdhe-group-sweep" {
+  syntax 1.0
   rfc 8422 section 5.4
   rfc 7027 section 2
   chain: [default]

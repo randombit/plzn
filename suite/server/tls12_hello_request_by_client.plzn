@@ -1,4 +1,5 @@
 plzn tls "server/tls12-hello-request-by-client/during-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {
@@ -12,6 +13,7 @@ plzn tls "server/tls12-hello-request-by-client/during-handshake" {
 }
 
 plzn tls "server/tls12-hello-request-by-client/after-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {

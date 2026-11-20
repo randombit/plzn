@@ -1,4 +1,5 @@
 plzn tls "server/tls13-unencrypted-alert/unencrypted-alert" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -12,6 +13,7 @@ plzn tls "server/tls13-unencrypted-alert/unencrypted-alert" {
 }
 
 plzn tls "server/tls13-unencrypted-alert/encrypted-alert" {
+  syntax 1.0
   rfc 8446 section 6
   chain: [default]
   uut server { versions: [tls13] }

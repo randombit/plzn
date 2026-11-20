@@ -1,4 +1,5 @@
 plzn tls "server/tls12-interleaved-application-data-in-renegotiation/before-cke" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {
@@ -28,6 +29,7 @@ plzn tls "server/tls12-interleaved-application-data-in-renegotiation/before-cke"
 }
 
 plzn tls "server/tls12-interleaved-application-data-in-renegotiation/before-ccs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {
@@ -57,6 +59,7 @@ plzn tls "server/tls12-interleaved-application-data-in-renegotiation/before-ccs"
 }
 
 plzn tls "server/tls12-interleaved-application-data-in-renegotiation/before-finished" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {

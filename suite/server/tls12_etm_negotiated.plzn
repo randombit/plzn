@@ -1,4 +1,5 @@
 plzn tls "server/tls12-etm-negotiated" {
+  syntax 1.0
   rfc 7366 section 2
   chain: [default]
   uut server {

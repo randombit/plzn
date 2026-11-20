@@ -1,4 +1,5 @@
 plzn tls "server/tls13-client-cert-compression-cr-extensions" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -23,6 +24,7 @@ plzn tls "server/tls13-client-cert-compression-cr-extensions" {
 }
 
 plzn tls "server/tls13-client-cert-compression-without-client-offer" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -46,6 +48,7 @@ plzn tls "server/tls13-client-cert-compression-without-client-offer" {
 }
 
 plzn tls "server/tls13-client-cert-compression-empty-certificate" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -64,6 +67,7 @@ plzn tls "server/tls13-client-cert-compression-empty-certificate" {
 }
 
 plzn tls "server/tls13-client-cert-compression-empty-message" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -83,6 +87,7 @@ plzn tls "server/tls13-client-cert-compression-empty-message" {
 }
 
 plzn tls "server/tls13-client-cert-compression-wrong-uncompressed-length" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -102,6 +107,7 @@ plzn tls "server/tls13-client-cert-compression-wrong-uncompressed-length" {
 }
 
 plzn tls "server/tls13-client-cert-compression-mislabelled-brotli" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -120,6 +126,7 @@ plzn tls "server/tls13-client-cert-compression-mislabelled-brotli" {
 }
 
 plzn tls "server/tls13-client-cert-compression-unsupported-algorithm" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -140,6 +147,7 @@ plzn tls "server/tls13-client-cert-compression-unsupported-algorithm" {
 }
 
 plzn tls "server/tls13-client-cert-compression-twice" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -155,6 +163,7 @@ plzn tls "server/tls13-client-cert-compression-twice" {
 }
 
 plzn tls "server/tls13-client-cert-compression-bomb" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -174,6 +183,7 @@ plzn tls "server/tls13-client-cert-compression-bomb" {
 }
 
 plzn tls "server/tls13-client-cert-compression-garbage" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {

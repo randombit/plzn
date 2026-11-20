@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-does-not-offer-obsolete-key-exchange" {
+  syntax 1.0
   rfc 10015 section 2
   rfc 10015 section 3
   rfc 10015 section 4
@@ -18,6 +19,7 @@ plzn tls "dtls12/client-does-not-offer-obsolete-key-exchange" {
 }
 
 plzn tls "dtls12/server-does-not-select-finite-field-dhe" {
+  syntax 1.0
   rfc 10015 section 3
   chain: [rsa_2048]
   uut server { versions: [dtls12] }
@@ -34,6 +36,7 @@ plzn tls "dtls12/server-does-not-select-finite-field-dhe" {
 }
 
 plzn tls "dtls12/server-does-not-select-rsa-key-transport" {
+  syntax 1.0
   rfc 10015 section 4
   chain: [rsa_2048]
   uut server { versions: [dtls12] }
@@ -51,6 +54,7 @@ plzn tls "dtls12/server-does-not-select-rsa-key-transport" {
 }
 
 plzn tls "dtls12/client-does-not-offer-rc4" {
+  syntax 1.0
   rfc 7465 section 2
   chain: [default]
   uut client { versions: [dtls12] }
@@ -68,6 +72,7 @@ plzn tls "dtls12/client-does-not-offer-rc4" {
 }
 
 plzn tls "dtls12/client-offers-extended-master-secret" {
+  syntax 1.0
   rfc 9325 section 3.5
   chain: [default]
   uut client { versions: [dtls12] }
@@ -81,6 +86,7 @@ plzn tls "dtls12/client-offers-extended-master-secret" {
 }
 
 plzn tls "dtls12/client-signals-secure-renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.4
   chain: [default]
   uut client { versions: [dtls12] }

@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-basic-connection" {
+  syntax 1.0
   rfc 9147 section 5
   chain: [default]
   uut server { versions: [dtls13] }
@@ -10,6 +11,7 @@ plzn tls "dtls13/server-basic-connection" {
 }
 
 plzn tls "dtls13/client-basic-connection" {
+  syntax 1.0
   rfc 9147 section 5
   chain: [default]
   uut client { versions: [dtls13] }

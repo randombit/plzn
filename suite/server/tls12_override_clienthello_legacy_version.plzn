@@ -1,4 +1,5 @@
 plzn tls "server/clienthello-legacy-version" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server { versions: [tls12] }

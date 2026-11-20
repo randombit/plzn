@@ -224,6 +224,7 @@ def render(probes, pins=None):
             fields.append(f"extensions: {hexlist(exts)}")
         out.append(f'# tlsfuzzer probe: {name}')
         out.append(f'plzn tls "server/client-compat-{slug(name)}" {{')
+        out.append('  syntax 1.0')
         out.append('  rfc 5246 section 7.4.1.2')
         out.append('  chain: [default]')
         out.append('  uut server { versions: [tls12] }')

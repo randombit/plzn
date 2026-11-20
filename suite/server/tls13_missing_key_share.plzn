@@ -1,4 +1,5 @@
 plzn tls "server/tls13-missing-key-share" {
+  syntax 1.0
   rfc 8446 section 9.2
   xfail go "sends HelloRetryRequest instead of the required missing_extension alert"
   chain: [default]

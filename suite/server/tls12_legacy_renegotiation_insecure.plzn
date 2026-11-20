@@ -1,4 +1,5 @@
 plzn tls "server/tls12-legacy-renegotiation/insecure" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [default]
   uut server {

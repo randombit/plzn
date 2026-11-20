@@ -1,4 +1,5 @@
 plzn tls "server/tls13-missing-signature-algorithms" {
+  syntax 1.0
   rfc 8446 section 9.2
   chain: [default]
   uut server { versions: [tls13] }

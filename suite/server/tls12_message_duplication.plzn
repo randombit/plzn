@@ -1,4 +1,5 @@
 plzn tls "server/tls12-message-duplication/client-hello-before-client-key-exchange" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "server/tls12-message-duplication/client-hello-before-client-key-exchan
 }
 
 plzn tls "server/tls12-message-duplication/client-hello-before-change-cipher-spec" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -32,6 +34,7 @@ plzn tls "server/tls12-message-duplication/client-hello-before-change-cipher-spe
 }
 
 plzn tls "server/tls12-message-duplication/client-hello-before-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -47,6 +50,7 @@ plzn tls "server/tls12-message-duplication/client-hello-before-finished" {
 }
 
 plzn tls "server/tls12-message-duplication/change-cipher-spec-before-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -63,6 +67,7 @@ plzn tls "server/tls12-message-duplication/change-cipher-spec-before-finished" {
 }
 
 plzn tls "server/tls12-message-duplication/change-cipher-spec-after-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -82,6 +87,7 @@ plzn tls "server/tls12-message-duplication/change-cipher-spec-after-finished" {
 }
 
 plzn tls "server/tls12-message-duplication/client-key-exchange-before-change-cipher-spec" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -98,6 +104,7 @@ plzn tls "server/tls12-message-duplication/client-key-exchange-before-change-cip
 }
 
 plzn tls "server/tls12-message-duplication/client-key-exchange-before-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -112,6 +119,7 @@ plzn tls "server/tls12-message-duplication/client-key-exchange-before-finished" 
 }
 
 plzn tls "server/tls12-message-duplication/client-key-exchange-after-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {

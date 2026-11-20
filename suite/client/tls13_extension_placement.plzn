@@ -2,6 +2,7 @@
 # rejected with illegal_parameter, also when the extension carries no
 # meaning such as padding.
 plzn tls "client/tls13-certificate-request-padding" {
+  syntax 1.0
   rfc 8446 section 4.2
   rfc 7685 section 3
   chain: [default]
@@ -20,6 +21,7 @@ plzn tls "client/tls13-certificate-request-padding" {
 }
 
 plzn tls "client/tls13-new-session-ticket-padding" {
+  syntax 1.0
   rfc 8446 section 4.2
   rfc 7685 section 3
   chain: [default]
@@ -38,6 +40,7 @@ plzn tls "client/tls13-new-session-ticket-padding" {
 }
 
 plzn tls "client/tls13-new-session-ticket-without-extensions-field" {
+  syntax 1.0
   rfc 8446 section 4.6.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -51,6 +54,7 @@ plzn tls "client/tls13-new-session-ticket-without-extensions-field" {
 }
 
 plzn tls "client/tls13-hrr-recognized-extension-not-allowed" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut client {
@@ -69,6 +73,7 @@ plzn tls "client/tls13-hrr-recognized-extension-not-allowed" {
 # A ServerHello carrying the HelloRetryRequest random is processed as an HRR
 # whatever its version fields say, and an HRR must carry supported_versions.
 plzn tls "client/tls12-serverhello-with-hrr-random" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   rfc 8446 section 4.1.4
   chain: [default]
@@ -93,6 +98,7 @@ plzn tls "client/tls12-serverhello-with-hrr-random" {
 # Extensions of the client's TLS 1.3 offer that have no meaning in a
 # TLS 1.2 ServerHello.
 plzn tls "client/tls12-serverhello-with-key-share" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut client {
@@ -111,6 +117,7 @@ plzn tls "client/tls12-serverhello-with-key-share" {
 }
 
 plzn tls "client/tls12-serverhello-with-psk-key-exchange-modes" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut client {
@@ -127,6 +134,7 @@ plzn tls "client/tls12-serverhello-with-psk-key-exchange-modes" {
 }
 
 plzn tls "client/tls13-client-certificate-type-without-certificate-request" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   client_chain: [ecdsa_p256]

@@ -1,4 +1,5 @@
 plzn tls "client/tls13-rejects-unoffered-psk-identity-selection" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   psk {

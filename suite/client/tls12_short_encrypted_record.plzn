@@ -2,6 +2,7 @@
 # encrypt-then-MAC ciphertext block are rejected by length alone, always with
 # bad_record_mac.
 plzn tls "client/tls12-encrypted-record-shorter-than-explicit-nonce" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   chain: [default]
   uut client {
@@ -16,6 +17,7 @@ plzn tls "client/tls12-encrypted-record-shorter-than-explicit-nonce" {
 }
 
 plzn tls "client/tls12-cbc-record-shorter-than-iv" {
+  syntax 1.0
   rfc 5246 section 7.2.2
   chain: [rsa_2048]
   uut client {
@@ -31,6 +33,7 @@ plzn tls "client/tls12-cbc-record-shorter-than-iv" {
 }
 
 plzn tls "client/tls12-etm-authenticated-empty-ciphertext" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   uut client {

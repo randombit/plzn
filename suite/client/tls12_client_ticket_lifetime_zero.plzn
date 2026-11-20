@@ -1,4 +1,5 @@
 plzn tls "client/tls12-ticket-lifetime-zero-is-unspecified" {
+  syntax 1.0
   rfc 5077 section 3.3
   chain: [default]
   uut client { versions: [tls12] }

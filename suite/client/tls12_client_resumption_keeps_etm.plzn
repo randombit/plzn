@@ -1,6 +1,7 @@
 # RFC 7366 3.1: a session negotiated with encrypt-then-MAC must not be resumed
 # with MAC-then-encrypt.
 plzn tls "client/tls12-client-rejects-resumption-dropping-etm" {
+  syntax 1.0
   rfc 7366 section 3.1
   chain: [default]
   uut client {

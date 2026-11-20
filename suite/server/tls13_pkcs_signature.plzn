@@ -1,4 +1,5 @@
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_md5" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -9,6 +10,7 @@ plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_md5" {
 }
 
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha1" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -19,6 +21,7 @@ plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha1" {
 }
 
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha224" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -29,6 +32,7 @@ plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha224" {
 }
 
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -39,6 +43,7 @@ plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha256" {
 }
 
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -49,6 +54,7 @@ plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha384" {
 }
 
 plzn tls "server/tls13-pkcs-signature/rsa_pkcs1_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }

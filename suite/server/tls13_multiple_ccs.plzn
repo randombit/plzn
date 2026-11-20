@@ -1,4 +1,5 @@
 plzn tls "server/tls13-multiple-ccs/valid-with-one-ccs" {
+  syntax 1.0
   rfc 8446 section D.4
   chain: [default]
   uut server { versions: [tls13] }
@@ -18,6 +19,7 @@ plzn tls "server/tls13-multiple-ccs/valid-with-one-ccs" {
 }
 
 plzn tls "server/tls13-multiple-ccs/second-ccs-before-client-finished" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -38,6 +40,7 @@ plzn tls "server/tls13-multiple-ccs/second-ccs-before-client-finished" {
 }
 
 plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-tcp-packet" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -63,6 +66,7 @@ plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-tcp-packet" {
 }
 
 plzn tls "server/tls13-multiple-ccs/ch-and-multiple-ccs-in-one-tcp-packet" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -89,6 +93,7 @@ plzn tls "server/tls13-multiple-ccs/ch-and-multiple-ccs-in-one-tcp-packet" {
 }
 
 plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-record" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -106,6 +111,7 @@ plzn tls "server/tls13-multiple-ccs/multiple-ccs-in-one-record" {
 }
 
 plzn tls "server/tls13-multiple-ccs/ccs-after-client-finished" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   xfail go "ignores a compatibility CCS received after the handshake"

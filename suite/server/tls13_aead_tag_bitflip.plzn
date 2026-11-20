@@ -1,4 +1,5 @@
 plzn tls "server/tls13-aead-tag-bitflip" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -15,6 +16,7 @@ plzn tls "server/tls13-aead-tag-bitflip" {
 }
 
 plzn tls "server/tls13-record-integrity-suite-group" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server {

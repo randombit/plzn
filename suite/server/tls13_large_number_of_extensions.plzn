@@ -1,4 +1,5 @@
 plzn tls "server/tls13-large-number-of-extensions/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server {
@@ -12,6 +13,7 @@ plzn tls "server/tls13-large-number-of-extensions/valid-handshake" {
 }
 
 plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-first-4096" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server {
@@ -29,6 +31,7 @@ plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-first-4096" {
 }
 
 plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-window" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server {
@@ -47,6 +50,7 @@ plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-window" {
 }
 
 plzn tls "server/tls13-large-number-of-extensions/empty-unassigned-last-window" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server {

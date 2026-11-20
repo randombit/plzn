@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-accepts-record-padding" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.4
   chain: [default]
@@ -11,6 +12,7 @@ plzn tls "dtls13/server-accepts-record-padding" {
 }
 
 plzn tls "dtls13/client-accepts-record-padding" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.4
   chain: [default]
@@ -23,6 +25,7 @@ plzn tls "dtls13/client-accepts-record-padding" {
 }
 
 plzn tls "dtls13/server-rejects-empty-inner-plaintext" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.2
   chain: [default]
@@ -36,6 +39,7 @@ plzn tls "dtls13/server-rejects-empty-inner-plaintext" {
 }
 
 plzn tls "dtls13/client-rejects-empty-inner-plaintext" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.2
   chain: [default]
@@ -49,6 +53,7 @@ plzn tls "dtls13/client-rejects-empty-inner-plaintext" {
 }
 
 plzn tls "dtls13/server-rejects-only-padding-inner-plaintext" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.2
   chain: [default]
@@ -62,6 +67,7 @@ plzn tls "dtls13/server-rejects-only-padding-inner-plaintext" {
 }
 
 plzn tls "dtls13/client-rejects-only-padding-inner-plaintext" {
+  syntax 1.0
   rfc 9147 section 4.2.3
   rfc 8446 section 5.2
   chain: [default]

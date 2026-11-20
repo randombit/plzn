@@ -1,4 +1,5 @@
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha1-ecdsa-only" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [ecdsa_p256]
   skip botan "Botan TLS does not implement the explicit ECDSA/SHA-1 SignatureScheme"
@@ -29,6 +30,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha1-ecdsa-only" {
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha224-ecdsa-only" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [ecdsa_p256]
   uut server {
@@ -58,6 +60,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha224-ecdsa-only" {
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha256-ecdsa-only" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [ecdsa_p256]
   uut server {
@@ -85,6 +88,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha256-ecdsa-only" {
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha384-ecdsa-only" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [ecdsa_p256]
   uut server {
@@ -113,6 +117,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha384-ecdsa-only" {
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha512-ecdsa-only" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [ecdsa_p256]
   uut server {
@@ -141,6 +146,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-sha512-ecdsa-only" {
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP256r1tls13_sha256-only" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -157,6 +163,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP256r1t
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP384r1tls13_sha384-only" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -173,6 +180,7 @@ plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP384r1t
 }
 
 plzn tls "server/tls12-ecdsa-sig-flexibility/connect-with-ecdsa_brainpoolP512r1tls13_sha512-only" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [ecdsa_p256]
   uut server {

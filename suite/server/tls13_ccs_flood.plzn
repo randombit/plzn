@@ -19,6 +19,7 @@
 # CCS is not sent.
 
 plzn tls "server/tls13-ccs-flood/after-client-hello-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -41,6 +42,7 @@ plzn tls "server/tls13-ccs-flood/after-client-hello-two" {
 }
 
 plzn tls "server/tls13-ccs-flood/after-client-hello-three-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -66,6 +68,7 @@ plzn tls "server/tls13-ccs-flood/after-client-hello-three-to-sixteen" {
 }
 
 plzn tls "server/tls13-ccs-flood/after-client-hello-seventeen-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -92,6 +95,7 @@ plzn tls "server/tls13-ccs-flood/after-client-hello-seventeen-to-thirty-two" {
 }
 
 plzn tls "server/tls13-ccs-flood/after-client-hello-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -121,6 +125,7 @@ plzn tls "server/tls13-ccs-flood/after-client-hello-thirty-three-to-two-hundred"
 }
 
 plzn tls "server/tls13-ccs-flood/after-client-hello-over-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -151,6 +156,7 @@ plzn tls "server/tls13-ccs-flood/after-client-hello-over-two-hundred" {
 }
 
 plzn tls "server/tls13-ccs-flood/before-client-finished-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -173,6 +179,7 @@ plzn tls "server/tls13-ccs-flood/before-client-finished-two" {
 }
 
 plzn tls "server/tls13-ccs-flood/before-client-finished-three-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -198,6 +205,7 @@ plzn tls "server/tls13-ccs-flood/before-client-finished-three-to-sixteen" {
 }
 
 plzn tls "server/tls13-ccs-flood/before-client-finished-seventeen-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -224,6 +232,7 @@ plzn tls "server/tls13-ccs-flood/before-client-finished-seventeen-to-thirty-two"
 }
 
 plzn tls "server/tls13-ccs-flood/before-client-finished-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -253,6 +262,7 @@ plzn tls "server/tls13-ccs-flood/before-client-finished-thirty-three-to-two-hund
 }
 
 plzn tls "server/tls13-ccs-flood/before-client-finished-over-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut server { versions: [tls13] }

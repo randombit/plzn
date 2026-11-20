@@ -1,4 +1,5 @@
 plzn tls "server/tls12-cke-point-not-on-curve" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: [default]
   uut server {

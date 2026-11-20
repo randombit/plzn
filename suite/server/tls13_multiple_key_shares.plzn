@@ -1,4 +1,5 @@
 plzn tls "server/tls13-multiple-key-shares" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server { versions: [tls13] }
@@ -14,6 +15,7 @@ plzn tls "server/tls13-multiple-key-shares" {
 }
 
 plzn tls "server/tls13-multiple-key-shares/all-ffdhe-groups" {
+  syntax 1.0
   rfc 7919 section 2
   chain: [default]
   uut server {

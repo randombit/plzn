@@ -1,4 +1,5 @@
 plzn tls "client/tls13-ticket-zero-length" {
+  syntax 1.0
   rfc 8446 section 4.6.1
   chain: [default]
   uut client { versions: [tls13] }

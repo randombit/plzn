@@ -1,4 +1,5 @@
 plzn tls "client/tls13-serverhello-ends-record-before-encrypted-extensions" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -20,6 +21,7 @@ plzn tls "client/tls13-serverhello-ends-record-before-encrypted-extensions" {
 }
 
 plzn tls "client/tls13-server-finished-ends-record-before-key-update" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -36,6 +38,7 @@ plzn tls "client/tls13-server-finished-ends-record-before-key-update" {
 }
 
 plzn tls "client/tls13-key-update-ends-record-before-next-key-update" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }

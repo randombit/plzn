@@ -1,4 +1,5 @@
 plzn tls "server/tls13-malformed-alpn" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut server { versions: [tls13], alpn_select: "foo" }

@@ -6,6 +6,7 @@
 # completes and application data flows. Botan's DTLS reassembly was
 # memory-exhaustible by exactly this shape before 3.13.0.
 plzn tls "dtls12/server-header-only-flood" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "client/tls13-serverhello-wrong-message-extension" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   xfail rustls "tolerates supported_groups in the ServerHello and completes"

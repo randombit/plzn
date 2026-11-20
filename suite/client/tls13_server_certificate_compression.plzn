@@ -1,4 +1,5 @@
 plzn tls "client/tls13-server-certificate-compression" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut client {
@@ -20,6 +21,7 @@ plzn tls "client/tls13-server-certificate-compression" {
 }
 
 plzn tls "client/tls13-server-certificate-compression-wrong-uncompressed-length" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut client {
@@ -35,6 +37,7 @@ plzn tls "client/tls13-server-certificate-compression-wrong-uncompressed-length"
 }
 
 plzn tls "client/tls13-server-certificate-compression-unsupported-algorithm" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut client {
@@ -50,6 +53,7 @@ plzn tls "client/tls13-server-certificate-compression-unsupported-algorithm" {
 }
 
 plzn tls "client/tls13-server-certificate-compression-corrupt-stream" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut client {

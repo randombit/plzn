@@ -10,6 +10,7 @@
 # tls13_server_empty_app_data_record).
 
 plzn tls "client/tls13-empty-record-flood/plaintext-handshake-before-server-hello-one-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -38,6 +39,7 @@ plzn tls "client/tls13-empty-record-flood/plaintext-handshake-before-server-hell
 }
 
 plzn tls "client/tls13-empty-record-flood/plaintext-handshake-before-server-hello-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -64,6 +66,7 @@ plzn tls "client/tls13-empty-record-flood/plaintext-handshake-before-server-hell
 }
 
 plzn tls "client/tls13-empty-record-flood/protected-handshake-after-encrypted-extensions-one-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   rfc 9846 section 5.4
   chain: [default]
@@ -89,6 +92,7 @@ plzn tls "client/tls13-empty-record-flood/protected-handshake-after-encrypted-ex
 }
 
 plzn tls "client/tls13-empty-record-flood/protected-handshake-after-encrypted-extensions-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   rfc 9846 section 5.4
   chain: [default]
@@ -113,6 +117,7 @@ plzn tls "client/tls13-empty-record-flood/protected-handshake-after-encrypted-ex
 }
 
 plzn tls "client/tls13-empty-record-flood/application-data-two-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -130,6 +135,7 @@ plzn tls "client/tls13-empty-record-flood/application-data-two-to-sixteen" {
 }
 
 plzn tls "client/tls13-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -148,6 +154,7 @@ plzn tls "client/tls13-empty-record-flood/application-data-seventeen-to-thirty-o
 }
 
 plzn tls "client/tls13-empty-record-flood/application-data-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -167,6 +174,7 @@ plzn tls "client/tls13-empty-record-flood/application-data-thirty-two" {
 }
 
 plzn tls "client/tls13-empty-record-flood/application-data-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {

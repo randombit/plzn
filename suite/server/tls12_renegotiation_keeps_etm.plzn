@@ -1,6 +1,7 @@
 # RFC 7366 3.1: "implementations MUST NOT renegotiate a downgrade from
 # encrypt-then-MAC to MAC-then-encrypt."
 plzn tls "server/tls12-renegotiation-keeps-etm/drop-etm" {
+  syntax 1.0
   rfc 7366 section 3.1
   chain: [default]
   uut server {
@@ -21,6 +22,7 @@ plzn tls "server/tls12-renegotiation-keeps-etm/drop-etm" {
 }
 
 plzn tls "server/tls12-renegotiation-keeps-etm/keep-etm" {
+  syntax 1.0
   rfc 7366 section 3.1
   chain: [default]
   uut server {

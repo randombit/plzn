@@ -1,4 +1,5 @@
 plzn tls "client/tls13-hrr-ffdhe2048" {
+  syntax 1.0
   rfc 7919 section 2
   chain: [default]
   uut client {

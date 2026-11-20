@@ -32,9 +32,20 @@ pub struct File {
     pub tests: Vec<Test>,
 }
 
+/// `syntax MAJOR.MINOR`: the language revision a test was written against.
+/// The parser only produces versions it implements (see
+/// `parse::SYNTAX_VERSION`), so later stages need not check it again.
+#[derive(Clone, Copy, Debug)]
+pub struct SyntaxVersion {
+    pub major: u32,
+    pub minor: u32,
+    pub span: Span,
+}
+
 #[derive(Clone, Debug)]
 pub struct Test {
     pub name: StrLit, // e.g. "tls12/happy-rsa"
+    pub syntax: SyntaxVersion,
     pub header: Vec<HeaderLine>,
     pub matrix: Option<Matrix>,
     pub psk: Option<PskBlock>,

@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-key-exchange-group-sweep" {
+  syntax 1.0
   rfc 9147 section 5.6
   chain: [default]
   uut server { versions: [dtls13] }
@@ -11,6 +12,7 @@ plzn tls "dtls13/server-key-exchange-group-sweep" {
 }
 
 plzn tls "dtls13/client-key-exchange-group-sweep" {
+  syntax 1.0
   rfc 9147 section 5.6
   chain: [default]
   uut client { versions: [dtls13] }

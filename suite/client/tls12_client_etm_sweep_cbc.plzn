@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-etm-sweep-cbc" {
+  syntax 1.0
   rfc 7366 section 3
   uut client { versions: [tls12], encrypt_then_mac: true }
   chain: [rsa_2048]

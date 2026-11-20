@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-frag-certificate-1" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -22,6 +23,7 @@ plzn tls "dtls12/client-frag-certificate-1" {
 }
 
 plzn tls "dtls12/client-frag-certificate-64" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -45,6 +47,7 @@ plzn tls "dtls12/client-frag-certificate-64" {
 }
 
 plzn tls "dtls12/client-reorder-server-hello" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {

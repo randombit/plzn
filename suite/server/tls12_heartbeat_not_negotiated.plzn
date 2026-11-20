@@ -1,4 +1,5 @@
 plzn tls "server/tls12-heartbeat-not-negotiated" {
+  syntax 1.0
   rfc 6520 section 2
   chain: [default]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls12-heartbeat-not-negotiated" {
 }
 
 plzn tls "server/tls12-heartbeat-in-handshake-without-support" {
+  syntax 1.0
   rfc 6520 section 3
   chain: [default]
   uut server {
@@ -33,6 +35,7 @@ plzn tls "server/tls12-heartbeat-in-handshake-without-support" {
 }
 
 plzn tls "server/tls12-heartbleed-in-handshake-without-support" {
+  syntax 1.0
   rfc 6520 section 4
   chain: [default]
   uut server {
@@ -52,6 +55,7 @@ plzn tls "server/tls12-heartbleed-in-handshake-without-support" {
 }
 
 plzn tls "server/tls12-heartbeat-after-handshake" {
+  syntax 1.0
   rfc 6520 section 3
   chain: [default]
   uut server {
@@ -66,6 +70,7 @@ plzn tls "server/tls12-heartbeat-after-handshake" {
 }
 
 plzn tls "server/tls12-heartbleed-after-handshake" {
+  syntax 1.0
   rfc 6520 section 4
   chain: [default]
   uut server {
@@ -80,6 +85,7 @@ plzn tls "server/tls12-heartbleed-after-handshake" {
 }
 
 plzn tls "server/tls12-heartbeat-invalid-mode-0-ignored" {
+  syntax 1.0
   rfc 6520 section 2
   chain: [default]
   uut server {
@@ -95,6 +101,7 @@ plzn tls "server/tls12-heartbeat-invalid-mode-0-ignored" {
 }
 
 plzn tls "server/tls12-heartbeat-invalid-mode-3-ignored" {
+  syntax 1.0
   rfc 6520 section 2
   chain: [default]
   uut server {
@@ -110,6 +117,7 @@ plzn tls "server/tls12-heartbeat-invalid-mode-3-ignored" {
 }
 
 plzn tls "server/tls12-heartbeat-invalid-mode-255-ignored" {
+  syntax 1.0
   rfc 6520 section 2
   chain: [default]
   uut server {

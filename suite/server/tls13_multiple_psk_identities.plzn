@@ -1,4 +1,5 @@
 plzn tls "server/tls13-selects-later-valid-psk-identity" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   psk {
@@ -24,6 +25,7 @@ plzn tls "server/tls13-selects-later-valid-psk-identity" {
 }
 
 plzn tls "server/tls13-rejects-bad-binder-for-first-selected-psk" {
+  syntax 1.0
   rfc 8446 section 4.2.11.2
   chain: []
   psk {
@@ -44,6 +46,7 @@ plzn tls "server/tls13-rejects-bad-binder-for-first-selected-psk" {
 }
 
 plzn tls "server/tls13-selects-first-of-duplicate-valid-psk-identities" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   psk {
@@ -68,6 +71,7 @@ plzn tls "server/tls13-selects-first-of-duplicate-valid-psk-identities" {
 }
 
 plzn tls "server/tls13-rejects-bad-binder-for-later-selected-psk" {
+  syntax 1.0
   rfc 8446 section 4.2.11.2
   chain: []
   psk {
@@ -89,6 +93,7 @@ plzn tls "server/tls13-rejects-bad-binder-for-later-selected-psk" {
 }
 
 plzn tls "server/tls13-selects-later-psk-identity-after-hrr" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   rfc 8446 section 4.2.11
   chain: []

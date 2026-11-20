@@ -1,4 +1,5 @@
 plzn tls "server/tls12-exporter-with-context" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [rsa]
   uut server { versions: [tls12], cipher_suites: [$suite] }
@@ -12,6 +13,7 @@ plzn tls "server/tls12-exporter-with-context" {
 }
 
 plzn tls "server/tls12-exporter-without-context" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [rsa]
   uut server { versions: [tls12], cipher_suites: [$suite] }
@@ -25,6 +27,7 @@ plzn tls "server/tls12-exporter-without-context" {
 }
 
 plzn tls "server/tls12-exporter-with-empty-context" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [rsa]
   uut server { versions: [tls12] }
@@ -35,6 +38,7 @@ plzn tls "server/tls12-exporter-with-empty-context" {
 }
 
 plzn tls "server/tls13-exporter" {
+  syntax 1.0
   rfc 8446 section 7.5
   chain: [default]
   uut server { versions: [tls13], cipher_suites: [$suite] }
@@ -48,6 +52,7 @@ plzn tls "server/tls13-exporter" {
 }
 
 plzn tls "server/tls12-tls-exporter-channel-binding" {
+  syntax 1.0
   rfc 9266 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -58,6 +63,7 @@ plzn tls "server/tls12-tls-exporter-channel-binding" {
 }
 
 plzn tls "server/tls13-tls-exporter-channel-binding" {
+  syntax 1.0
   rfc 9266 section 4
   chain: [default]
   uut server { versions: [tls13] }
@@ -68,6 +74,7 @@ plzn tls "server/tls13-tls-exporter-channel-binding" {
 }
 
 plzn tls "server/tls12-exporter-after-resumption" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -88,6 +95,7 @@ plzn tls "server/tls12-exporter-after-resumption" {
 }
 
 plzn tls "server/tls13-exporter-after-resumption" {
+  syntax 1.0
   rfc 8446 section 7.5
   chain: [default]
   uut server { versions: [tls13] }

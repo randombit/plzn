@@ -4,6 +4,7 @@
 # implements the group; the other shims skip the configuration.
 
 plzn tls "client/tls13-curvesm2-group" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   chain: [default]
   uut client {
@@ -22,6 +23,7 @@ plzn tls "client/tls13-curvesm2-group" {
 # takes the client's SM2 share and ML-KEM-768 encapsulation key and answers
 # with its own SM2 share and the ciphertext.
 plzn tls "client/tls13-curvesm2mlkem768-group" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   chain: [default]
   uut client {
@@ -39,6 +41,7 @@ plzn tls "client/tls13-curvesm2mlkem768-group" {
 # The client key-shares x25519 only and lists curveSM2 second; plzn's server
 # retries for curveSM2 and the client answers with a fresh SM2 share.
 plzn tls "client/tls13-curvesm2-after-hrr" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   rfc 8446 section 4.1.4
   chain: [default]

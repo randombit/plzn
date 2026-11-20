@@ -1,4 +1,5 @@
 plzn tls "server/tls12-truncating-of-krsa-cke/padded-client-key-exchange" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls12-truncating-of-krsa-cke/padded-client-key-exchange" {
 }
 
 plzn tls "server/tls12-truncating-of-krsa-cke/truncated-client-key-exchange" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-etm-bad-mac" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [default]
   uut server {

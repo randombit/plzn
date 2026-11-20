@@ -1,4 +1,5 @@
 plzn tls "server/tls12-eddsa-in-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -28,6 +29,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/md5-ecdsa-forced" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -52,6 +54,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/md5-ecdsa-forced" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/sha512-ecdsa-forced" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -77,6 +80,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/sha512-ecdsa-forced" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/advertise-ed25519-as-ed448" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -101,6 +105,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/advertise-ed25519-as-ed448" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/empty-signature" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -126,6 +131,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/empty-signature" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-r-component" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -152,6 +158,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-r-component" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-s-component" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -178,6 +185,7 @@ plzn tls "server/tls12-eddsa-in-certificate-verify/all-zero-s-component" {
 }
 
 plzn tls "server/tls12-eddsa-in-certificate-verify/corrupted-signature" {
+  syntax 1.0
   rfc 8422 section 5.10
   skip botan "no Ed25519 TLS signature scheme"
   # handshake.signature includes a two-byte length; offsets from 2 address the Ed25519 signature.

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-rejects-new-session-ticket-prefix-after-server-hello-done" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   rfc 5077 section 3.3
   chain: [default]
@@ -23,6 +24,7 @@ plzn tls "client/tls12-rejects-new-session-ticket-prefix-after-server-hello-done
 }
 
 plzn tls "client/tls12-rejects-finished-prefix-after-server-hello-done" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   rfc 5246 section 7.4.9
   chain: [default]
@@ -43,6 +45,7 @@ plzn tls "client/tls12-rejects-finished-prefix-after-server-hello-done" {
 }
 
 plzn tls "client/tls12-rejects-trailing-partial-message-after-finished" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client { versions: [tls12] }
@@ -64,6 +67,7 @@ plzn tls "client/tls12-rejects-trailing-partial-message-after-finished" {
 }
 
 plzn tls "client/tls12-rejects-trailing-partial-message-body-after-finished" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client { versions: [tls12] }
@@ -78,6 +82,7 @@ plzn tls "client/tls12-rejects-trailing-partial-message-body-after-finished" {
 }
 
 plzn tls "client/tls12-rejects-trailing-partial-message-after-resumed-finished" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   rfc 5077
   chain: [default]

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-point-extension/client-point-compressed" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [default]
   uut server {
@@ -21,6 +22,7 @@ plzn tls "server/tls12-point-extension/client-point-compressed" {
 }
 
 plzn tls "server/tls12-point-extension/client-point-hybrid" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [default]
   uut server {
@@ -42,6 +44,7 @@ plzn tls "server/tls12-point-extension/client-point-hybrid" {
 }
 
 plzn tls "server/tls12-point-extension/client-point-xy" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [default]
   uut server {

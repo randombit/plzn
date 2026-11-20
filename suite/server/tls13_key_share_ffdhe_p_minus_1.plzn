@@ -1,4 +1,5 @@
 plzn tls "server/tls13-key-share-ffdhe-p-minus-1" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-supported-groups-trailing-data" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-chacha20/suite-in-tls-1-1" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -13,6 +14,7 @@ plzn tls "server/tls12-chacha20/suite-in-tls-1-1" {
 }
 
 plzn tls "server/tls12-chacha20/empty-app-data" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -29,6 +31,7 @@ plzn tls "server/tls12-chacha20/empty-app-data" {
 }
 
 plzn tls "server/tls12-chacha20/empty-app-data-with-app-data" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -48,6 +51,7 @@ plzn tls "server/tls12-chacha20/empty-app-data-with-app-data" {
 }
 
 plzn tls "server/tls12-chacha20/maximum-size-app-data" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -63,6 +67,7 @@ plzn tls "server/tls12-chacha20/maximum-size-app-data" {
 }
 
 plzn tls "server/tls12-chacha20/too-big-app-data" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -77,6 +82,7 @@ plzn tls "server/tls12-chacha20/too-big-app-data" {
 }
 
 plzn tls "server/tls12-chacha20/corrupted-tag-app-data" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -93,6 +99,7 @@ plzn tls "server/tls12-chacha20/corrupted-tag-app-data" {
 }
 
 plzn tls "server/tls12-chacha20/0-byte-ciphertext-record" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -107,6 +114,7 @@ plzn tls "server/tls12-chacha20/0-byte-ciphertext-record" {
 }
 
 plzn tls "server/tls12-chacha20/1-byte-ciphertext-record" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -121,6 +129,7 @@ plzn tls "server/tls12-chacha20/1-byte-ciphertext-record" {
 }
 
 plzn tls "server/tls12-chacha20/8-byte-ciphertext-record" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   uut server { versions: [tls12] }
   chain: [rsa_2048]
@@ -135,6 +144,7 @@ plzn tls "server/tls12-chacha20/8-byte-ciphertext-record" {
 }
 
 plzn tls "server/tls12-chacha20/15-byte-ciphertext-record" {
+  syntax 1.0
   rfc 5246 section 6.2.3.3
   uut server { versions: [tls12] }
   chain: [rsa_2048]

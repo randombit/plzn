@@ -4,6 +4,7 @@
 # does permit.
 
 plzn tls "server/tls13-hrr-client-hello2-changes/legacy-version" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server {
@@ -25,6 +26,7 @@ plzn tls "server/tls13-hrr-client-hello2-changes/legacy-version" {
 # RFC 8446 4.2.2: the client copies the cookie "received in the
 # HelloRetryRequest"; one that the server never sent is not a copy.
 plzn tls "server/tls13-hrr-client-hello2-changes/unsolicited-cookie" {
+  syntax 1.0
   rfc 8446 section 4.2.2
   chain: [default]
   uut server {
@@ -46,6 +48,7 @@ plzn tls "server/tls13-hrr-client-hello2-changes/unsolicited-cookie" {
 
 # PSKs may only be removed from the second ClientHello, not replaced.
 plzn tls "server/tls13-hrr-client-hello2-changes/psk-identity-replaced" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   psk {
@@ -69,6 +72,7 @@ plzn tls "server/tls13-hrr-client-hello2-changes/psk-identity-replaced" {
 
 # Removing every PSK removes the extension, which leaves a full handshake.
 plzn tls "server/tls13-hrr-client-hello2-changes/psk-removed" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   psk {

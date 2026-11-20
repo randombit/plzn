@@ -9,6 +9,7 @@
 # shape of that attack. Both roles.
 
 plzn tls "dtls12/server-large-length-future-fragment" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -37,6 +38,7 @@ plzn tls "dtls12/server-large-length-future-fragment" {
 }
 
 plzn tls "dtls12/client-large-length-future-fragment" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {

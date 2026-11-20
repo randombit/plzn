@@ -1,4 +1,5 @@
 plzn tls "dtls12/appdata-before-handshake" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut client {
@@ -12,6 +13,7 @@ plzn tls "dtls12/appdata-before-handshake" {
 }
 
 plzn tls "dtls12/empty-appdata-before-handshake" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut client {
@@ -27,6 +29,7 @@ plzn tls "dtls12/empty-appdata-before-handshake" {
 }
 
 plzn tls "dtls12/consecutive-warning-alerts-tolerated" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut server {
@@ -44,6 +47,7 @@ plzn tls "dtls12/consecutive-warning-alerts-tolerated" {
 }
 
 plzn tls "dtls12/bogus-alert-level" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut server {
@@ -56,6 +60,7 @@ plzn tls "dtls12/bogus-alert-level" {
 }
 
 plzn tls "dtls12/large-authenticated-plaintext" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -68,6 +73,7 @@ plzn tls "dtls12/large-authenticated-plaintext" {
 }
 
 plzn tls "dtls12/oversized-unauthenticated-ciphertext-discarded" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -83,6 +89,7 @@ plzn tls "dtls12/oversized-unauthenticated-ciphertext-discarded" {
 }
 
 plzn tls "dtls12/multiple-appdata-records-in-one-datagram" {
+  syntax 1.0
   rfc 6347 section 4.1.1
   chain: [ecdsa_p256]
   uut server {
@@ -98,6 +105,7 @@ plzn tls "dtls12/multiple-appdata-records-in-one-datagram" {
 }
 
 plzn tls "dtls12/send-extra-finished-packed" {
+  syntax 1.0
   rfc 6347 section 4.2
   chain: [ecdsa_p256]
   uut client {
@@ -114,6 +122,7 @@ plzn tls "dtls12/send-extra-finished-packed" {
 }
 
 plzn tls "dtls12/send-extra-finished-reordered" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {

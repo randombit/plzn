@@ -1,4 +1,5 @@
 plzn tls "server/tls13-supported-versions-forward-compat" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -20,6 +21,7 @@ plzn tls "server/tls13-supported-versions-forward-compat" {
 # numerically highest entry, routes the hello to its TLS 1.3 server and then
 # demands the TLS 1.3 extensions (missing_extension).
 plzn tls "server/tls12-13-supported-versions-unknown-high-then-tls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12, tls13] }

@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-forged-epoch0-during-reneg" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   xfail openssl "delivers the data at once, but its echo SSL_write drives the pending renegotiation first, so the reply waits for the handshake"

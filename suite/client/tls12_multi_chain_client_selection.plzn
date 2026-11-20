@@ -1,4 +1,5 @@
 plzn tls "client/tls12-multi-chain-ecdsa-scheme-does-not-constrain-curve" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   uut client {
@@ -28,6 +29,7 @@ plzn tls "client/tls12-multi-chain-ecdsa-scheme-does-not-constrain-curve" {
 }
 
 plzn tls "client/tls12-multi-chain-picks-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   uut client {
@@ -56,6 +58,7 @@ plzn tls "client/tls12-multi-chain-picks-rsa" {
 }
 
 plzn tls "client/tls12-multi-chain-none-fits" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   uut client {
@@ -84,6 +87,7 @@ plzn tls "client/tls12-multi-chain-none-fits" {
 }
 
 plzn tls "client/tls12-single-credential-wrong-curve" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   uut client {
@@ -113,6 +117,7 @@ plzn tls "client/tls12-single-credential-wrong-curve" {
 }
 
 plzn tls "client/tls12-multi-chain-certificate-type-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [ecdsa_p256, rsa_2048]
@@ -132,6 +137,7 @@ plzn tls "client/tls12-multi-chain-certificate-type-rsa" {
 }
 
 plzn tls "client/tls12-multi-chain-certificate-type-ecdsa" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [rsa_2048, ecdsa_p256]
@@ -151,6 +157,7 @@ plzn tls "client/tls12-multi-chain-certificate-type-ecdsa" {
 }
 
 plzn tls "client/tls12-multi-chain-certificate-type-ecdsa-ed25519" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [rsa_2048, ed25519]
@@ -171,6 +178,7 @@ plzn tls "client/tls12-multi-chain-certificate-type-ecdsa-ed25519" {
 }
 
 plzn tls "client/tls12-multi-chain-preserves-credential-preference" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [ecdsa_p384, ecdsa_p256]

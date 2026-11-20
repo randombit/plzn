@@ -1,4 +1,5 @@
 plzn tls "dtls12/sni-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {

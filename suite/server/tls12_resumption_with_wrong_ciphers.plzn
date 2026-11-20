@@ -1,4 +1,5 @@
 plzn tls "server/tls12-resumption-with-wrong-ciphers/session-id-resume" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]
@@ -25,6 +26,7 @@ plzn tls "server/tls12-resumption-with-wrong-ciphers/session-id-resume" {
 }
 
 plzn tls "server/tls12-resumption-with-wrong-ciphers/cipher-from-old-hello-not-selected" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]
@@ -56,6 +58,7 @@ plzn tls "server/tls12-resumption-with-wrong-ciphers/cipher-from-old-hello-not-s
 }
 
 plzn tls "server/tls12-resumption-with-wrong-ciphers/null-cipher" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]

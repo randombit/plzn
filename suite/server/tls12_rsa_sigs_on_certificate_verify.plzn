@@ -1,4 +1,5 @@
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -28,6 +29,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha256-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   skip botan "Botan TLS does not implement the explicit RSA/SHA-1 SignatureScheme"
   uut server {
@@ -59,6 +61,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha256-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha256-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -88,6 +91,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha256-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha256-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -117,6 +121,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha256-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha512-with-sha256-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -146,6 +151,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha512-with-sha256-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha384-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   skip botan "Botan TLS does not implement the explicit RSA/SHA-1 SignatureScheme"
   uut server {
@@ -177,6 +183,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha1-with-sha384-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha384-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -206,6 +213,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha256-with-sha384-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha384-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -235,6 +243,7 @@ plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha384-with-sha384-prf" {
 }
 
 plzn tls "server/tls12-rsa-sigs-on-certificate-verify/sha512-with-sha384-prf" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true

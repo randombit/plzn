@@ -1,4 +1,5 @@
 plzn tls "server/tls12-client-version-too-old" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server {

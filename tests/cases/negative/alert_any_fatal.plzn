@@ -2,6 +2,7 @@
 # counts as a match. Used to cover tests where the exact code
 # isn't pinned by the spec.
 plzn tls "negative/alert-any-fatal" {
+  syntax 1.0
   rfc 5246
   chain: [default]
   uut server { versions: [tls12] }

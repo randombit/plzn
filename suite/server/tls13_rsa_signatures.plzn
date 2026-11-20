@@ -1,4 +1,5 @@
 plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -12,6 +13,7 @@ plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha256" {
 }
 
 plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -25,6 +27,7 @@ plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha384" {
 }
 
 plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -38,6 +41,7 @@ plzn tls "server/tls13-rsa-signatures/rsa_pss_rsae_sha512" {
 }
 
 plzn tls "server/tls13-rsa-signatures/rsa_pss_pss_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -48,6 +52,7 @@ plzn tls "server/tls13-rsa-signatures/rsa_pss_pss_sha256" {
 }
 
 plzn tls "server/tls13-rsa-signatures/rsa_pss_pss_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -58,6 +63,7 @@ plzn tls "server/tls13-rsa-signatures/rsa_pss_pss_sha384" {
 }
 
 plzn tls "server/tls13-rsa-signatures/rsa_pss_pss_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }

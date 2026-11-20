@@ -1,4 +1,5 @@
 plzn tls "dtls13/client-ignores-records-after-close-notify" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut client { versions: [dtls13] }
@@ -11,6 +12,7 @@ plzn tls "dtls13/client-ignores-records-after-close-notify" {
 }
 
 plzn tls "dtls13/server-ignores-records-after-close-notify" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut server { versions: [dtls13] }

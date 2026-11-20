@@ -1,4 +1,5 @@
 plzn tls "client/tls13-ee-record-size-limit-too-small" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   xfail openssl "ignores an unrequested record_size_limit in EncryptedExtensions and completes (RFC 8446 4.2 MUST abort)"

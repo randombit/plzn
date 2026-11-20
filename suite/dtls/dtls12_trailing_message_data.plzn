@@ -1,4 +1,5 @@
 plzn tls "dtls12/trailing-client-hello" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -9,6 +10,7 @@ plzn tls "dtls12/trailing-client-hello" {
 }
 
 plzn tls "dtls12/trailing-hello-verify-request" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut client {
@@ -20,6 +22,7 @@ plzn tls "dtls12/trailing-hello-verify-request" {
 }
 
 plzn tls "dtls12/trailing-server-hello" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -30,6 +33,7 @@ plzn tls "dtls12/trailing-server-hello" {
 }
 
 plzn tls "dtls12/trailing-server-certificate" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -40,6 +44,7 @@ plzn tls "dtls12/trailing-server-certificate" {
 }
 
 plzn tls "dtls12/trailing-certificate-status" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {
@@ -60,6 +65,7 @@ plzn tls "dtls12/trailing-certificate-status" {
 }
 
 plzn tls "dtls12/trailing-server-key-exchange" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -71,6 +77,7 @@ plzn tls "dtls12/trailing-server-key-exchange" {
 }
 
 plzn tls "dtls12/trailing-certificate-request" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -82,6 +89,7 @@ plzn tls "dtls12/trailing-certificate-request" {
 }
 
 plzn tls "dtls12/trailing-server-hello-done" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -92,6 +100,7 @@ plzn tls "dtls12/trailing-server-hello-done" {
 }
 
 plzn tls "dtls12/trailing-client-certificate" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -103,6 +112,7 @@ plzn tls "dtls12/trailing-client-certificate" {
 }
 
 plzn tls "dtls12/trailing-certificate-verify" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -114,6 +124,7 @@ plzn tls "dtls12/trailing-certificate-verify" {
 }
 
 plzn tls "dtls12/trailing-client-key-exchange" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -124,6 +135,7 @@ plzn tls "dtls12/trailing-client-key-exchange" {
 }
 
 plzn tls "dtls12/trailing-client-finished" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -134,6 +146,7 @@ plzn tls "dtls12/trailing-client-finished" {
 }
 
 plzn tls "dtls12/trailing-new-session-ticket" {
+  syntax 1.0
   rfc 5077 section 3.1
   chain: [ecdsa_p256]
   uut client {
@@ -145,6 +158,7 @@ plzn tls "dtls12/trailing-new-session-ticket" {
 }
 
 plzn tls "dtls12/trailing-server-finished" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {

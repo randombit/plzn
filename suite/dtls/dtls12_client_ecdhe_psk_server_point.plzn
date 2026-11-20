@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-ecdhe-psk-server-point-zero" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: []
   psk {
@@ -17,6 +18,7 @@ plzn tls "dtls12/client-ecdhe-psk-server-point-zero" {
 }
 
 plzn tls "dtls12/client-ecdhe-psk-server-point-truncated" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: []
   psk {
@@ -35,6 +37,7 @@ plzn tls "dtls12/client-ecdhe-psk-server-point-truncated" {
 }
 
 plzn tls "dtls12/client-ecdhe-psk-server-point-padded" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: []
   psk {

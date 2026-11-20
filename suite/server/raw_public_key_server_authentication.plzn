@@ -1,4 +1,5 @@
 plzn tls "server/tls12-raw-public-key-server-authentication" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -19,6 +20,7 @@ plzn tls "server/tls12-raw-public-key-server-authentication" {
 }
 
 plzn tls "server/tls13-raw-public-key-server-authentication" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -39,6 +41,7 @@ plzn tls "server/tls13-raw-public-key-server-authentication" {
 }
 
 plzn tls "server/tls12-prefers-raw-public-key-over-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -55,6 +58,7 @@ plzn tls "server/tls12-prefers-raw-public-key-over-x509" {
 }
 
 plzn tls "server/tls13-prefers-raw-public-key-over-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -71,6 +75,7 @@ plzn tls "server/tls13-prefers-raw-public-key-over-x509" {
 }
 
 plzn tls "server/tls12-prefers-x509-over-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -88,6 +93,7 @@ plzn tls "server/tls12-prefers-x509-over-raw-public-key" {
 }
 
 plzn tls "server/tls13-prefers-x509-over-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -105,6 +111,7 @@ plzn tls "server/tls13-prefers-x509-over-raw-public-key" {
 }
 
 plzn tls "server/tls12-raw-public-key-only-no-common-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -119,6 +126,7 @@ plzn tls "server/tls12-raw-public-key-only-no-common-certificate-type" {
 }
 
 plzn tls "server/tls13-raw-public-key-only-no-common-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -134,6 +142,7 @@ plzn tls "server/tls13-raw-public-key-only-no-common-certificate-type" {
 }
 
 plzn tls "server/tls13-raw-public-key-ignores-signature-algorithms-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
@@ -154,6 +163,7 @@ plzn tls "server/tls13-raw-public-key-ignores-signature-algorithms-cert" {
 }
 
 plzn tls "server/tls12-certificate-type-ignores-unknown-value" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -174,6 +184,7 @@ plzn tls "server/tls12-certificate-type-ignores-unknown-value" {
 }
 
 plzn tls "server/tls13-certificate-type-ignores-unknown-value" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut server {
@@ -194,6 +205,7 @@ plzn tls "server/tls13-certificate-type-ignores-unknown-value" {
 }
 
 plzn tls "server/tls12-certificate-type-absence-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -209,6 +221,7 @@ plzn tls "server/tls12-certificate-type-absence-selects-x509" {
 }
 
 plzn tls "server/tls13-certificate-type-absence-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -224,6 +237,7 @@ plzn tls "server/tls13-certificate-type-absence-selects-x509" {
 }
 
 plzn tls "server/tls12-raw-public-key-only-rejects-absent-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -236,6 +250,7 @@ plzn tls "server/tls12-raw-public-key-only-rejects-absent-certificate-type" {
 }
 
 plzn tls "server/tls13-raw-public-key-only-rejects-absent-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -248,6 +263,7 @@ plzn tls "server/tls13-raw-public-key-only-rejects-absent-certificate-type" {
 }
 
 plzn tls "server/tls12-rejects-empty-server-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   uut server {
@@ -261,6 +277,7 @@ plzn tls "server/tls12-rejects-empty-server-certificate-type-list" {
 }
 
 plzn tls "server/tls13-rejects-empty-server-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   uut server {
@@ -274,6 +291,7 @@ plzn tls "server/tls13-rejects-empty-server-certificate-type-list" {
 }
 
 plzn tls "server/tls12-rejects-default-only-server-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -289,6 +307,7 @@ plzn tls "server/tls12-rejects-default-only-server-certificate-type-list" {
 }
 
 plzn tls "server/tls13-rejects-default-only-server-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut server {
@@ -304,6 +323,7 @@ plzn tls "server/tls13-rejects-default-only-server-certificate-type-list" {
 }
 
 plzn tls "server/tls12-raw-public-key-server-authentication-resumption" {
+  syntax 1.0
   rfc 7250 section 4.2
   rfc 5077 section 3.1
   chain: [ecdsa_p256]
@@ -328,6 +348,7 @@ plzn tls "server/tls12-raw-public-key-server-authentication-resumption" {
 }
 
 plzn tls "server/tls13-raw-public-key-server-authentication-resumption" {
+  syntax 1.0
   rfc 7250 section 4.2
   rfc 8446 section 4.6.1
   chain: [ecdsa_p256]

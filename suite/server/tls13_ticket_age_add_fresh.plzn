@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ticket-age-add-fresh-across-connections" {
+  syntax 1.0
   rfc 9846 section 4.7.1
   chain: [default]
   uut server {

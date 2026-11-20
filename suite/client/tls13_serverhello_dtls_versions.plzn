@@ -6,6 +6,7 @@
 # may reject other values.
 
 plzn tls "client/tls13-serverhello-dtls-legacy-version" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut client { versions: [tls13] }
@@ -23,6 +24,7 @@ plzn tls "client/tls13-serverhello-dtls-legacy-version" {
 }
 
 plzn tls "client/tls13-serverhello-supported-versions-selects-dtls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -40,6 +42,7 @@ plzn tls "client/tls13-serverhello-supported-versions-selects-dtls" {
 }
 
 plzn tls "client/tls13-hrr-supported-versions-selects-dtls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut client {
@@ -60,6 +63,7 @@ plzn tls "client/tls13-hrr-supported-versions-selects-dtls" {
 }
 
 plzn tls "client/tls13-hrr-dtls-legacy-version" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut client {
@@ -88,6 +92,7 @@ plzn tls "client/tls13-hrr-dtls-legacy-version" {
 # OpenSSL and Go treat {254, x} as "not TLS" and hang up without an alert;
 # Botan's TLS 1.3 record layer answers illegal_parameter.
 plzn tls "client/tls13-serverhello-dtls-record-version" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }

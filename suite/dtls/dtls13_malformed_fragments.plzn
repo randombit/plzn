@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-rejects-fragment-type-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut server { versions: [dtls13] }
@@ -7,6 +8,7 @@ plzn tls "dtls13/server-rejects-fragment-type-mismatch" {
 }
 
 plzn tls "dtls13/client-rejects-fragment-type-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut client { versions: [dtls13] }
@@ -15,6 +17,7 @@ plzn tls "dtls13/client-rejects-fragment-type-mismatch" {
 }
 
 plzn tls "dtls13/server-rejects-fragment-total-length-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut server { versions: [dtls13] }
@@ -23,6 +26,7 @@ plzn tls "dtls13/server-rejects-fragment-total-length-mismatch" {
 }
 
 plzn tls "dtls13/client-rejects-fragment-total-length-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut client { versions: [dtls13] }
@@ -31,6 +35,7 @@ plzn tls "dtls13/client-rejects-fragment-total-length-mismatch" {
 }
 
 plzn tls "dtls13/server-rejects-fragment-body-length-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut server { versions: [dtls13] }
@@ -39,6 +44,7 @@ plzn tls "dtls13/server-rejects-fragment-body-length-mismatch" {
 }
 
 plzn tls "dtls13/client-rejects-fragment-body-length-mismatch" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut client { versions: [dtls13] }
@@ -47,6 +53,7 @@ plzn tls "dtls13/client-rejects-fragment-body-length-mismatch" {
 }
 
 plzn tls "dtls13/server-rejects-conflicting-fragment-overlap" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut server { versions: [dtls13] }
@@ -56,6 +63,7 @@ plzn tls "dtls13/server-rejects-conflicting-fragment-overlap" {
 }
 
 plzn tls "dtls13/server-rejects-fragment-past-message-end" {
+  syntax 1.0
   rfc 9147 section 5.5
   chain: [default]
   uut server { versions: [dtls13] }

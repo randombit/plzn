@@ -1,4 +1,5 @@
 plzn tls "client/tls13-serverhello-invalid-legacy-version" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut client { versions: [tls13] }

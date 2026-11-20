@@ -1,4 +1,5 @@
 plzn tls "server/tls13-cert-compression-smoke-zlib" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls13-cert-compression-smoke-zlib" {
 }
 
 plzn tls "server/tls12-cert-compression-ignored" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -30,6 +32,7 @@ plzn tls "server/tls12-cert-compression-ignored" {
 }
 
 plzn tls "server/tls13-cert-compression-zlib-preferred" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -52,6 +55,7 @@ plzn tls "server/tls13-cert-compression-zlib-preferred" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -69,6 +73,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -86,6 +91,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -103,6 +109,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -120,6 +127,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -137,6 +145,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -154,6 +163,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -171,6 +181,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -188,6 +199,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-alone" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -205,6 +217,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-alone" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -222,6 +235,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0000-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -239,6 +253,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-000a-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -256,6 +271,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0100-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -273,6 +289,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-0302-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -290,6 +307,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-3fff-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -307,6 +325,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4000-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -324,6 +343,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-4001-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -341,6 +361,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-fffe-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-then-zlib" {
+  syntax 1.0
   rfc 8879 section 7.3
   chain: [default]
   uut server {
@@ -358,6 +379,7 @@ plzn tls "server/tls13-cert-compression-unreasonable-algorithm-ffff-then-zlib" {
 }
 
 plzn tls "server/tls13-cert-compression-empty-list" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -374,6 +396,7 @@ plzn tls "server/tls13-cert-compression-empty-list" {
 }
 
 plzn tls "server/tls13-cert-compression-duplicated-algorithms" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -392,6 +415,7 @@ plzn tls "server/tls13-cert-compression-duplicated-algorithms" {
 }
 
 plzn tls "server/tls13-cert-compression-zero-length-list" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -408,6 +432,7 @@ plzn tls "server/tls13-cert-compression-zero-length-list" {
 }
 
 plzn tls "server/tls13-cert-compression-odd-length-list" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -424,6 +449,7 @@ plzn tls "server/tls13-cert-compression-odd-length-list" {
 }
 
 plzn tls "server/tls13-cert-compression-truncated-list" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -440,6 +466,7 @@ plzn tls "server/tls13-cert-compression-truncated-list" {
 }
 
 plzn tls "server/tls13-cert-compression-padded-list" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {
@@ -456,6 +483,7 @@ plzn tls "server/tls13-cert-compression-padded-list" {
 }
 
 plzn tls "server/tls13-cert-compression-odd-extension-length" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server {

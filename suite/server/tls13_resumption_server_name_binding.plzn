@@ -10,6 +10,7 @@
 # instead, which RFC 8446 4.1.2 forbids.
 
 plzn tls "server/tls13-resumption-server-name-binding/same-name-resumes" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server {
@@ -36,6 +37,7 @@ plzn tls "server/tls13-resumption-server-name-binding/same-name-resumes" {
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/different-name-resumes" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server {
@@ -65,6 +67,7 @@ plzn tls "server/tls13-resumption-server-name-binding/different-name-resumes" {
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/name-omitted-resumes" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server {
@@ -94,6 +97,7 @@ plzn tls "server/tls13-resumption-server-name-binding/name-omitted-resumes" {
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/name-added-resumes" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server {
@@ -123,6 +127,7 @@ plzn tls "server/tls13-resumption-server-name-binding/name-added-resumes" {
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/case-only-difference-resumes" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server {
@@ -150,6 +155,7 @@ plzn tls "server/tls13-resumption-server-name-binding/case-only-difference-resum
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/hrr-second-clienthello-different-name" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -169,6 +175,7 @@ plzn tls "server/tls13-resumption-server-name-binding/hrr-second-clienthello-dif
 }
 
 plzn tls "server/tls13-resumption-server-name-binding/hrr-second-clienthello-name-omitted" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }

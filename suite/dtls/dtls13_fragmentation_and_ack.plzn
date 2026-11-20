@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-handshake-fragmentation-and-ack" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "dtls13/server-handshake-fragmentation-and-ack" {
 }
 
 plzn tls "dtls13/client-handshake-fragmentation-and-ack" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -31,6 +33,7 @@ plzn tls "dtls13/client-handshake-fragmentation-and-ack" {
 }
 
 plzn tls "dtls13/server-reassembles-fragmented-client-hello" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -43,6 +46,7 @@ plzn tls "dtls13/server-reassembles-fragmented-client-hello" {
 }
 
 plzn tls "dtls13/client-reassembles-fragmented-certificate" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }

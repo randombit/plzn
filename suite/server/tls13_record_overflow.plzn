@@ -1,4 +1,5 @@
 plzn tls "server/tls13-record-overflow" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   xfail rustls "does not enforce the 2^14-byte plaintext record limit"

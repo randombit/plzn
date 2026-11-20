@@ -1,4 +1,5 @@
 plzn tls "client/tls12-psk-server-omits-optional-identity-hint" {
+  syntax 1.0
   rfc 4279 section 2
   chain: []
   psk {

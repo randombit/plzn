@@ -2,6 +2,7 @@
 # state-machine tests where the RFC mandates "the peer aborts the
 # handshake" without pinning a specific alert code.
 plzn tls "negative/handshake-fails" {
+  syntax 1.0
   rfc 5246
   chain: [default]
   uut server { versions: [tls12] }

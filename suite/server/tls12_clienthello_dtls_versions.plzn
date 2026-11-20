@@ -10,6 +10,7 @@
 # to decode and it answers decode_error.
 
 plzn tls "server/tls12-clienthello-dtls-legacy-version" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -28,6 +29,7 @@ plzn tls "server/tls12-clienthello-dtls-legacy-version" {
 }
 
 plzn tls "server/tls12-clienthello-supported-versions-dtls-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -41,6 +43,7 @@ plzn tls "server/tls12-clienthello-supported-versions-dtls-only" {
 }
 
 plzn tls "server/tls12-clienthello-supported-versions-dtls13-and-dtls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -51,6 +54,7 @@ plzn tls "server/tls12-clienthello-supported-versions-dtls13-and-dtls12" {
 }
 
 plzn tls "server/tls12-clienthello-supported-versions-dtls-then-tls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -65,6 +69,7 @@ plzn tls "server/tls12-clienthello-supported-versions-dtls-then-tls12" {
 }
 
 plzn tls "server/tls12-clienthello-supported-versions-tls12-then-dtls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -81,6 +86,7 @@ plzn tls "server/tls12-clienthello-supported-versions-tls12-then-dtls" {
 # RFC 8446 4.2.1: with supported_versions present the server MUST NOT use
 # legacy_version for negotiation, so the DTLS legacy_version is noise.
 plzn tls "server/tls12-clienthello-dtls-legacy-version-with-supported-versions-tls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -100,6 +106,7 @@ plzn tls "server/tls12-clienthello-dtls-legacy-version-with-supported-versions-t
 
 # Every version field says DTLS 1.2; nothing offered is a TLS version.
 plzn tls "server/tls12-clienthello-dtls-legacy-version-with-supported-versions-dtls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -118,6 +125,7 @@ plzn tls "server/tls12-clienthello-dtls-legacy-version-with-supported-versions-d
 # Go treat a {254, x} first record as "not TLS" and hang up without an alert
 # (Botan has no record state yet to send one under).
 plzn tls "server/tls12-clienthello-dtls-record-version" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -137,6 +145,7 @@ plzn tls "server/tls12-clienthello-dtls-record-version" {
 # a DTLS ClientHello body under a 5-byte TLS record header on a stream.
 # rustls accepts the record (see above) and then refuses the version offer.
 plzn tls "server/tls12-clienthello-dtls-at-every-layer" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -155,6 +164,7 @@ plzn tls "server/tls12-clienthello-dtls-at-every-layer" {
 # lists only DTLS versions, so the server MUST NOT fall back to the
 # legacy_version (0x0303) it would otherwise have accepted.
 plzn tls "server/tls12-13-clienthello-supported-versions-dtls-only-no-legacy-fallback" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12, tls13] }
@@ -169,6 +179,7 @@ plzn tls "server/tls12-13-clienthello-supported-versions-dtls-only-no-legacy-fal
 # TLS 1.3 server, which then demands key_share and friends. See also the
 # unknown-high row in tls13_supported_versions_forward_compat.plzn.
 plzn tls "server/tls12-13-clienthello-supported-versions-dtls13-then-tls12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls12, tls13] }

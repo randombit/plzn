@@ -126,6 +126,7 @@ mod cli {
 
     const SWEEP: &str = r#"
 plzn tls "crash/sweep" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-x25519/too-small-Yc" {
+  syntax 1.0
   rfc 7748 section 6.1
   uut server {
     versions: [tls12]
@@ -15,6 +16,7 @@ plzn tls "server/tls12-x25519/too-small-Yc" {
 }
 
 plzn tls "server/tls12-x25519/too-big-Yc" {
+  syntax 1.0
   rfc 7748 section 6.1
   uut server {
     versions: [tls12]
@@ -30,6 +32,7 @@ plzn tls "server/tls12-x25519/too-big-Yc" {
 }
 
 plzn tls "server/tls12-x25519/empty-Yc" {
+  syntax 1.0
   rfc 7748 section 6.1
   uut server {
     versions: [tls12]
@@ -46,6 +49,7 @@ plzn tls "server/tls12-x25519/empty-Yc" {
 }
 
 plzn tls "server/tls12-x25519/all-zero-Yc" {
+  syntax 1.0
   rfc 7748 section 6.1
   uut server {
     versions: [tls12]
@@ -62,6 +66,7 @@ plzn tls "server/tls12-x25519/all-zero-Yc" {
 }
 
 plzn tls "server/tls12-x25519/Yc-of-1" {
+  syntax 1.0
   rfc 7748 section 6.1
   uut server {
     versions: [tls12]
@@ -78,6 +83,7 @@ plzn tls "server/tls12-x25519/Yc-of-1" {
 }
 
 plzn tls "server/tls12-x25519/Yc-with-high-bit-set" {
+  syntax 1.0
   rfc 7748 section 5
   uut server {
     versions: [tls12]
@@ -98,6 +104,7 @@ plzn tls "server/tls12-x25519/Yc-with-high-bit-set" {
 }
 
 plzn tls "server/tls12-x25519/unknown-group-only-falls-back-to-dhe" {
+  syntax 1.0
   rfc 8422 section 5.1
   uut server {
     versions: [tls12]
@@ -119,6 +126,7 @@ plzn tls "server/tls12-x25519/unknown-group-only-falls-back-to-dhe" {
 }
 
 plzn tls "server/tls12-x25519/unknown-group-only-no-fallback" {
+  syntax 1.0
   rfc 8422 section 5.1
   chain: [default]
   uut server {

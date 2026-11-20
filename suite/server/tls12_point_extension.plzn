@@ -1,4 +1,5 @@
 plzn tls "server/tls12-point-extension/server-ec-point-formats-content" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [default]
   uut server {

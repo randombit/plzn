@@ -1,4 +1,5 @@
 plzn tls "dtls12/renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [ecdsa_p256]
   uut server {
@@ -27,6 +28,7 @@ plzn tls "dtls12/renegotiation" {
 # The cookie-disabled path lets the same before/after traffic assertion run
 # on implementations where the cookie-enabled renegotiation path fails.
 plzn tls "dtls12/renegotiation-without-cookie-exchange" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [ecdsa_p256]
   uut server {

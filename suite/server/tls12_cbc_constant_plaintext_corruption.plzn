@@ -1,4 +1,5 @@
 plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x00" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [default]
   uut server {
@@ -13,6 +14,7 @@ plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x00" {
 }
 
 plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x0f" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [default]
   uut server {
@@ -27,6 +29,7 @@ plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x0f" {
 }
 
 plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x2f" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [default]
   uut server {
@@ -41,6 +44,7 @@ plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0x2f" {
 }
 
 plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0xff" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [default]
   uut server {
@@ -55,6 +59,7 @@ plzn tls "server/tls12-cbc-constant-plaintext-corruption/all-0xff" {
 }
 
 plzn tls "server/tls12-cbc-constant-plaintext-corruption/256-bytes-of-0x0f" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [default]
   uut server {

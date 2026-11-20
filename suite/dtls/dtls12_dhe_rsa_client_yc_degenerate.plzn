@@ -1,4 +1,5 @@
 plzn tls "dtls12/dhe-client-yc-zero" {
+  syntax 1.0
   rfc 7919 section 5.1
   chain: [rsa_2048]
   uut server {
@@ -12,6 +13,7 @@ plzn tls "dtls12/dhe-client-yc-zero" {
 }
 
 plzn tls "dtls12/dhe-client-yc-one" {
+  syntax 1.0
   rfc 7919 section 5.1
   chain: [rsa_2048]
   uut server {
@@ -25,6 +27,7 @@ plzn tls "dtls12/dhe-client-yc-one" {
 }
 
 plzn tls "dtls12/dhe-client-yc-p-minus-1" {
+  syntax 1.0
   rfc 7919 section 5.1
   chain: [rsa_2048]
   uut server {

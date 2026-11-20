@@ -1,4 +1,5 @@
 plzn tls "server/tls12-version-numbers/very-high-version-254-254" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server {
@@ -24,6 +25,7 @@ plzn tls "server/tls12-version-numbers/very-high-version-254-254" {
 }
 
 plzn tls "server/tls12-version-numbers/high-version-4-1" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server {
@@ -48,6 +50,7 @@ plzn tls "server/tls12-version-numbers/high-version-4-1" {
 }
 
 plzn tls "server/tls12-version-numbers/high-version-6-3" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server {
@@ -72,6 +75,7 @@ plzn tls "server/tls12-version-numbers/high-version-6-3" {
 }
 
 plzn tls "server/tls12-version-numbers/very-low-version-0-0" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server {
@@ -85,6 +89,7 @@ plzn tls "server/tls12-version-numbers/very-low-version-0-0" {
 }
 
 plzn tls "server/tls12-version-numbers/low-record-version-3-0-tls12" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -109,6 +114,7 @@ plzn tls "server/tls12-version-numbers/low-record-version-3-0-tls12" {
 }
 
 plzn tls "server/tls12-version-numbers/high-record-version-3-254-tls12" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -133,6 +139,7 @@ plzn tls "server/tls12-version-numbers/high-record-version-3-254-tls12" {
 }
 
 plzn tls "server/tls12-version-numbers/high-record-version-3-254-very-high-version-254-254" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {

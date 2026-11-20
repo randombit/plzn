@@ -1,4 +1,5 @@
 plzn tls "client/legacy-basic" {
+  syntax 1.0
   rfc 2246 section 7
   rfc 4346 section 7
   chain: [rsa_2048]
@@ -13,6 +14,7 @@ plzn tls "client/legacy-basic" {
 }
 
 plzn tls "client/legacy-ecdhe-rsa" {
+  syntax 1.0
   rfc 4492 section 5
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -26,6 +28,7 @@ plzn tls "client/legacy-ecdhe-rsa" {
 }
 
 plzn tls "client/legacy-ecdhe-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5
   chain: [ecdsa_p256]
   matrix { version in [tls10, tls11] }
@@ -39,6 +42,7 @@ plzn tls "client/legacy-ecdhe-ecdsa" {
 }
 
 plzn tls "client/legacy-dhe-rsa" {
+  syntax 1.0
   rfc 2246 section 7.4.3
   rfc 4346 section 7.4.3
   chain: [rsa_2048]
@@ -53,6 +57,7 @@ plzn tls "client/legacy-dhe-rsa" {
 }
 
 plzn tls "client/legacy-client-authentication" {
+  syntax 1.0
   rfc 2246 section 7.4.6
   rfc 4346 section 7.4.6
   chain: [rsa_2048]
@@ -67,6 +72,7 @@ plzn tls "client/legacy-client-authentication" {
 }
 
 plzn tls "client/legacy-psk" {
+  syntax 1.0
   rfc 4279 section 2
   chain: []
   matrix { version in [tls10, tls11] }
@@ -84,6 +90,7 @@ plzn tls "client/legacy-psk" {
 }
 
 plzn tls "client/legacy-ecdhe-psk" {
+  syntax 1.0
   rfc 5489 section 3
   chain: []
   matrix { version in [tls10, tls11] }

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-client-hello-max-size" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]
@@ -22,6 +23,7 @@ plzn tls "server/tls12-client-hello-max-size" {
 }
 
 plzn tls "server/tls12-client-hello-max-size/no-alpn" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]

@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-rejects-nonempty-legacy-cookie" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut server { versions: [dtls13] }
@@ -9,6 +10,7 @@ plzn tls "dtls13/server-rejects-nonempty-legacy-cookie" {
 }
 
 plzn tls "dtls13/client-rejects-serverhello-legacy-session-id" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client { versions: [dtls13] }
@@ -19,6 +21,7 @@ plzn tls "dtls13/client-rejects-serverhello-legacy-session-id" {
 }
 
 plzn tls "dtls13/client-rejects-hello-verify-request" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client { versions: [dtls13] }
@@ -36,6 +39,7 @@ plzn tls "dtls13/client-rejects-hello-verify-request" {
 }
 
 plzn tls "dtls13/client-rejects-empty-cookie-hello-verify-request" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client { versions: [dtls13] }
@@ -53,6 +57,7 @@ plzn tls "dtls13/client-rejects-empty-cookie-hello-verify-request" {
 }
 
 plzn tls "dtls13/client-rejects-dtls13-after-dtls12-cookie-retry" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client { versions: [dtls13, dtls12] }
@@ -69,6 +74,7 @@ plzn tls "dtls13/client-rejects-dtls13-after-dtls12-cookie-retry" {
 }
 
 plzn tls "dtls13/client-rejects-hello-verify-request-trailing-byte" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [default]
   uut client { versions: [dtls13, dtls12] }

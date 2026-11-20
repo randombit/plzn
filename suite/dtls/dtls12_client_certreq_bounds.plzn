@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-certreq-empty-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [ecdsa_p256]
   uut client {
@@ -14,6 +15,7 @@ plzn tls "dtls12/client-certreq-empty-sigalgs" {
 }
 
 plzn tls "dtls12/client-certreq-empty-types" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [ecdsa_p256]
   uut client {

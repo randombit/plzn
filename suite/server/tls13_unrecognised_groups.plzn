@@ -8,6 +8,7 @@
 # no shared group, handshake_failure, where the other backends negotiate it.
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-secp256r1-listed" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -29,6 +30,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-secp256r1-
 }
 
 plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-ec" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -51,6 +53,7 @@ plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-e
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-ffdhe2048-listed" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -72,6 +75,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ec-ffdhe2048-
 }
 
 plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-ec" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -94,6 +98,7 @@ plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-e
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ec" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -112,6 +117,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ec" {
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-secp256r1-listed" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -133,6 +139,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-secp256
 }
 
 plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-ffdhe" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -155,6 +162,7 @@ plzn tls "server/tls13-unrecognised-groups/known-secp256r1-share-after-unknown-f
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-ffdhe2048-listed" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -176,6 +184,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-key-shares-ffdhe-ffdhe20
 }
 
 plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-ffdhe" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -198,6 +207,7 @@ plzn tls "server/tls13-unrecognised-groups/known-ffdhe2048-share-after-unknown-f
 }
 
 plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ffdhe" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -216,6 +226,7 @@ plzn tls "server/tls13-unrecognised-groups/only-unknown-groups-ffdhe" {
 }
 
 plzn tls "server/tls13-unrecognised-groups/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {

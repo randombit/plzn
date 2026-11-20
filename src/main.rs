@@ -3305,7 +3305,7 @@ mod chain_resolution_tests {
 
     fn program(role: &str, version: &str, chain: &str, capabilities: &str) -> Program {
         let source = format!(
-            "plzn tls \"chains\" {{\nchain: [{chain}]\nuut {role} {{ versions: [{version}] }}\npeer {{ capabilities: [{capabilities}] }}\nflow {{ close }}\nexpect alert fatal/handshake_failure\n}}"
+            "plzn tls \"chains\" {{\nsyntax 1.0\nchain: [{chain}]\nuut {role} {{ versions: [{version}] }}\npeer {{ capabilities: [{capabilities}] }}\nflow {{ close }}\nexpect alert fatal/handshake_failure\n}}"
         );
         assert!(plzn::lint("chains", &source).is_empty());
         let file = plzn::parse::parse(&plzn::lex::lex(&source).unwrap()).unwrap();

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-finished-bitflip" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut server { versions: [tls13] }
@@ -13,6 +14,7 @@ plzn tls "server/tls13-finished-bitflip" {
 }
 
 plzn tls "server/tls13-finished-integrity-suite-group" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut server {

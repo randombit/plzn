@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-sweep-ecdhe-psk" {
+  syntax 1.0
   rfc 5489 section 3
   chain: []
   psk {

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-post-handshake-server-hello" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -11,6 +12,7 @@ plzn tls "client/tls12-post-handshake-server-hello" {
 }
 
 plzn tls "client/tls12-post-handshake-certificate" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -23,6 +25,7 @@ plzn tls "client/tls12-post-handshake-certificate" {
 }
 
 plzn tls "client/tls12-post-handshake-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut client { versions: [tls12] }

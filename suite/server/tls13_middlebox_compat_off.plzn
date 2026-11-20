@@ -1,4 +1,5 @@
 plzn tls "server/tls13-middlebox-compat-off" {
+  syntax 1.0
   rfc 8446 section D.4
   chain: [default]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls13-middlebox-compat-off" {
 }
 
 plzn tls "server/tls13-middlebox-compat-off-still-accepts-peer-ccs" {
+  syntax 1.0
   rfc 8446 section D.4
   chain: [default]
   uut server {

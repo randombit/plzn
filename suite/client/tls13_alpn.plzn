@@ -1,4 +1,5 @@
 plzn tls "client/tls13-alpn-advertisement-and-selection" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut client {
@@ -16,6 +17,7 @@ plzn tls "client/tls13-alpn-advertisement-and-selection" {
 }
 
 plzn tls "client/tls13-alpn-reject-unoffered-selection" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [default]
   uut client {
@@ -30,6 +32,7 @@ plzn tls "client/tls13-alpn-reject-unoffered-selection" {
 }
 
 plzn tls "client/tls13-alpn-empty-selection" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut client {
@@ -44,6 +47,7 @@ plzn tls "client/tls13-alpn-empty-selection" {
 }
 
 plzn tls "client/tls13-alpn-reject-multiple-selected-protocols" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [default]
   xfail gnutls "accepts an EncryptedExtensions ALPN response containing multiple protocols"
@@ -58,6 +62,7 @@ plzn tls "client/tls13-alpn-reject-multiple-selected-protocols" {
 }
 
 plzn tls "client/tls13-alpn-resumption" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut client {

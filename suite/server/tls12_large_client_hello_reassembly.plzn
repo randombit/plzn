@@ -1,4 +1,5 @@
 plzn tls "server/tls12-large-client-hello-reassembly/large-client-hello-padding" {
+  syntax 1.0
   rfc 7685 section 3
   chain: [default]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls12-large-client-hello-reassembly/large-client-hello-padding"
 }
 
 plzn tls "server/tls12-large-client-hello-reassembly/large-incorrect-client-hello-length" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {

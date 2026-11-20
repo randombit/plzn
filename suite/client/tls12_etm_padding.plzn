@@ -1,4 +1,5 @@
 plzn tls "client/tls12-etm-accepts-padding-only-fragment" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   uut client {
@@ -16,6 +17,7 @@ plzn tls "client/tls12-etm-accepts-padding-only-fragment" {
 }
 
 plzn tls "client/tls12-etm-rejects-authenticated-invalid-padding" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   uut client {

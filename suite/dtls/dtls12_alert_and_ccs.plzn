@@ -1,4 +1,5 @@
 plzn tls "dtls12/alert" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut client {
@@ -14,6 +15,7 @@ plzn tls "dtls12/alert" {
 }
 
 plzn tls "dtls12/fragment-alert" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut server {
@@ -32,6 +34,7 @@ plzn tls "dtls12/fragment-alert" {
 }
 
 plzn tls "dtls12/double-alert" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut server {
@@ -49,6 +52,7 @@ plzn tls "dtls12/double-alert" {
 }
 
 plzn tls "dtls12/app-data-after-change-cipher-spec" {
+  syntax 1.0
   rfc 6347 section 4.2.4
   chain: [ecdsa_p256]
   uut client {
@@ -77,6 +81,7 @@ plzn tls "dtls12/app-data-after-change-cipher-spec" {
 }
 
 plzn tls "dtls12/empty-app-data-after-change-cipher-spec" {
+  syntax 1.0
   rfc 6347 section 4.2.4
   chain: [ecdsa_p256]
   uut client {
@@ -103,6 +108,7 @@ plzn tls "dtls12/empty-app-data-after-change-cipher-spec" {
 }
 
 plzn tls "dtls12/alert-after-change-cipher-spec" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [ecdsa_p256]
   uut client {
@@ -130,6 +136,7 @@ plzn tls "dtls12/alert-after-change-cipher-spec" {
 }
 
 plzn tls "dtls12/bad-change-cipher-spec-dtls-value" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut client {
@@ -146,6 +153,7 @@ plzn tls "dtls12/bad-change-cipher-spec-dtls-value" {
 }
 
 plzn tls "dtls12/bad-change-cipher-spec-dtls-length" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut client {
@@ -160,6 +168,7 @@ plzn tls "dtls12/bad-change-cipher-spec-dtls-length" {
 }
 
 plzn tls "dtls12/bad-client-change-cipher-spec-value" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut server {
@@ -175,6 +184,7 @@ plzn tls "dtls12/bad-client-change-cipher-spec-value" {
 }
 
 plzn tls "dtls12/bad-client-change-cipher-spec-length" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut server {
@@ -189,6 +199,7 @@ plzn tls "dtls12/bad-client-change-cipher-spec-length" {
 }
 
 plzn tls "dtls12/bad-client-change-cipher-spec-type-override" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut server {
@@ -204,6 +215,7 @@ plzn tls "dtls12/bad-client-change-cipher-spec-type-override" {
 }
 
 plzn tls "dtls12/bad-server-change-cipher-spec-type-override" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [ecdsa_p256]
   uut client {

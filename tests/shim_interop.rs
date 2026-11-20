@@ -37,6 +37,7 @@ fn lower_source(name: &str, source: &str) -> plzn::ir::Program {
 
 const TLS12_SERVER: &str = r#"
 plzn tls "shim/tls12-server" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -53,6 +54,7 @@ plzn tls "shim/tls12-server" {
 
 const TLS13_SERVER: &str = r#"
 plzn tls "shim/tls13-server" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -127,6 +129,7 @@ fn run_case(kind: ShimKind, source_name: &str, source: &str, version: u16) {
 // did not offer and plzn would reject -- so `expect ok` PROVES selection by the client's sig algs.
 const TLS13_MULTICERT: &str = r#"
 plzn tls "shim/tls13-multicert-select" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -224,6 +227,7 @@ fn go_shim_tls13_multicert_select_rsa() {
 // so a conformant client MUST reject the handshake.
 const TLS13_CLIENT_REJECT_UNOFFERED_ALPN: &str = r#"
 plzn tls "shim/tls13-client-reject-unoffered-alpn" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -302,6 +306,7 @@ fn rustls_shim_tls13_client_reject_unoffered_alpn() {
 // the failure category rather than only the wire alert. Cross-library.
 const STRUCTURED_FLOW: &str = r#"
 plzn tls "shim/structured" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -438,6 +443,7 @@ fn go_shim_structured_error_cases() {
 // "pass" and so could not live in the pass-asserting shim corpus.
 const MATCHER_MISMATCH_FLOW: &str = r#"
 plzn tls "shim/matcher-mismatch" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -487,6 +493,7 @@ fn matcher_mismatch_reports_expected_and_observed() {
 // sentinel; the client asserts it via the random_suffix matcher. Cross-library.
 const DOWNGRADE_SENTINEL: &str = r#"
 plzn tls "shim/tls12-downgrade-sentinel" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [rsa_2048]
   uut server {
@@ -571,6 +578,7 @@ fn rustls_shim_tls12_downgrade_sentinel() {
 // verifier DOES support Ed25519 (see crypto::tests::ed25519_round_trip).
 const TLS13_ED25519: &str = r#"
 plzn tls "shim/tls13-ed25519" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -631,6 +639,7 @@ fn openssl_shim_tls13_ed25519() {
 
 const TLS12_CLIENT: &str = r#"
 plzn tls "shim/tls12-client" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [tls12]
@@ -647,6 +656,7 @@ plzn tls "shim/tls12-client" {
 
 const TLS13_CLIENT: &str = r#"
 plzn tls "shim/tls13-client" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -707,6 +717,7 @@ fn run_client_case(kind: ShimKind, source_name: &str, source: &str, version: u16
 
 const TLS13_CLIENT_REJECTS_UNOFFERED_SERVER_SIGALG: &str = r#"
 plzn tls "shim/tls13-client-rejects-unoffered-server-sigalg" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls13]
@@ -754,6 +765,7 @@ fn gnutls_shim_tls13_client_sends_alert_for_unoffered_server_sigalg() {
 
 const DTLS12_SERVER_SMOKE: &str = r#"
 plzn tls "shim/dtls12-server" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [dtls12]
@@ -769,6 +781,7 @@ plzn tls "shim/dtls12-server" {
 
 const DTLS12_CLIENT_SMOKE: &str = r#"
 plzn tls "shim/dtls12-client" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]
@@ -830,6 +843,7 @@ fn run_dtls_case(kind: ShimKind, source_name: &str, source: &str, shim_is_server
 // direction the happy `run_client_case` deliberately skips. Cross-library.
 const TLS13_CLIENT_REJECT: &str = r#"
 plzn tls "shim/tls13-client-reject-untrusted" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -1491,6 +1505,7 @@ fn rustls_shim_tls13_client_eku_mismatch() {
 // (sees the failure) and the shim (told to expect it) must pass.
 const UUT_VERSION_MISMATCH: &str = r#"
 plzn tls "uut/version-mismatch" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1504,6 +1519,7 @@ plzn tls "uut/version-mismatch" {
 
 const UUT_CIPHER_MISMATCH: &str = r#"
 plzn tls "uut/cipher-mismatch" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1571,6 +1587,7 @@ fn openssl_shim_uut_cipher_mismatch() {
 // second connection can still decrypt the stateless ticket and resume.
 const TLS13_RESUME: &str = r#"
 plzn tls "shim/tls13-resume" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1643,6 +1660,7 @@ fn run_resume_case(kind: ShimKind) {
 // stateless ticket.
 const TLS12_RESUME: &str = r#"
 plzn tls "shim/tls12-resume" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -1723,6 +1741,7 @@ fn rustls_shim_tls12_resume() {
 // against a configured trust anchor. Exercises the full TLS 1.3 client-auth flow.
 const TLS13_CLIENT_AUTH_OK: &str = r#"
 plzn tls "shim/tls13-client-auth" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -1804,6 +1823,7 @@ fn go_shim_tls13_client_auth() {
 // TLS13_CLIENT_AUTH_OK, which only tests plzn's client side.
 const TLS13_SERVER_CLIENT_AUTH: &str = r#"
 plzn tls "shim/tls13-server-requests-client-auth" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -1954,6 +1974,7 @@ fn rustls_shim_tls13_server_client_auth_ca_hint() {
 // alongside; the RPK selection rides the existing client-cert-type negotiation.
 const TLS13_SERVER_CLIENT_RPK: &str = r#"
 plzn tls "shim/tls13-server-requests-client-auth-rpk" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -2038,6 +2059,7 @@ fn rustls_shim_tls13_server_client_auth_rpk() {
 // suite/server/tls13_offer_rpk_x509_fallback where no server enables RPK).
 const TLS13_RPK_SELECTED: &str = r#"
 plzn tls "shim/tls13-rpk-selected" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2129,6 +2151,7 @@ fn rustls_shim_tls13_rpk_selected_ecdsa() {
 // completing handshake proves a genuine compress/decompress round-trip.
 const TLS13_CERT_COMPRESSION: &str = r#"
 plzn tls "shim/tls13-cert-compression" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2206,6 +2229,7 @@ fn rustls_shim_tls13_cert_compression_ecdsa() {
 // CertificateVerify), so the server must abort.
 const TLS13_CLIENT_AUTH_MISSING: &str = r#"
 plzn tls "shim/tls13-client-auth-missing" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2279,6 +2303,7 @@ fn botan_shim_tls13_client_auth_missing() {
 // would disrupt the flight ordering). Cross-library.
 const TLS13_CLIENT_AUTH_BADSIG: &str = r#"
 plzn tls "shim/tls13-client-auth-badsig" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2370,6 +2395,7 @@ fn openssl_shim_tls13_client_auth_badsig() {
 // (previously it applied none). Cross-library.
 const TLS12_CLIENT_AUTH_BADSIG: &str = r#"
 plzn tls "shim/tls12-client-auth-badsig" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2464,6 +2490,7 @@ fn openssl_shim_tls12_client_auth_badsig() {
 // Cross-library.
 const TLS13_CLIENT_AUTH_BYPASS: &str = r#"
 plzn tls "shim/tls13-client-auth-bypass" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2538,6 +2565,7 @@ fn openssl_shim_tls13_client_auth_bypass() {
 // building. Cross-library.
 const TLS13_CLIENT_AUTH_CHAIN: &str = r#"
 plzn tls "shim/tls13-client-auth-chain" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2614,6 +2642,7 @@ fn openssl_shim_tls13_client_auth_chain() {
 // handshake completes with an app-data exchange.
 const TLS12_CLIENT_AUTH_OK: &str = r#"
 plzn tls "shim/tls12-client-auth" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2688,6 +2717,7 @@ fn openssl_shim_tls12_client_auth() {
 // none, so the empty list is requested explicitly.
 const TLS12_CLIENT_AUTH_MISSING: &str = r#"
 plzn tls "shim/tls12-client-auth-missing" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2814,6 +2844,7 @@ fn run_client_auth_untrusted(kind: ShimKind, test_id: &str, src: &str, tls_versi
 
 const TLS13_CLIENT_AUTH_UNTRUSTED: &str = r#"
 plzn tls "shim/tls13-client-auth-untrusted" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2825,6 +2856,7 @@ plzn tls "shim/tls13-client-auth-untrusted" {
 
 const TLS12_CLIENT_AUTH_UNTRUSTED: &str = r#"
 plzn tls "shim/tls12-client-auth-untrusted" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2924,6 +2956,7 @@ fn run_alpn_ok(kind: ShimKind, test_id: &str, src: &str, tls_version: u16, seed:
 
 const TLS13_ALPN_OK: &str = r#"
 plzn tls "shim/tls13-alpn" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2942,6 +2975,7 @@ plzn tls "shim/tls13-alpn" {
 
 const TLS12_ALPN_OK: &str = r#"
 plzn tls "shim/tls12-alpn" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -3040,6 +3074,7 @@ fn run_alpn_mismatch(kind: ShimKind, test_id: &str, src: &str, tls_version: u16,
 
 const TLS13_ALPN_MISMATCH: &str = r#"
 plzn tls "shim/tls13-alpn-mismatch" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3055,6 +3090,7 @@ plzn tls "shim/tls13-alpn-mismatch" {
 
 const TLS12_ALPN_MISMATCH: &str = r#"
 plzn tls "shim/tls12-alpn-mismatch" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -3176,6 +3212,7 @@ fn run_sni_ok(kind: ShimKind, test_id: &str, src: &str, tls_version: u16, seed: 
 
 const TLS13_SNI_OK: &str = r#"
 plzn tls "shim/tls13-sni" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3194,6 +3231,7 @@ plzn tls "shim/tls13-sni" {
 
 const TLS12_SNI_OK: &str = r#"
 plzn tls "shim/tls12-sni" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -3261,6 +3299,7 @@ fn go_shim_tls12_sni() {
 // would have let this handshake wrongly succeed. Cross-library.
 const TLS13_SERVER_SIGALG_PREF: &str = r#"
 plzn tls "shim/tls13-server-sigalg-pref" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3335,6 +3374,7 @@ fn openssl_shim_tls13_server_sigalg_pref() {
 // real servers (previously only covered against the internal harness). Cross-library.
 const TLS13_HRR: &str = r#"
 plzn tls "shim/tls13-hrr" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3398,6 +3438,7 @@ fn openssl_shim_tls13_hrr() {
 // self-checks the negotiated suite (`expect.cipher`). Cross-library.
 const TLS13_CHACHA: &str = r#"
 plzn tls "shim/tls13-chacha20" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3465,6 +3506,7 @@ fn openssl_shim_tls13_chacha20() {
 // exercises plzn's deferred-hash path and the AES-256-GCM AEAD. Cross-library.
 const TLS13_AES256: &str = r#"
 plzn tls "shim/tls13-aes256" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3539,6 +3581,7 @@ fn gnutls_shim_tls13_aes256() {
 // (previously the client only did x25519). Cross-library.
 const TLS13_P256: &str = r#"
 plzn tls "shim/tls13-p256" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3598,6 +3641,7 @@ fn openssl_shim_tls13_p256() {
 // plzn's P-384 ECDH in TLS 1.3. Cross-library.
 const TLS13_P384: &str = r#"
 plzn tls "shim/tls13-p384" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3659,6 +3703,7 @@ fn openssl_shim_tls13_p384() {
 // allowed_key_exchange_methods. Cross-library where the library still supports it.
 const TLS12_RSA_KEX: &str = r#"
 plzn tls "shim/tls12-rsa-kex" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -3721,6 +3766,7 @@ fn openssl_shim_tls12_rsa_kex() {
 // through its library's external-PSK callback/credential API.
 const TLS13_EXT_PSK: &str = r#"
 plzn tls "shim/tls13-ext-psk" {
+  syntax 1.0
   chain: []
   uut server {
     versions: [tls13]
@@ -3740,6 +3786,7 @@ plzn tls "shim/tls13-ext-psk" {
 
 const TLS13_EXT_PSK_CLIENT: &str = r#"
 plzn tls "shim/tls13-ext-psk-client" {
+  syntax 1.0
   chain: []
   uut client {
     versions: [tls13]
@@ -3759,6 +3806,7 @@ plzn tls "shim/tls13-ext-psk-client" {
 
 const TLS12_PSK_CLIENT: &str = r#"
 plzn tls "shim/tls12-psk-client" {
+  syntax 1.0
   chain: []
   uut client {
     versions: [tls12]
@@ -3783,6 +3831,7 @@ plzn tls "shim/tls12-psk-client" {
 // exact single-suite policy.
 const TLS12_PSK_SERVER_PINNED: &str = r#"
 plzn tls "shim/tls12-psk-server-pinned" {
+  syntax 1.0
   chain: []
   psk {
     identity: "plzn-psk-id"
@@ -3803,6 +3852,7 @@ plzn tls "shim/tls12-psk-server-pinned" {
 
 const DTLS12_PSK_CLIENT_PINNED: &str = r#"
 plzn tls "shim/dtls12-psk-client-pinned" {
+  syntax 1.0
   chain: []
   psk {
     identity: "plzn-psk-id"
@@ -3823,6 +3873,7 @@ plzn tls "shim/dtls12-psk-client-pinned" {
 
 const DTLS12_PSK_SERVER_PINNED: &str = r#"
 plzn tls "shim/dtls12-psk-server-pinned" {
+  syntax 1.0
   chain: []
   psk {
     identity: "plzn-psk-id"
@@ -4098,6 +4149,7 @@ fn wolfssl_shim_tls13_client() {
 // those fields via `recv ClientHello { ... }`. Cross-library.
 const TLS13_CLIENT_CH_LEGACY_VERSION: &str = r#"
 plzn tls "shim/tls13-client-ch-legacy-version" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4114,6 +4166,7 @@ plzn tls "shim/tls13-client-ch-legacy-version" {
 
 const TLS13_CLIENT_CH_NULL_COMPRESSION: &str = r#"
 plzn tls "shim/tls13-client-ch-null-compression" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4173,6 +4226,7 @@ fn openssl_shim_tls13_client_ch_null_compression() {
 // iff 0x1301 appears in the offered list. Cross-library.
 const TLS13_CLIENT_CH_MANDATORY_SUITE: &str = r#"
 plzn tls "shim/tls13-client-ch-mandatory-suite" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4191,6 +4245,7 @@ plzn tls "shim/tls13-client-ch-mandatory-suite" {
 // (and modern clients offer only it). Cross-library.
 const TLS12_CLIENT_CH_NULL_COMPRESSION: &str = r#"
 plzn tls "shim/tls12-client-ch-null-compression" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [tls12]
@@ -4251,6 +4306,7 @@ fn openssl_shim_tls12_client_ch_null_compression() {
 // each is present in the shim client's ClientHello. Cross-library.
 const TLS13_CLIENT_CH_SUPPORTED_VERSIONS: &str = r#"
 plzn tls "shim/tls13-client-ch-supported-versions" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4267,6 +4323,7 @@ plzn tls "shim/tls13-client-ch-supported-versions" {
 
 const TLS13_CLIENT_CH_KEY_SHARE: &str = r#"
 plzn tls "shim/tls13-client-ch-key-share" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4326,6 +4383,7 @@ fn openssl_shim_tls13_client_ch_key_share() {
 // an acceptable scheme (RFC 5246 7.4.1.4.1). Cross-library.
 const TLS13_CLIENT_CH_SIG_ALGS: &str = r#"
 plzn tls "shim/tls13-client-ch-sig-algs" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4342,6 +4400,7 @@ plzn tls "shim/tls13-client-ch-sig-algs" {
 
 const TLS12_CLIENT_CH_SIG_ALGS: &str = r#"
 plzn tls "shim/tls12-client-ch-sig-algs" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [tls12]
@@ -4404,6 +4463,7 @@ fn openssl_shim_tls12_client_ch_sig_algs() {
 // the ChaCha20 AEAD. Cross-library.
 const TLS13_CLIENT_SELECT_AES256: &str = r#"
 plzn tls "shim/tls13-client-select-aes256" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4420,6 +4480,7 @@ plzn tls "shim/tls13-client-select-aes256" {
 
 const TLS13_CLIENT_SELECT_CHACHA20: &str = r#"
 plzn tls "shim/tls13-client-select-chacha20" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4480,6 +4541,7 @@ fn openssl_shim_tls13_client_select_chacha20() {
 // client must abort. Cross-library.
 const TLS13_CLIENT_REJECT_BOGUS_SUITE: &str = r#"
 plzn tls "shim/tls13-client-reject-bogus-suite" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4551,6 +4613,7 @@ fn openssl_shim_tls13_client_reject_bogus_suite() {
 // not pinned (unsupported_extension vs illegal_parameter vary), so a generic handshake-fails.
 const TLS13_CLIENT_REJECT_UNSOLICITED_EE_EXT: &str = r#"
 plzn tls "shim/tls13-client-reject-unsolicited-ee-ext" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4646,6 +4709,7 @@ fn rustls_shim_tls13_client_reject_unsolicited_ee_ext() {
 // RFC 8446 4.1.3: "legacy_compression_method: A single byte which MUST have the value 0."
 const TLS13_CLIENT_REJECT_SH_BAD_COMPRESSION: &str = r#"
 plzn tls "shim/tls13-client-reject-sh-bad-compression" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4660,6 +4724,7 @@ plzn tls "shim/tls13-client-reject-sh-bad-compression" {
 // key_share (0x0033) is a ServerHello/HRR-only extension (RFC 8446 4.2 table); illegal in EE.
 const TLS13_CLIENT_REJECT_EE_KEY_SHARE: &str = r#"
 plzn tls "shim/tls13-client-reject-ee-key-share" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4674,6 +4739,7 @@ plzn tls "shim/tls13-client-reject-ee-key-share" {
 // pre_shared_key (0x0029) is a ServerHello-only extension (RFC 8446 4.2 table); illegal in EE.
 const TLS13_CLIENT_REJECT_EE_PSK: &str = r#"
 plzn tls "shim/tls13-client-reject-ee-psk" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4745,6 +4811,7 @@ fn tls13_client_reject_ee_psk() {
 // 4.2 table); illegal in EncryptedExtensions.
 const TLS13_CLIENT_REJECT_EE_CERT_AUTHORITIES: &str = r#"
 plzn tls "shim/tls13-client-reject-ee-cert-authorities" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4784,6 +4851,7 @@ fn tls13_client_reject_ee_cert_authorities() {
 // decode. The record is sealed under the handshake key, so this is a decode error, not AEAD.
 const TLS13_CLIENT_REJECT_CERT_TRAILING: &str = r#"
 plzn tls "shim/tls13-client-reject-cert-trailing" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4798,6 +4866,7 @@ plzn tls "shim/tls13-client-reject-cert-trailing" {
 // Truncated Certificate body -- a structurally invalid handshake message.
 const TLS13_CLIENT_REJECT_CERT_TRUNCATED: &str = r#"
 plzn tls "shim/tls13-client-reject-cert-truncated" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4813,6 +4882,7 @@ plzn tls "shim/tls13-client-reject-cert-truncated" {
 // plaintext byte (the record still opens under the handshake key) makes the Finished check fail.
 const TLS13_CLIENT_REJECT_SERVER_FINISHED_CORRUPT: &str = r#"
 plzn tls "shim/tls13-client-reject-server-finished-corrupt" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4828,6 +4898,7 @@ plzn tls "shim/tls13-client-reject-server-finished-corrupt" {
 // KeyShareEntry "MUST be in the same group as the KeyShareEntry ... offered by the client").
 const TLS13_CLIENT_REJECT_SH_UNOFFERED_KEYSHARE: &str = r#"
 plzn tls "shim/tls13-client-reject-sh-unoffered-keyshare" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -4976,6 +5047,7 @@ fn gnutls_shim_dtls12_server() {
 
 const GNUTLS_TLS12_CBC_SHA2_BAD_MAC: &str = r#"
 plzn tls "shim/gnutls-tls12-cbc-sha2-bad-mac" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]

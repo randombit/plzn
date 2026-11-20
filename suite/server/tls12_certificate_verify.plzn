@@ -3,6 +3,7 @@
 # internal_error pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls12-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -31,6 +32,7 @@ plzn tls "server/tls12-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls12-certificate-verify/md5-forced" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -55,6 +57,7 @@ plzn tls "server/tls12-certificate-verify/md5-forced" {
 }
 
 plzn tls "server/tls12-certificate-verify/md5-forced-in-hashinfo" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -79,6 +82,7 @@ plzn tls "server/tls12-certificate-verify/md5-forced-in-hashinfo" {
 }
 
 plzn tls "server/tls12-certificate-verify/tls11-signature-in-tls12" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-cbc-large-record-with-252-byte-padding" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [rsa_2048]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "server/tls12-cbc-large-record-with-252-byte-padding" {
 }
 
 plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha256" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [rsa_2048]
   uut server {
@@ -33,6 +35,7 @@ plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha256" {
 }
 
 plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha384" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [rsa_2048]
   uut server {
@@ -50,6 +53,7 @@ plzn tls "server/tls12-cbc-large-record-with-maximum-padding-sha384" {
 }
 
 plzn tls "server/tls12-cbc-large-record-with-maximum-padding-etm" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-flight-fragmented" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {

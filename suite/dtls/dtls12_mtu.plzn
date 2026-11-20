@@ -1,4 +1,5 @@
 plzn tls "dtls12/mtu-dtls12-server" {
+  syntax 1.0
   rfc 6347 section 4.1.1
   chain: [ecdsa_p256]
   matrix {
@@ -18,6 +19,7 @@ plzn tls "dtls12/mtu-dtls12-server" {
 }
 
 plzn tls "dtls12/mtu-dtls12-client-certificate" {
+  syntax 1.0
   rfc 6347 section 4.1.1
   chain: [ecdsa_p256]
   uut client {

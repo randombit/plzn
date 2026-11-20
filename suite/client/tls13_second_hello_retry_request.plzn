@@ -1,4 +1,5 @@
 plzn tls "client/tls13-second-hello-retry-request" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   chain: [default]
   uut client {

@@ -9,7 +9,7 @@ use plzn::transport::{MockFactory, MockTransport};
 
 fn source(version: &str, header: &str, steps: &str) -> String {
     format!(
-        "plzn tls \"consumption\" {{\nchain: [ecdsa_p256]\nuut server {{ versions: [{version}] }}\n{header}\nflow {{\n{steps}\nclose\n}}\nexpect ok\n}}\n"
+        "plzn tls \"consumption\" {{\nsyntax 1.0\nchain: [ecdsa_p256]\nuut server {{ versions: [{version}] }}\n{header}\nflow {{\n{steps}\nclose\n}}\nexpect ok\n}}\n"
     )
 }
 

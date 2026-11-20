@@ -2,6 +2,7 @@
 # suites must be filtered out of a legacy-only ClientHello. Inspect the actual
 # offer so a successful handshake alone cannot hide an invalid advertised suite.
 plzn tls "client/legacy-offer-excludes-tls12-cipher-suites" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [rsa_2048]
   matrix {
@@ -28,6 +29,7 @@ plzn tls "client/legacy-offer-excludes-tls12-cipher-suites" {
 
 # Botan's legacy-only policy fallback and the JDK TLSv1.1 context history.
 plzn tls "client/legacy-offers-highest-enabled-version" {
+  syntax 1.0
   rfc 4346 section 7.4.1.2
   chain: [rsa_2048]
   uut client { versions: [tls11, tls10] }
@@ -43,6 +45,7 @@ plzn tls "client/legacy-offers-highest-enabled-version" {
 # Complement the server receiver coverage with client-side CBC read continuity.
 # Empty records and one-byte fragments remain legal throughout the connection.
 plzn tls "client/legacy-repeated-fragmented-application-data" {
+  syntax 1.0
   rfc 2246 section 6.2.1
   rfc 4346 section 6.2.1
   chain: [rsa_2048]

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-multi-chain-picks-p384" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   uut server { versions: [tls13] }
   chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
@@ -18,6 +19,7 @@ plzn tls "server/tls13-multi-chain-picks-p384" {
 }
 
 plzn tls "server/tls13-multi-chain-picks-p256" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   uut server { versions: [tls13] }
   chain: [rsa_2048, ecdsa_p384, ecdsa_p256]
@@ -37,6 +39,7 @@ plzn tls "server/tls13-multi-chain-picks-p256" {
 }
 
 plzn tls "server/tls13-multi-chain-picks-rsa" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   uut server { versions: [tls13] }
   chain: [ecdsa_p256, ecdsa_p384, rsa_2048]
@@ -56,6 +59,7 @@ plzn tls "server/tls13-multi-chain-picks-rsa" {
 }
 
 plzn tls "server/tls13-multi-chain-none-fits" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   uut server { versions: [tls13] }
   chain: [ecdsa_p256, ecdsa_p384, rsa_2048]

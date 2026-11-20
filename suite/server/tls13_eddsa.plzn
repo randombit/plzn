@@ -1,4 +1,5 @@
 plzn tls "server/tls13-eddsa/ed25519-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [ed25519]
@@ -13,6 +14,7 @@ plzn tls "server/tls13-eddsa/ed25519-only" {
 }
 
 plzn tls "server/tls13-eddsa/ed448-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }
@@ -23,6 +25,7 @@ plzn tls "server/tls13-eddsa/ed448-only" {
 }
 
 plzn tls "server/tls13-eddsa/ecdsa_sha1-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }
@@ -33,6 +36,7 @@ plzn tls "server/tls13-eddsa/ecdsa_sha1-only" {
 }
 
 plzn tls "server/tls13-eddsa/ecdsa_sha224-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }
@@ -43,6 +47,7 @@ plzn tls "server/tls13-eddsa/ecdsa_sha224-only" {
 }
 
 plzn tls "server/tls13-eddsa/ecdsa_secp256r1_sha256-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }
@@ -53,6 +58,7 @@ plzn tls "server/tls13-eddsa/ecdsa_secp256r1_sha256-only" {
 }
 
 plzn tls "server/tls13-eddsa/ecdsa_secp384r1_sha384-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }
@@ -63,6 +69,7 @@ plzn tls "server/tls13-eddsa/ecdsa_secp384r1_sha384-only" {
 }
 
 plzn tls "server/tls13-eddsa/ecdsa_secp521r1_sha512-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ed25519]
   uut server { versions: [tls13] }

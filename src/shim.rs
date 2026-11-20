@@ -2842,6 +2842,7 @@ mod crash_tests {
         let p = lower_one(
             r#"
 plzn tls "req/cbc-p521" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2868,6 +2869,7 @@ plzn tls "req/cbc-p521" {
         let p = lower_one(
             r#"
 plzn tls "req/unsupported-offered-group" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -2895,6 +2897,7 @@ plzn tls "req/unsupported-offered-group" {
         let p = lower_one(
             r#"
 plzn tls "req/tls12-peer-against-12-13-uut" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12, tls13],
@@ -2920,6 +2923,7 @@ plzn tls "req/tls12-peer-against-12-13-uut" {
         let p = lower_one(
             r#"
 plzn tls "req/dtls12" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls12] }
   flow handshake {}
@@ -2940,6 +2944,7 @@ plzn tls "req/dtls12" {
         let p = lower_one(
             r#"
 plzn tls "req/dtls13" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls13] }
   flow handshake {}
@@ -2961,6 +2966,7 @@ plzn tls "req/dtls13" {
         let p = lower_one(
             r#"
 plzn tls "req/abandoned" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2993,6 +2999,7 @@ plzn tls "req/abandoned" {
         let p = lower_one(
             r#"
 plzn tls "req/client-cert-with-uut" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -3015,6 +3022,7 @@ plzn tls "req/client-cert-with-uut" {
         let p = lower_one(
             r#"
 plzn tls "req/client-cert-requested" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -3039,6 +3047,7 @@ plzn tls "req/client-cert-requested" {
         let p = lower_one(
             r#"
 plzn tls "req/peer-compression-only" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   peer { capabilities: [compress_cert] }
@@ -3056,6 +3065,7 @@ plzn tls "req/peer-compression-only" {
         let p = lower_one(
             r#"
 plzn tls "req/uut-compression" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13], compress_certificate: true }
   peer { capabilities: [compress_cert] }
@@ -3219,6 +3229,7 @@ mod external_shim_tests {
     fn sidecar_expectation_has_backend_precedence_and_reaches_config() {
         let source = r#"
 plzn tls "external/expect" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow handshake {}

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-trailing-clienthello" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }
@@ -7,6 +8,7 @@ plzn tls "server/tls12-trailing-clienthello" {
 }
 
 plzn tls "server/tls12-trailing-client-certificate" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -19,6 +21,7 @@ plzn tls "server/tls12-trailing-client-certificate" {
 }
 
 plzn tls "server/tls12-trailing-client-certificateverify" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -30,6 +33,7 @@ plzn tls "server/tls12-trailing-client-certificateverify" {
 }
 
 plzn tls "server/tls12-trailing-clientkeyexchange" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }
@@ -38,6 +42,7 @@ plzn tls "server/tls12-trailing-clientkeyexchange" {
 }
 
 plzn tls "server/tls12-trailing-client-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }

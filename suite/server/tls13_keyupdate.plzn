@@ -1,4 +1,5 @@
 plzn tls "server/tls13-keyupdate/empty-keyupdate-message" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -11,6 +12,7 @@ plzn tls "server/tls13-keyupdate/empty-keyupdate-message" {
 }
 
 plzn tls "server/tls13-keyupdate/large-keyupdate-message" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -24,6 +26,7 @@ plzn tls "server/tls13-keyupdate/large-keyupdate-message" {
 }
 
 plzn tls "server/tls13-keyupdate/invalid-message-type" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -38,6 +41,7 @@ plzn tls "server/tls13-keyupdate/invalid-message-type" {
 }
 
 plzn tls "server/tls13-keyupdate/two-keyupdates-in-one-record-with-future-keys" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -54,6 +58,7 @@ plzn tls "server/tls13-keyupdate/two-keyupdates-in-one-record-with-future-keys" 
 }
 
 plzn tls "server/tls13-keyupdate/fragmented-keyupdate-appdata-between" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

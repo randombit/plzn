@@ -34,6 +34,7 @@
 # the application-data rows run to 1,000 everywhere.
 
 plzn tls "dtls12/empty-record-flood/server-plaintext-handshake-before-client-key-exchange-one-to-two-hundred-and-one" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -58,6 +59,7 @@ plzn tls "dtls12/empty-record-flood/server-plaintext-handshake-before-client-key
 }
 
 plzn tls "dtls12/empty-record-flood/server-application-data-two-to-thirty-two" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -78,6 +80,7 @@ plzn tls "dtls12/empty-record-flood/server-application-data-two-to-thirty-two" {
 }
 
 plzn tls "dtls12/empty-record-flood/server-application-data-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -99,6 +102,7 @@ plzn tls "dtls12/empty-record-flood/server-application-data-thirty-three-to-two-
 }
 
 plzn tls "dtls12/empty-record-flood/server-application-data-over-two-hundred" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -121,6 +125,7 @@ plzn tls "dtls12/empty-record-flood/server-application-data-over-two-hundred" {
 }
 
 plzn tls "dtls12/empty-record-flood/client-plaintext-handshake-before-server-hello-one-to-two-hundred-and-one" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -149,6 +154,7 @@ plzn tls "dtls12/empty-record-flood/client-plaintext-handshake-before-server-hel
 }
 
 plzn tls "dtls12/empty-record-flood/client-application-data-two-to-thirty-two" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -169,6 +175,7 @@ plzn tls "dtls12/empty-record-flood/client-application-data-two-to-thirty-two" {
 }
 
 plzn tls "dtls12/empty-record-flood/client-application-data-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
@@ -190,6 +197,7 @@ plzn tls "dtls12/empty-record-flood/client-application-data-thirty-three-to-two-
 }
 
 plzn tls "dtls12/empty-record-flood/client-application-data-over-two-hundred" {
+  syntax 1.0
   rfc 6347 section 4.1
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]

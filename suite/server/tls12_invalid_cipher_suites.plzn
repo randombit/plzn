@@ -1,4 +1,5 @@
 plzn tls "server/tls12-invalid-cipher-suites/null-null" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -11,6 +12,7 @@ plzn tls "server/tls12-invalid-cipher-suites/null-null" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/fortezza" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -23,6 +25,7 @@ plzn tls "server/tls12-invalid-cipher-suites/fortezza" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0047" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -35,6 +38,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0047" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/export1024" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -47,6 +51,7 @@ plzn tls "server/tls12-invalid-cipher-suites/export1024" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/dhe-dss-rc4" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -59,6 +64,7 @@ plzn tls "server/tls12-invalid-cipher-suites/dhe-dss-rc4" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x006e" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -71,6 +77,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x006e" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/gost" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -83,6 +90,7 @@ plzn tls "server/tls12-invalid-cipher-suites/gost" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x00c6" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -95,6 +103,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x00c6" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/empty-renegotiation-info-scsv" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -107,6 +116,7 @@ plzn tls "server/tls12-invalid-cipher-suites/empty-renegotiation-info-scsv" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0100" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -119,6 +129,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x0100" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x2000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -131,6 +142,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x2000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x3000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -143,6 +155,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x3000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x4000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -155,6 +168,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x4000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x5000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -167,6 +181,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x5000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x6000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -179,6 +194,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x6000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x7000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -191,6 +207,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x7000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x8000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -203,6 +220,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x8000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0x9000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -215,6 +233,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0x9000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xa000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -227,6 +246,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xa000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xb000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -239,6 +259,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xb000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xc0b0" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -251,6 +272,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xc0b0" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xccaf" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -263,6 +285,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xccaf" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xd000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -275,6 +298,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xd000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xe000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -287,6 +311,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xe000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/unknown-0xf000" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {
@@ -299,6 +324,7 @@ plzn tls "server/tls12-invalid-cipher-suites/unknown-0xf000" {
 }
 
 plzn tls "server/tls12-invalid-cipher-suites/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server {

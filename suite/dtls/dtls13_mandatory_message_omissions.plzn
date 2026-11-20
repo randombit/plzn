@@ -1,4 +1,5 @@
 plzn tls "dtls13/mandatory-server-message-omissions/server-hello" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client { versions: [dtls13] }
@@ -11,6 +12,7 @@ plzn tls "dtls13/mandatory-server-message-omissions/server-hello" {
 }
 
 plzn tls "dtls13/mandatory-server-message-omissions/encrypted-extensions" {
+  syntax 1.0
   rfc 8446 section 4.3.1
   chain: [default]
   uut client { versions: [dtls13] }
@@ -24,6 +26,7 @@ plzn tls "dtls13/mandatory-server-message-omissions/encrypted-extensions" {
 }
 
 plzn tls "dtls13/mandatory-server-message-omissions/certificate" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   uut client { versions: [dtls13] }
@@ -38,6 +41,7 @@ plzn tls "dtls13/mandatory-server-message-omissions/certificate" {
 }
 
 plzn tls "dtls13/mandatory-server-message-omissions/certificate-verify" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut client { versions: [dtls13] }
@@ -53,6 +57,7 @@ plzn tls "dtls13/mandatory-server-message-omissions/certificate-verify" {
 }
 
 plzn tls "dtls13/mandatory-server-message-omissions/finished" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut client { versions: [dtls13] }
@@ -69,6 +74,7 @@ plzn tls "dtls13/mandatory-server-message-omissions/finished" {
 }
 
 plzn tls "dtls13/mandatory-client-message-omissions/initial-client-hello" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut server { versions: [dtls13] }
@@ -81,6 +87,7 @@ plzn tls "dtls13/mandatory-client-message-omissions/initial-client-hello" {
 }
 
 plzn tls "dtls13/mandatory-client-message-omissions/certificate-after-certificate-request" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [rsa_2048]
@@ -93,6 +100,7 @@ plzn tls "dtls13/mandatory-client-message-omissions/certificate-after-certificat
 }
 
 plzn tls "dtls13/mandatory-client-message-omissions/certificate-verify-after-client-certificate" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   client_chain: [rsa_2048]
@@ -105,6 +113,7 @@ plzn tls "dtls13/mandatory-client-message-omissions/certificate-verify-after-cli
 }
 
 plzn tls "dtls13/mandatory-client-message-omissions/finished" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut server { versions: [dtls13] }

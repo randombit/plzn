@@ -1,4 +1,5 @@
 plzn tls "dtls12/sigalg-rsa-pss-sha256" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "dtls12/sigalg-rsa-pss-sha256" {
 }
 
 plzn tls "dtls12/sigalg-rsa-pss-sha384" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -31,6 +33,7 @@ plzn tls "dtls12/sigalg-rsa-pss-sha384" {
 }
 
 plzn tls "dtls12/sigalg-rsa-pss-sha512" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -47,6 +50,7 @@ plzn tls "dtls12/sigalg-rsa-pss-sha512" {
 }
 
 plzn tls "dtls12/sigalg-rsa-pkcs1-sha256" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -63,6 +67,7 @@ plzn tls "dtls12/sigalg-rsa-pkcs1-sha256" {
 }
 
 plzn tls "dtls12/sigalg-rsa-pkcs1-sha384" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -79,6 +84,7 @@ plzn tls "dtls12/sigalg-rsa-pkcs1-sha384" {
 }
 
 plzn tls "dtls12/sigalg-rsa-pkcs1-sha512" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {

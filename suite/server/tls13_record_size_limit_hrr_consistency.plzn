@@ -1,4 +1,5 @@
 plzn tls "server/tls13-record-size-limit/hrr-unchanged" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -23,6 +24,7 @@ plzn tls "server/tls13-record-size-limit/hrr-unchanged" {
 }
 
 plzn tls "server/tls13-record-size-limit/hrr-value-changed" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -47,6 +49,7 @@ plzn tls "server/tls13-record-size-limit/hrr-value-changed" {
 }
 
 plzn tls "server/tls13-record-size-limit/hrr-extension-removed" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -71,6 +74,7 @@ plzn tls "server/tls13-record-size-limit/hrr-extension-removed" {
 }
 
 plzn tls "server/tls13-record-size-limit/hrr-extension-added" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }

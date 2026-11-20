@@ -54,6 +54,7 @@
 # with data and padding).
 
 plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hello-one-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -83,6 +84,7 @@ plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hell
 }
 
 plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hello-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -110,6 +112,7 @@ plzn tls "server/tls13-empty-record-flood/plaintext-handshake-before-client-hell
 }
 
 plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hello-fragments-one-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -140,6 +143,7 @@ plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hel
 }
 
 plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hello-fragments-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -171,6 +175,7 @@ plzn tls "server/tls13-empty-record-flood/plaintext-handshake-between-client-hel
 # handshake keys. RFC 9846 5.4 asks for unexpected_message at the first; above
 # 32 BoringSSL's empty-record counter produces that alert anyway.
 plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-finished-one-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   rfc 9846 section 5.4
   chain: [default]
@@ -193,6 +198,7 @@ plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-fini
 }
 
 plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-finished-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   rfc 9846 section 5.4
   chain: [default]
@@ -214,6 +220,7 @@ plzn tls "server/tls13-empty-record-flood/protected-handshake-before-client-fini
 }
 
 plzn tls "server/tls13-empty-record-flood/application-data-two-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -231,6 +238,7 @@ plzn tls "server/tls13-empty-record-flood/application-data-two-to-sixteen" {
 }
 
 plzn tls "server/tls13-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -249,6 +257,7 @@ plzn tls "server/tls13-empty-record-flood/application-data-seventeen-to-thirty-o
 }
 
 plzn tls "server/tls13-empty-record-flood/application-data-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -268,6 +277,7 @@ plzn tls "server/tls13-empty-record-flood/application-data-thirty-two" {
 }
 
 plzn tls "server/tls13-empty-record-flood/application-data-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {

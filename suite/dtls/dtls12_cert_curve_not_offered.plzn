@@ -1,4 +1,5 @@
 plzn tls "dtls12/cert-curve-not-offered" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p256]
   uut server {

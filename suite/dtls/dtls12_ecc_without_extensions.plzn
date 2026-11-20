@@ -6,6 +6,7 @@
 # runs it on secp256r1.
 
 plzn tls "dtls12/ecc-without-extensions/no-supported-groups" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [default]
   uut server {
@@ -23,6 +24,7 @@ plzn tls "dtls12/ecc-without-extensions/no-supported-groups" {
 }
 
 plzn tls "dtls12/ecc-without-extensions/no-supported-groups-no-ec-point-formats" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [default]
   uut server {
@@ -47,6 +49,7 @@ plzn tls "dtls12/ecc-without-extensions/no-supported-groups-no-ec-point-formats"
 # so ECDHE proceeds, and the ServerHello must not answer an extension the
 # client did not send (RFC 5246 7.4.1.4).
 plzn tls "dtls12/ecc-without-extensions/no-ec-point-formats-still-ecdhe" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [default]
   uut server {

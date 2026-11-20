@@ -1,4 +1,5 @@
 plzn tls "server/tls12-ske-rsa-sigalg-sweep" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   uut server {
     versions: [tls12]

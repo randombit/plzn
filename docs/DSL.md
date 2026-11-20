@@ -18,6 +18,7 @@ are placeholders; square brackets denote optional syntax only where stated.
 
 ```plzn
 plzn tls "tls13/application-data" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [tls13]
@@ -30,6 +31,8 @@ plzn tls "tls13/application-data" {
 }
 ```
 
+`syntax 1.0` names the revision of this language the test is written in; it
+is the first statement of every test (see [Syntax version](#syntax-version)).
 `uut` names the unit under test: `uut server` makes plzn the client;
 `uut client` makes plzn the server. Every `send` and `recv` is from **plzn's**
 perspective. A `send` constructs a message; a `recv` consumes and checks one.
@@ -40,6 +43,7 @@ The equivalent basic client test needs no explicit application-data exchange:
 
 ```plzn
 plzn tls "tls13/client-handshake" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [tls13]
@@ -80,12 +84,14 @@ matrix lists, session qualifiers, and expectation alternatives do not.
 
 ## Test structure and scope
 
-A test requires a `chain:` declaration and exactly one `uut` block. It then
-contains either one flow and its expectation, or a sequence of named sessions.
+A test starts with its `syntax` declaration, and requires a `chain:`
+declaration and exactly one `uut` block. It then contains either one flow and
+its expectation, or a sequence of named sessions.
 
 | Scope | Declarations |
 | --- | --- |
 | File | `plzn tls "name" { ... }` |
+| Syntax version | `syntax MAJOR.MINOR`, the first statement of the test |
 | Test configuration | `chain: [...]`, `client_chain: [...]`, `uut client\|server { ... }`, `peer { ... }`, `psk { ... }`, `matrix { ... }`, `repeat N` |
 | Test metadata | `rfc N [section PATH]`, `skip BACKENDS ["reason"]`, `xfail BACKENDS ["reason"]` |
 | Single-connection test | One `flow`, one primary `expect`, optional backend expectation overrides and `assert` lines |
@@ -115,6 +121,26 @@ xfail BACKEND_C "tracked discrepancy"
 expected; an unexpected pass is a failure of that annotation. Backend IDs used
 by the bundled shims are `botan`, `openssl`, `rustls`, `gnutls`, `wolfssl`,
 `boringssl`, and `go`.
+
+### Syntax version
+
+The first statement of every test is `syntax MAJOR.MINOR`: the revision of
+this language the test requires. The current revision is `1.0`. Each test
+carries its own declaration; there is no file-level default. Only comments
+and blank lines may precede it, and it appears once.
+
+Revisions follow SemVer. The minor number rises when the language gains
+something an earlier plzn would reject. The major number rises, and the minor
+number returns to zero, when a valid test would stop being accepted or would
+change meaning.
+
+plzn accepts a test when the major number is the one it implements and the
+minor number is no newer than its own. It rejects any other test at the
+`syntax` line, without parsing the rest of that test's body. plzn implements
+one major revision at a time.
+
+The version is two decimal integers joined by a dot, with no spaces, leading
+zeros, or patch component.
 
 ### Credentials
 
@@ -327,6 +353,7 @@ explicitly, and then repeats an application-data exchange on the connection:
 
 ```plzn
 plzn tls "tls13/explicit-finish-and-repeated-data" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
   flow handshake until send Finished {
@@ -461,6 +488,7 @@ are separate ordinary field matchers.
 
 ```plzn
 plzn tls "tls13/hello-extension-checks" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
   flow handshake {
@@ -682,6 +710,7 @@ implements; an unsupported selection is a lint error.
 
 ```plzn
 plzn tls "tls13/application-data-sizes" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
   matrix {
@@ -707,6 +736,7 @@ several names can be comma-separated. Captures are not general variables.
 
 ```plzn
 plzn tls "tls13/fresh-server-random" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
   repeat 3
@@ -751,6 +781,7 @@ There are no session-local UUT, peer, matrix, or credential blocks.
 
 ```plzn
 plzn tls "tls13/ticket-resumption" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [tls13]
@@ -789,6 +820,7 @@ A test-level PSK block supplies a default external identity and secret:
 
 ```plzn
 plzn tls "tls13/external-psk" {
+  syntax 1.0
   chain: []
   uut server { versions: [tls13] }
   psk {
@@ -823,6 +855,7 @@ DTLS uses the same test, flow, value, and expectation syntax. For example:
 
 ```plzn
 plzn tls "dtls12/basic-handshake" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server { versions: [dtls12] }
   flow handshake {}

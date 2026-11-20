@@ -1,4 +1,5 @@
 plzn tls "server/tls12-session-id-resumption/issued-session-id-resumes" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [default]
   uut server {
@@ -25,6 +26,7 @@ plzn tls "server/tls12-session-id-resumption/issued-session-id-resumes" {
 }
 
 plzn tls "server/tls12-session-id-resumption/unrecognized-session-id-starts-full-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [default]
   uut server {

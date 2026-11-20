@@ -5,6 +5,7 @@
 # retrying.
 
 plzn tls "server/tls13-no-unknown-groups/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {
@@ -21,6 +22,7 @@ plzn tls "server/tls13-no-unknown-groups/valid-handshake" {
 }
 
 plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown-plus-recognised" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {
@@ -42,6 +44,7 @@ plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown-plus-recognised" {
 }
 
 plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {
@@ -58,6 +61,7 @@ plzn tls "server/tls13-no-unknown-groups/long-list-of-unknown" {
 }
 
 plzn tls "server/tls13-no-unknown-groups/window-0x0105" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {
@@ -74,6 +78,7 @@ plzn tls "server/tls13-no-unknown-groups/window-0x0105" {
 }
 
 plzn tls "server/tls13-no-unknown-groups/window-sweep-low" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {
@@ -91,6 +96,7 @@ plzn tls "server/tls13-no-unknown-groups/window-sweep-low" {
 }
 
 plzn tls "server/tls13-no-unknown-groups/window-sweep-high" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server {

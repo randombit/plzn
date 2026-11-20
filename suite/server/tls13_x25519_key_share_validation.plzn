@@ -1,4 +1,5 @@
 plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-uncompressed" {
+  syntax 1.0
   rfc 7748 section 6.1
   chain: [default]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-uncompressed
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-prime" {
+  syntax 1.0
   rfc 7748 section 6.1
   chain: [default]
   uut server {
@@ -35,6 +37,7 @@ plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-p
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-char2" {
+  syntax 1.0
   rfc 7748 section 6.1
   chain: [default]
   uut server {
@@ -54,6 +57,7 @@ plzn tls "server/tls13-x25519-key-share-validation/ec-point-formats-compressed-c
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/all-zero-key-share" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {
@@ -69,6 +73,7 @@ plzn tls "server/tls13-x25519-key-share-validation/all-zero-key-share" {
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/low-order-key-share-one" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {
@@ -84,6 +89,7 @@ plzn tls "server/tls13-x25519-key-share-validation/low-order-key-share-one" {
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/31-byte-key-share" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {
@@ -99,6 +105,7 @@ plzn tls "server/tls13-x25519-key-share-validation/31-byte-key-share" {
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/empty-key-share" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {
@@ -113,6 +120,7 @@ plzn tls "server/tls13-x25519-key-share-validation/empty-key-share" {
 }
 
 plzn tls "server/tls13-x25519-key-share-validation/33-byte-key-share" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {

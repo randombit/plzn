@@ -1,4 +1,5 @@
 plzn tls "client/tls12-tls-unique-full-handshake" {
+  syntax 1.0
   rfc 5929 section 3
   chain: [default]
   uut client { versions: [tls12] }
@@ -9,6 +10,7 @@ plzn tls "client/tls12-tls-unique-full-handshake" {
 }
 
 plzn tls "client/tls12-tls-unique-resumption-with-ems" {
+  syntax 1.0
   rfc 7627 section 5.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -31,6 +33,7 @@ plzn tls "client/tls12-tls-unique-resumption-with-ems" {
 }
 
 plzn tls "client/tls12-tls-unique-unavailable-on-resumption-without-ems" {
+  syntax 1.0
   rfc 7627 section 5.4
   chain: [default]
   uut client {

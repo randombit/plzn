@@ -1,4 +1,5 @@
 plzn tls "server/tls12-server-name/empty-extension" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -10,6 +11,7 @@ plzn tls "server/tls12-server-name/empty-extension" {
 }
 
 plzn tls "server/tls12-server-name/empty-name-list" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -21,6 +23,7 @@ plzn tls "server/tls12-server-name/empty-name-list" {
 }
 
 plzn tls "server/tls12-server-name/empty-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -33,6 +36,7 @@ plzn tls "server/tls12-server-name/empty-host-name" {
 }
 
 plzn tls "server/tls12-server-name/trailing-data" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -44,6 +48,7 @@ plzn tls "server/tls12-server-name/trailing-data" {
 }
 
 plzn tls "server/tls12-server-name/name-list-length-overruns-extension" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -55,6 +60,7 @@ plzn tls "server/tls12-server-name/name-list-length-overruns-extension" {
 }
 
 plzn tls "server/tls12-server-name/duplicate-host-name-type" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -67,6 +73,7 @@ plzn tls "server/tls12-server-name/duplicate-host-name-type" {
 }
 
 plzn tls "server/tls12-server-name/unknown-type-after-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -83,6 +90,7 @@ plzn tls "server/tls12-server-name/unknown-type-after-host-name" {
 }
 
 plzn tls "server/tls12-server-name/unknown-type-before-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -100,6 +108,7 @@ plzn tls "server/tls12-server-name/unknown-type-before-host-name" {
 }
 
 plzn tls "server/tls12-server-name/nul-in-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -112,6 +121,7 @@ plzn tls "server/tls12-server-name/nul-in-host-name" {
 }
 
 plzn tls "server/tls12-server-name/control-character-in-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -126,6 +136,7 @@ plzn tls "server/tls12-server-name/control-character-in-host-name" {
 }
 
 plzn tls "server/tls12-server-name/non-ascii-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -140,6 +151,7 @@ plzn tls "server/tls12-server-name/non-ascii-host-name" {
 }
 
 plzn tls "server/tls12-server-name/escape-sequence-in-host-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls12] }

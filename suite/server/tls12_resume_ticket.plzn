@@ -1,4 +1,5 @@
 plzn tls "server/tls12-resume-ticket" {
+  syntax 1.0
   rfc 5077
   chain: [default]
   uut server { versions: [tls12] }

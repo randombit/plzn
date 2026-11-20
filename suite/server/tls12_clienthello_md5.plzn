@@ -1,4 +1,5 @@
 plzn tls "server/tls12-clienthello-md5/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -24,6 +25,7 @@ plzn tls "server/tls12-clienthello-md5/valid-handshake" {
 }
 
 plzn tls "server/tls12-clienthello-md5/only-md5-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -38,6 +40,7 @@ plzn tls "server/tls12-clienthello-md5/only-md5-rsa" {
 }
 
 plzn tls "server/tls12-clienthello-md5/unknown-signature-algorithm-numbers" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {

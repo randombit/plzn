@@ -1,4 +1,5 @@
 plzn tls "server/tls12-record-size-limit/maximum-client-limit" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -27,6 +28,7 @@ plzn tls "server/tls12-record-size-limit/maximum-client-limit" {
 }
 
 plzn tls "server/tls13-record-size-limit/maximum-client-limit" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls13] }
@@ -51,6 +53,7 @@ plzn tls "server/tls13-record-size-limit/maximum-client-limit" {
 }
 
 plzn tls "server/tls12-record-size-limit/takes-precedence-over-max-fragment-length" {
+  syntax 1.0
   rfc 8449 section 5
   chain: [default]
   uut server { versions: [tls12] }
@@ -85,6 +88,7 @@ plzn tls "server/tls12-record-size-limit/takes-precedence-over-max-fragment-leng
 }
 
 plzn tls "server/tls13-record-size-limit/takes-precedence-over-max-fragment-length" {
+  syntax 1.0
   rfc 8449 section 5
   chain: [default]
   uut server { versions: [tls13] }
@@ -115,6 +119,7 @@ plzn tls "server/tls13-record-size-limit/takes-precedence-over-max-fragment-leng
 }
 
 plzn tls "server/tls12-record-size-limit/across-prf-hashes" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [rsa_2048]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/no-common-curve-tls12" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]

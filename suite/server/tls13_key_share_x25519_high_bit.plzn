@@ -1,4 +1,5 @@
 plzn tls "server/tls13-key-share-x25519-high-bit" {
+  syntax 1.0
   rfc 7748 section 5
   chain: [default]
   uut server {

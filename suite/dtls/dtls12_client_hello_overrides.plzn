@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-hello-dtls10-version" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -11,6 +12,7 @@ plzn tls "dtls12/client-hello-dtls10-version" {
 }
 
 plzn tls "dtls12/client-hello-no-null-compression" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [ecdsa_p256]
   uut server {
@@ -24,6 +26,7 @@ plzn tls "dtls12/client-hello-no-null-compression" {
 }
 
 plzn tls "dtls12/client-hello-session-id" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [ecdsa_p256]
   uut server {
@@ -40,6 +43,7 @@ plzn tls "dtls12/client-hello-session-id" {
 }
 
 plzn tls "dtls12/client-hello-zero-random" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [ecdsa_p256]
   uut server {

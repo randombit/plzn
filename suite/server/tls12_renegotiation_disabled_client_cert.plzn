@@ -1,4 +1,5 @@
 plzn tls "server/tls12-renegotiation-disabled-client-cert/secure-renegotiation-with-client-cert" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {
@@ -17,6 +18,7 @@ plzn tls "server/tls12-renegotiation-disabled-client-cert/secure-renegotiation-w
 }
 
 plzn tls "server/tls12-renegotiation-disabled-client-cert/insecure-renegotiation-after-hello-request" {
+  syntax 1.0
   rfc 5746 section 4.2
   chain: [default]
   uut server {
@@ -33,6 +35,7 @@ plzn tls "server/tls12-renegotiation-disabled-client-cert/insecure-renegotiation
 }
 
 plzn tls "server/tls12-renegotiation-disabled-client-cert/renegotiation-refused-after-hello-request" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {
@@ -56,6 +59,7 @@ plzn tls "server/tls12-renegotiation-disabled-client-cert/renegotiation-refused-
 # client-initiated renegotiation, so a server that only permits
 # server-initiated renegotiation must take it.
 plzn tls "server/tls12-renegotiation-disabled-client-cert/server-initiated-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [default]
   uut server {

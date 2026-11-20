@@ -1,4 +1,5 @@
 plzn tls "dtls13/client-replay-window" {
+  syntax 1.0
   rfc 9147 section 4.5.1
   chain: [default]
   uut client { versions: [dtls13] }
@@ -13,6 +14,7 @@ plzn tls "dtls13/client-replay-window" {
 }
 
 plzn tls "dtls13/server-replay-window" {
+  syntax 1.0
   rfc 9147 section 4.5.1
   chain: [default]
   uut server { versions: [dtls13] }
@@ -27,6 +29,7 @@ plzn tls "dtls13/server-replay-window" {
 }
 
 plzn tls "dtls13/client-replay-window-large-gaps" {
+  syntax 1.0
   rfc 9147 section 4.2.2
   rfc 9147 section 4.5.1
   chain: [default]
@@ -43,6 +46,7 @@ plzn tls "dtls13/client-replay-window-large-gaps" {
 }
 
 plzn tls "dtls13/client-replay-window-non-monotonic" {
+  syntax 1.0
   rfc 9147 section 4.5.1
   chain: [default]
   uut client { versions: [dtls13] }

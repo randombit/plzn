@@ -15,6 +15,7 @@
 # by dtls12_client_tampered_record_same_datagram.
 
 plzn tls "dtls12/stray-record-to-server/future-epoch" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -32,6 +33,7 @@ plzn tls "dtls12/stray-record-to-server/future-epoch" {
 }
 
 plzn tls "dtls12/stray-record-to-server/previous-epoch" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -49,6 +51,7 @@ plzn tls "dtls12/stray-record-to-server/previous-epoch" {
 }
 
 plzn tls "dtls12/stray-record-to-server/far-future-sequence-number" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut server {
@@ -69,6 +72,7 @@ plzn tls "dtls12/stray-record-to-server/far-future-sequence-number" {
 }
 
 plzn tls "dtls12/stray-record-to-server/record-version-dtls10" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -87,6 +91,7 @@ plzn tls "dtls12/stray-record-to-server/record-version-dtls10" {
 }
 
 plzn tls "dtls12/stray-record-to-server/record-version-tls" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -103,6 +108,7 @@ plzn tls "dtls12/stray-record-to-server/record-version-tls" {
 }
 
 plzn tls "dtls12/stray-record-to-server/empty-protected-record" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -120,6 +126,7 @@ plzn tls "dtls12/stray-record-to-server/empty-protected-record" {
 }
 
 plzn tls "dtls12/stray-record-to-server/truncated-protected-record" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -137,6 +144,7 @@ plzn tls "dtls12/stray-record-to-server/truncated-protected-record" {
 }
 
 plzn tls "dtls12/stray-record-to-server/short-datagram" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -154,6 +162,7 @@ plzn tls "dtls12/stray-record-to-server/short-datagram" {
 }
 
 plzn tls "dtls12/stray-record-to-server/future-epoch-app-data-before-client-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -176,6 +185,7 @@ plzn tls "dtls12/stray-record-to-server/future-epoch-app-data-before-client-flig
 }
 
 plzn tls "dtls12/stray-record-to-server/future-epoch-handshake-before-client-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -196,6 +206,7 @@ plzn tls "dtls12/stray-record-to-server/future-epoch-handshake-before-client-fli
 }
 
 plzn tls "dtls12/stray-record-to-server/truncated-record-before-client-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -218,6 +229,7 @@ plzn tls "dtls12/stray-record-to-server/truncated-record-before-client-flight" {
 }
 
 plzn tls "dtls12/stray-record-to-server/empty-handshake-record-before-client-flight" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -239,6 +251,7 @@ plzn tls "dtls12/stray-record-to-server/empty-handshake-record-before-client-fli
 }
 
 plzn tls "dtls12/stray-record-to-server/short-datagram-before-client-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -260,6 +273,7 @@ plzn tls "dtls12/stray-record-to-server/short-datagram-before-client-flight" {
 }
 
 plzn tls "dtls12/stray-record-to-server/near-wrap-epoch" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -279,6 +293,7 @@ plzn tls "dtls12/stray-record-to-server/near-wrap-epoch" {
 }
 
 plzn tls "dtls12/stray-record-to-server/near-wrap-epoch-before-client-flight" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {

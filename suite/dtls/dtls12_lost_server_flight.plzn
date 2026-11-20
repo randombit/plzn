@@ -1,4 +1,5 @@
 plzn tls "dtls12/lost-server-flight" {
+  syntax 1.0
   rfc 6347 section 4.2.4
   chain: [ecdsa_p256]
   xfail openssl "does not answer a retransmitted cookie ClientHello with its flight; it re-sends only when its own retransmit timer fires (now reachable via advance_clock, which dtls12/retransmit exercises), not on receiving a duplicate ClientHello the way Botan does"

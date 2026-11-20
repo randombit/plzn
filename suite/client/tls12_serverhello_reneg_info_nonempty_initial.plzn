@@ -1,4 +1,5 @@
 plzn tls "client/tls12-serverhello-reneg-info-nonempty-initial" {
+  syntax 1.0
   rfc 5746 section 3.4
   chain: [default]
   xfail rustls "does not verify renegotiation_info on the initial ServerHello and completes (RFC 5746 3.4 MUST abort)"

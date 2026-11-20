@@ -6,6 +6,7 @@
 # offer).
 
 plzn tls "client/tls12-serverhello-dtls-legacy-version" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [default]
   uut client { versions: [tls12] }
@@ -19,6 +20,7 @@ plzn tls "client/tls12-serverhello-dtls-legacy-version" {
 }
 
 plzn tls "client/tls12-serverhello-dtls13-legacy-version" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [default]
   uut client { versions: [tls12] }
@@ -33,6 +35,7 @@ plzn tls "client/tls12-serverhello-dtls13-legacy-version" {
 # server that negotiates TLS 1.3 sets selected_version to a version the
 # client offered; anything else is illegal.
 plzn tls "client/tls12-serverhello-supported-versions-selects-dtls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut client { versions: [tls12, tls13] }
@@ -55,6 +58,7 @@ plzn tls "client/tls12-serverhello-supported-versions-selects-dtls" {
 # omits the extension, so to it the ServerHello's copy is unsolicited
 # (RFC 8446 4.2: unsupported_extension).
 plzn tls "client/tls12-only-client-serverhello-supported-versions-selects-dtls" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut client { versions: [tls12] }
@@ -71,6 +75,7 @@ plzn tls "client/tls12-only-client-serverhello-supported-versions-selects-dtls" 
 # The record header of the ServerHello claims DTLS 1.2. OpenSSL and Go treat
 # a {254, x} first record as "not TLS" and hang up without an alert.
 plzn tls "client/tls12-serverhello-dtls-record-version" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client { versions: [tls12] }

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-certificate-status-zero-type-truncated" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [default]
   skip openssl "does not offer status_request unless configured (no shim knob yet)"

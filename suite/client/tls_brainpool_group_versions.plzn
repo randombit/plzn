@@ -2,6 +2,7 @@
 # RFC 8734 ones only for TLS 1.3, so a client offering a single version
 # advertises only the matching ones.
 plzn tls "client/tls13-only-client-omits-tls12-brainpool-groups" {
+  syntax 1.0
   rfc 8734 section 1
   chain: [default]
   uut client {
@@ -20,6 +21,7 @@ plzn tls "client/tls13-only-client-omits-tls12-brainpool-groups" {
 }
 
 plzn tls "client/tls12-only-client-omits-tls13-brainpool-groups" {
+  syntax 1.0
   rfc 8734 section 1
   chain: [default]
   uut client {
@@ -39,6 +41,7 @@ plzn tls "client/tls12-only-client-omits-tls13-brainpool-groups" {
 
 # The same holds for the RFC 8734 Brainpool signature schemes.
 plzn tls "client/tls12-only-client-omits-tls13-brainpool-signature-schemes" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [default]
   uut client { versions: [tls12] }

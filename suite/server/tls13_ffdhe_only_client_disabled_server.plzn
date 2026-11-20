@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ffdhe-only-client-disabled-server" {
+  syntax 1.0
   rfc 8446 section 4.1.1
   chain: [default]
   uut server {

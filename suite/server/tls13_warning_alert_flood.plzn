@@ -53,6 +53,7 @@
 # tls13_user_canceled_warning.
 
 plzn tls "server/tls13-warning-alert-flood/application-data-one-to-four" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -69,6 +70,7 @@ plzn tls "server/tls13-warning-alert-flood/application-data-one-to-four" {
 }
 
 plzn tls "server/tls13-warning-alert-flood/application-data-five-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -89,6 +91,7 @@ plzn tls "server/tls13-warning-alert-flood/application-data-five-to-sixteen" {
 }
 
 plzn tls "server/tls13-warning-alert-flood/application-data-seventeen-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -110,6 +113,7 @@ plzn tls "server/tls13-warning-alert-flood/application-data-seventeen-to-thirty-
 }
 
 plzn tls "server/tls13-warning-alert-flood/application-data-over-thirty-two" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -132,6 +136,7 @@ plzn tls "server/tls13-warning-alert-flood/application-data-over-thirty-two" {
 }
 
 plzn tls "server/tls13-warning-alert-flood/interleaved-with-application-data-one-burst" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -150,6 +155,7 @@ plzn tls "server/tls13-warning-alert-flood/interleaved-with-application-data-one
 }
 
 plzn tls "server/tls13-warning-alert-flood/interleaved-with-application-data-two-or-more-bursts" {
+  syntax 1.0
   rfc 8446 section 6.1
   chain: [default]
   uut server { versions: [tls13] }

@@ -70,6 +70,7 @@
 # The first records on the connection are empty: Botan's TLS 1.2 server has no
 # sequence numbers before a ClientHello, so its decode_error is never written.
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hello-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -102,6 +103,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hell
 }
 
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hello-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -132,6 +134,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-before-client-hell
 }
 
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -163,6 +166,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello
 }
 
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -194,6 +198,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-hello
 # The ClientHello is split into 64-byte records and the empties go before its
 # last one: still handshake content type, so no interleaving rule applies.
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hello-fragments-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -227,6 +232,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hel
 }
 
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hello-fragments-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -260,6 +266,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-between-client-hel
 # BoringSSL is waiting for the ChangeCipherSpec here and refuses any handshake
 # record, so it never reaches its empty-record counter at this position.
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-exchange-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -285,6 +292,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-e
 }
 
 plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-exchange-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -311,6 +319,7 @@ plzn tls "server/tls12-empty-record-flood/plaintext-handshake-after-client-key-e
 # Under the client's write keys: zero-length handshake fragments that decrypt
 # cleanly. Each library counts or rejects them.
 plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -334,6 +343,7 @@ plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-fini
 }
 
 plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -361,6 +371,7 @@ plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-fini
 }
 
 plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-finished-over-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -392,6 +403,7 @@ plzn tls "server/tls12-empty-record-flood/protected-handshake-before-client-fini
 # classic empty-fragment countermeasure shape); rustls has no CBC suite and skips
 # that half.
 plzn tls "server/tls12-empty-record-flood/application-data-two-to-sixteen" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -411,6 +423,7 @@ plzn tls "server/tls12-empty-record-flood/application-data-two-to-sixteen" {
 }
 
 plzn tls "server/tls12-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -431,6 +444,7 @@ plzn tls "server/tls12-empty-record-flood/application-data-seventeen-to-thirty-o
 }
 
 plzn tls "server/tls12-empty-record-flood/application-data-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -452,6 +466,7 @@ plzn tls "server/tls12-empty-record-flood/application-data-thirty-two" {
 }
 
 plzn tls "server/tls12-empty-record-flood/application-data-thirty-three" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -477,6 +492,7 @@ plzn tls "server/tls12-empty-record-flood/application-data-thirty-three" {
 }
 
 plzn tls "server/tls12-empty-record-flood/application-data-thirty-four-to-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -503,6 +519,7 @@ plzn tls "server/tls12-empty-record-flood/application-data-thirty-four-to-two-hu
 }
 
 plzn tls "server/tls12-empty-record-flood/application-data-over-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {

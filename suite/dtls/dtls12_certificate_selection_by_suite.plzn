@@ -1,4 +1,5 @@
 plzn tls "dtls12/certificate-selection-ecdsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [dtls12] }
@@ -20,6 +21,7 @@ plzn tls "dtls12/certificate-selection-ecdsa-suite-match-first" {
 }
 
 plzn tls "dtls12/certificate-selection-ecdsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [dtls12] }
@@ -41,6 +43,7 @@ plzn tls "dtls12/certificate-selection-ecdsa-suite-match-second" {
 }
 
 plzn tls "dtls12/certificate-selection-rsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [dtls12] }
@@ -62,6 +65,7 @@ plzn tls "dtls12/certificate-selection-rsa-suite-match-first" {
 }
 
 plzn tls "dtls12/certificate-selection-rsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [dtls12] }

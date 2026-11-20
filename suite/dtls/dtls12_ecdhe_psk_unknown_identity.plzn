@@ -1,4 +1,5 @@
 plzn tls "dtls12/ecdhe-psk-unknown-identity" {
+  syntax 1.0
   rfc 5489 section 3.3
   chain: []
   uut server {

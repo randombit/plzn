@@ -1,4 +1,5 @@
 plzn tls "server/tls12-length/client-hello-message" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -10,6 +11,7 @@ plzn tls "server/tls12-length/client-hello-message" {
 }
 
 plzn tls "server/tls12-length/client-hello-session-id" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -23,6 +25,7 @@ plzn tls "server/tls12-length/client-hello-session-id" {
 }
 
 plzn tls "server/tls12-length/client-hello-cipher-suites" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -36,6 +39,7 @@ plzn tls "server/tls12-length/client-hello-cipher-suites" {
 }
 
 plzn tls "server/tls12-length/client-hello-compression-methods" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -48,6 +52,7 @@ plzn tls "server/tls12-length/client-hello-compression-methods" {
 }
 
 plzn tls "server/tls12-length/client-hello-extensions" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -60,6 +65,7 @@ plzn tls "server/tls12-length/client-hello-extensions" {
 }
 
 plzn tls "server/tls12-length/client-key-exchange-message" {
+  syntax 1.0
   rfc 5246 section 7.4.7
   chain: [default]
   uut server { versions: [tls12] }
@@ -73,6 +79,7 @@ plzn tls "server/tls12-length/client-key-exchange-message" {
 }
 
 plzn tls "server/tls12-length/client-key-exchange-public-key" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [default]
   uut server { versions: [tls12] }
@@ -85,6 +92,7 @@ plzn tls "server/tls12-length/client-key-exchange-public-key" {
 }
 
 plzn tls "server/tls12-length/client-certificate-message" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -98,6 +106,7 @@ plzn tls "server/tls12-length/client-certificate-message" {
 }
 
 plzn tls "server/tls12-length/client-certificate-list" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -111,6 +120,7 @@ plzn tls "server/tls12-length/client-certificate-list" {
 }
 
 plzn tls "server/tls12-length/client-certificate-entry" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -125,6 +135,7 @@ plzn tls "server/tls12-length/client-certificate-entry" {
 }
 
 plzn tls "server/tls12-length/client-certificate-verify-message" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -139,6 +150,7 @@ plzn tls "server/tls12-length/client-certificate-verify-message" {
 }
 
 plzn tls "server/tls12-length/client-certificate-verify-signature" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -152,6 +164,7 @@ plzn tls "server/tls12-length/client-certificate-verify-signature" {
 }
 
 plzn tls "server/tls12-length/client-finished-message" {
+  syntax 1.0
   rfc 5246 section 7.4.9
   chain: [default]
   uut server { versions: [tls12] }
@@ -164,6 +177,7 @@ plzn tls "server/tls12-length/client-finished-message" {
 }
 
 plzn tls "server/tls12-length/signature-algorithms-extension" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -176,6 +190,7 @@ plzn tls "server/tls12-length/signature-algorithms-extension" {
 }
 
 plzn tls "server/tls12-length/signature-algorithms-list" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -188,6 +203,7 @@ plzn tls "server/tls12-length/signature-algorithms-list" {
 }
 
 plzn tls "server/tls12-length/renegotiation-info-extension" {
+  syntax 1.0
   rfc 5746 section 3.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -200,6 +216,7 @@ plzn tls "server/tls12-length/renegotiation-info-extension" {
 }
 
 plzn tls "server/tls12-length/renegotiation-info-vector" {
+  syntax 1.0
   rfc 5746 section 3.2
   xfail wolfssl "does not check that renegotiated_connection is empty in an initial ClientHello (this build never parses renegotiation_info; secure-renegotiation builds accept it too)"
   chain: [default]
@@ -212,6 +229,7 @@ plzn tls "server/tls12-length/renegotiation-info-vector" {
 }
 
 plzn tls "server/tls12-length/alpn-extension" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut server { versions: [tls12], alpn_select: "h2" }
@@ -223,6 +241,7 @@ plzn tls "server/tls12-length/alpn-extension" {
 }
 
 plzn tls "server/tls12-length/alpn-protocol-list" {
+  syntax 1.0
   rfc 7301 section 3.1
   xfail gnutls "accepts an ALPN extension with a short ProtocolNameList length"
   chain: [default]
@@ -235,6 +254,7 @@ plzn tls "server/tls12-length/alpn-protocol-list" {
 }
 
 plzn tls "server/tls12-length/ec-point-formats-extension" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -247,6 +267,7 @@ plzn tls "server/tls12-length/ec-point-formats-extension" {
 }
 
 plzn tls "server/tls12-length/ec-point-formats-list" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   xfail gnutls "accepts an EC point formats extension with a short list length"
   chain: [default]
@@ -260,6 +281,7 @@ plzn tls "server/tls12-length/ec-point-formats-list" {
 }
 
 plzn tls "server/tls12-length/encrypt-then-mac-extension" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [default]
   uut server { versions: [tls12] }
@@ -272,6 +294,7 @@ plzn tls "server/tls12-length/encrypt-then-mac-extension" {
 }
 
 plzn tls "server/tls12-length/extended-master-secret-extension" {
+  syntax 1.0
   rfc 7627 section 5.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -284,6 +307,7 @@ plzn tls "server/tls12-length/extended-master-secret-extension" {
 }
 
 plzn tls "server/tls12-length/heartbeat-extension" {
+  syntax 1.0
   rfc 6520 section 2
   chain: [default]
   uut server { versions: [tls12] }
@@ -296,6 +320,7 @@ plzn tls "server/tls12-length/heartbeat-extension" {
 }
 
 plzn tls "server/tls12-length/padding-extension" {
+  syntax 1.0
   rfc 7685 section 3
   chain: [default]
   uut server { versions: [tls12] }

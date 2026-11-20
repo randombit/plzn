@@ -1,4 +1,5 @@
 plzn tls "client/tls13-server-picks-ecdsa-chain" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [rsa_2048, ecdsa_p256]
   uut client {

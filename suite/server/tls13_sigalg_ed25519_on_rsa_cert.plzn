@@ -1,4 +1,5 @@
 plzn tls "server/tls13-sigalg-ed25519-on-rsa-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }

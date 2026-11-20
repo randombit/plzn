@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.7
   chain: [default]
   uut client { versions: [tls12] }

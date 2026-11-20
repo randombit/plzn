@@ -1,4 +1,5 @@
 plzn tls "dtls12/interleave-certificate-cke" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -28,6 +29,7 @@ plzn tls "dtls12/interleave-certificate-cke" {
 }
 
 plzn tls "dtls12/interleave-certificate-cke-split" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {

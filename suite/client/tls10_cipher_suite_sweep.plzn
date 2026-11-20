@@ -1,4 +1,5 @@
 plzn tls "client/tls10-cipher-suite-sweep" {
+  syntax 1.0
   rfc 2246 section 7.4.1.2
   chain: [rsa_2048, ecdsa_p256]
   matrix { suite in cipher_suites(tls10) }

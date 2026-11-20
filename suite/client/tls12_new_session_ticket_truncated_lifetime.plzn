@@ -1,4 +1,5 @@
 plzn tls "client/tls12-new-session-ticket-truncated-lifetime" {
+  syntax 1.0
   rfc 5077 section 3.3
   chain: [default]
   uut client {

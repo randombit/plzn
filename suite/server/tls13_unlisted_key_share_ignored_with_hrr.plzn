@@ -1,4 +1,5 @@
 plzn tls "server/tls13-unlisted-key-share-ignored-with-hrr" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   skip botan "aborts with illegal_parameter; see the sibling case"

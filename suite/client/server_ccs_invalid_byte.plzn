@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-ccs-invalid-byte" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [default]
   uut client { versions: [tls12] }
@@ -14,6 +15,7 @@ plzn tls "client/tls12-server-ccs-invalid-byte" {
 }
 
 plzn tls "client/tls13-server-ccs-invalid-byte" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -33,6 +35,7 @@ plzn tls "client/tls13-server-ccs-invalid-byte" {
 # The ChangeCipherSpec is its own record type; a handshake record cannot
 # stand in for it, even one using the library's internal CCS type value.
 plzn tls "client/tls12-server-ccs-as-handshake-message" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [default]
   uut client { versions: [tls12] }

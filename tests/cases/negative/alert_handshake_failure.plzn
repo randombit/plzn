@@ -3,6 +3,7 @@
 # normal TLS 1.2 ECDHE-RSA handshake. The integration test points
 # this at a FakeAlertOracle that replies with exactly that alert.
 plzn tls "negative/alert-handshake-failure" {
+  syntax 1.0
   rfc 5246 section 7.2
   chain: [default]
   uut server { versions: [tls12] }

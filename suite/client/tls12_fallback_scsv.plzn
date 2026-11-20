@@ -1,4 +1,5 @@
 plzn tls "client/tls12-initial-clienthello-omits-fallback-scsv" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [default]
   uut client { versions: [tls12] }

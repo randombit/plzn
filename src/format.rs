@@ -189,6 +189,7 @@ mod tests {
     fn canonicalizes_blocks_and_multiline_lists() {
         let source = concat!(
             "plzn tls \"format/me\" {  \r\n",
+            "   syntax 1.0\r\n",
             "      chain: [default]\r\n",
             " uut client {\r\n",
             "          versions: [\r\n",
@@ -204,6 +205,7 @@ mod tests {
         );
         let expected = concat!(
             "plzn tls \"format/me\" {\n",
+            "  syntax 1.0\n",
             "  chain: [default]\n",
             "  uut client {\n",
             "    versions: [\n",
@@ -224,6 +226,7 @@ mod tests {
     fn preserves_hanging_list_alignment_and_ignores_delimiters_in_comments_and_strings() {
         let source = concat!(
             "plzn tls \"format/}[hanging\" {\n",
+            "syntax 1.0\n",
             " matrix {\n",
             "       value in [one, two,\n",
             " three, four]\n",
@@ -237,6 +240,7 @@ mod tests {
         );
         let expected = concat!(
             "plzn tls \"format/}[hanging\" {\n",
+            "  syntax 1.0\n",
             "  matrix {\n",
             "    value in [one, two,\n",
             "              three, four]\n",
@@ -255,7 +259,7 @@ mod tests {
 
     #[test]
     fn refuses_syntactically_invalid_input() {
-        let errors = format_source("bad.plzn", "plzn tls \"bad\" {\n").unwrap_err();
+        let errors = format_source("bad.plzn", "plzn tls \"bad\" {\n  syntax 1.0\n").unwrap_err();
         assert!(!errors.is_empty());
     }
 }

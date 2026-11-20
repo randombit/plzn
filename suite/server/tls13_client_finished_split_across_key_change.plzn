@@ -1,4 +1,5 @@
 plzn tls "server/tls13-client-finished-split-across-key-change" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

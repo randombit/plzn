@@ -3,6 +3,7 @@
 # internal_error pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls12-certificate-verify-malformed/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -31,6 +32,7 @@ plzn tls "server/tls12-certificate-verify-malformed/valid-handshake" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/pad" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -54,6 +56,7 @@ plzn tls "server/tls12-certificate-verify-malformed/pad" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/truncate" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -78,6 +81,7 @@ plzn tls "server/tls12-certificate-verify-malformed/truncate" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/0-byte-sig" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -102,6 +106,7 @@ plzn tls "server/tls12-certificate-verify-malformed/0-byte-sig" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/1-byte-sig" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -126,6 +131,7 @@ plzn tls "server/tls12-certificate-verify-malformed/1-byte-sig" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/2-byte-sig" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -150,6 +156,7 @@ plzn tls "server/tls12-certificate-verify-malformed/2-byte-sig" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/3-byte-sig" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -174,6 +181,7 @@ plzn tls "server/tls12-certificate-verify-malformed/3-byte-sig" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/truncated-to-3-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -198,6 +206,7 @@ plzn tls "server/tls12-certificate-verify-malformed/truncated-to-3-bytes" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/truncated-to-2-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -222,6 +231,7 @@ plzn tls "server/tls12-certificate-verify-malformed/truncated-to-2-bytes" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/truncated-to-1-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -245,6 +255,7 @@ plzn tls "server/tls12-certificate-verify-malformed/truncated-to-1-bytes" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/truncated-to-0-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   uut server {
     versions: [tls12], require_client_cert: true
@@ -268,6 +279,7 @@ plzn tls "server/tls12-certificate-verify-malformed/truncated-to-0-bytes" {
 }
 
 plzn tls "server/tls12-certificate-verify-malformed/fuzz-signature-length" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]

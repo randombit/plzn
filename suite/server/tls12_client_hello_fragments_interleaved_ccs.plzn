@@ -1,4 +1,5 @@
 plzn tls "server/tls12-client-hello-fragments-interleaved-ccs/single-interleaved-client-hello-fragment" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -29,6 +30,7 @@ plzn tls "server/tls12-client-hello-fragments-interleaved-ccs/single-interleaved
 }
 
 plzn tls "server/tls12-client-hello-fragments-interleaved-ccs/multiple-interleaved-client-hello-fragments" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {

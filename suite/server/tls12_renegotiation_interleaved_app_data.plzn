@@ -1,4 +1,5 @@
 plzn tls "server/tls12-renegotiation-interleaved-app-data/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [rsa_2048]
   uut server {
@@ -13,6 +14,7 @@ plzn tls "server/tls12-renegotiation-interleaved-app-data/valid-handshake" {
 }
 
 plzn tls "server/tls12-renegotiation-interleaved-app-data/weaved-app-data-and-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.1
   chain: [rsa_2048]
   uut server {

@@ -2,6 +2,7 @@
 # unsupported_extension since 4.1 (tls_validate_no_unknown_extensions, run on
 # TLS 1.3 server extension responses); 3.6 ignored them.
 plzn tls "client/tls13-rejects-grease-version-selection" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -16,6 +17,7 @@ plzn tls "client/tls13-rejects-grease-version-selection" {
 }
 
 plzn tls "client/tls13-rejects-grease-cipher-selection" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -31,6 +33,7 @@ plzn tls "client/tls13-rejects-grease-cipher-selection" {
 }
 
 plzn tls "client/tls13-rejects-grease-serverhello-extension" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -47,6 +50,7 @@ plzn tls "client/tls13-rejects-grease-serverhello-extension" {
 }
 
 plzn tls "client/tls13-rejects-grease-encrypted-extensions-extension" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -64,6 +68,7 @@ plzn tls "client/tls13-rejects-grease-encrypted-extensions-extension" {
 }
 
 plzn tls "client/tls13-rejects-grease-certificate-verify-signature" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -77,6 +82,7 @@ plzn tls "client/tls13-rejects-grease-certificate-verify-signature" {
 }
 
 plzn tls "client/tls13-ignores-grease-new-session-ticket-extension" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -92,6 +98,7 @@ plzn tls "client/tls13-ignores-grease-new-session-ticket-extension" {
 }
 
 plzn tls "client/tls13-rejects-grease-hrr-version-selection" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -106,6 +113,7 @@ plzn tls "client/tls13-rejects-grease-hrr-version-selection" {
 }
 
 plzn tls "client/tls13-rejects-grease-hrr-cipher-selection" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -121,6 +129,7 @@ plzn tls "client/tls13-rejects-grease-hrr-cipher-selection" {
 }
 
 plzn tls "client/tls13-rejects-grease-hrr-extension" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -138,6 +147,7 @@ plzn tls "client/tls13-rejects-grease-hrr-extension" {
 }
 
 plzn tls "client/tls13-rejects-grease-hrr-group-selection" {
+  syntax 1.0
   rfc 8701
   chain: [default]
   uut client { versions: [tls13] }
@@ -152,6 +162,7 @@ plzn tls "client/tls13-rejects-grease-hrr-group-selection" {
 }
 
 plzn tls "client/tls13-ignores-grease-certificate-request-signature-algorithm" {
+  syntax 1.0
   rfc 8701 section 4.1
   chain: [default]
   uut client { versions: [tls13] }

@@ -2,6 +2,7 @@
 # Inject a zero-length APPLICATION_DATA record before sending
 # Finished. The server should reject this.
 plzn tls "tls13/empty-record-before-finished" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

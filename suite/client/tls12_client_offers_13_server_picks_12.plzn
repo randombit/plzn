@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-offers-13-server-picks-12" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut client {

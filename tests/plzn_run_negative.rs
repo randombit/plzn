@@ -177,6 +177,7 @@ fn ok_expectation_on_failing_peer_reports_mismatch() {
     let program = lower_source(
         r#"
         plzn tls "runner/ok-expectation-mismatch" {
+          syntax 1.0
           chain: [default]
           uut server { versions: [tls12] }
           flow handshake {

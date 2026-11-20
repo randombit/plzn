@@ -1,4 +1,5 @@
 plzn tls "client/tls13-reject-unshared-group" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut client { versions: [tls13] }

@@ -15,6 +15,7 @@
 # 4: the server "simply ignores" both extensions then).
 
 plzn tls "server/tls12-ecc-without-extensions/ecdhe-rsa-no-supported-groups" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [rsa_2048]
   uut server {
@@ -35,6 +36,7 @@ plzn tls "server/tls12-ecc-without-extensions/ecdhe-rsa-no-supported-groups" {
 }
 
 plzn tls "server/tls12-ecc-without-extensions/ecdhe-ecdsa-no-supported-groups" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [ecdsa_p256]
   uut server {
@@ -55,6 +57,7 @@ plzn tls "server/tls12-ecc-without-extensions/ecdhe-ecdsa-no-supported-groups" {
 }
 
 plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-no-ec-point-formats" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [default]
   uut server {
@@ -81,6 +84,7 @@ plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-no-ec-point-fo
 # takes uncompressed points, so ECDHE must still be negotiated. The ServerHello
 # must not answer an extension the client did not send (RFC 5246 7.4.1.4).
 plzn tls "server/tls12-ecc-without-extensions/no-ec-point-formats-still-ecdhe" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [default]
   uut server {
@@ -104,6 +108,7 @@ plzn tls "server/tls12-ecc-without-extensions/no-ec-point-formats-still-ecdhe" {
 # allows (ECDHE on a curve of their choice, pinned above), so there is no
 # fallback to observe on them.
 plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-static-rsa" {
+  syntax 1.0
   rfc 8422 section 5.1
   chain: [rsa_2048]
   uut server {
@@ -126,6 +131,7 @@ plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-
 }
 
 plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-dhe" {
+  syntax 1.0
   rfc 8422 section 5.1
   chain: [rsa_2048]
   uut server {
@@ -160,6 +166,7 @@ plzn tls "server/tls12-ecc-without-extensions/no-supported-groups-falls-back-to-
 # suite, so both fall through to a full handshake that then has no suite;
 # neither sentence of RFC 8422 4 is a MUST, so this is pinned, not xfailed.
 plzn tls "server/tls12-ecc-without-extensions/resumption-ignores-missing-extensions" {
+  syntax 1.0
   rfc 8422 section 4
   chain: [default]
   uut server {

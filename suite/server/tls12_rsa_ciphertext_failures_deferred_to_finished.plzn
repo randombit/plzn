@@ -1,4 +1,5 @@
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-1-byte" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-paddin
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-4-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -29,6 +31,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-paddin
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-8-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -44,6 +47,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-paddin
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-padding-short-by-40-bytes" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -59,6 +63,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/pkcs1-paddin
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/low-hamming-weight-plaintext" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -74,6 +79,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/low-hamming-
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/high-hamming-weight-plaintext" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -89,6 +95,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/high-hamming
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/46-byte-zero-premaster-with-type-3-suffix" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -104,6 +111,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/46-byte-zero
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/all-zero-plaintext" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -119,6 +127,7 @@ plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/all-zero-pla
 }
 
 plzn tls "server/tls12-rsa-ciphertext-failures-deferred-to-finished/all-ones-plaintext" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
