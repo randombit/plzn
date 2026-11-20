@@ -1,0 +1,171 @@
+# A DTLS 1.3 server receiving a ClientHello whose legacy_version is the
+# mandated DTLS 1.2 value {254, 253} (RFC 9147 5.3) but whose
+# supported_versions lists only stream TLS versions (TLS 1.2 = 0x0303,
+# TLS 1.3 = 0x0304). RFC 8446 4.2.1: when the extension is present the server
+# MUST NOT use legacy_version for negotiation, MUST select only a version
+# listed in it, and MUST ignore the entries it does not know. A DTLS server
+# knows no stream-TLS code, so no version is shared and the handshake ends in
+# protocol_version; answering with DTLS 1.2 from legacy_version, or with DTLS
+# 1.3 because 0x0304 "is TLS 1.3", are both wrong.
+
+plzn tls "dtls13/clienthello-supported-versions-tls13-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/clienthello-supported-versions-tls12-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/clienthello-supported-versions-tls13-and-tls12" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+# Control: the same stream-TLS codes with dtls13 after them. The unknown entries
+# are skipped, not treated as an error, so the rejections above come from the
+# missing DTLS version and not from the mere presence of a TLS one.
+plzn tls "dtls13/clienthello-supported-versions-tls-then-dtls13" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12, dtls13] }
+    recv ServerHello { legacy_version: 0xfefd, selected_version: dtls13 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The same offers to a server that also has DTLS 1.2 enabled, in a DTLS 1.3
+# shaped ClientHello (key_share, empty legacy_cookie). legacy_version alone
+# would negotiate DTLS 1.2 here, which is exactly what the extension forbids.
+plzn tls "dtls13/dual-version-server/clienthello-supported-versions-tls13-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13, dtls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/clienthello-supported-versions-tls12-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13, dtls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/clienthello-supported-versions-tls13-and-tls12" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13, dtls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/clienthello-supported-versions-tls-then-dtls13" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls13, dtls12] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12, dtls13] }
+    recv ServerHello { legacy_version: 0xfefd, selected_version: dtls13 }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# And in a DTLS 1.2 shaped ClientHello (no key_share), the hello a DTLS 1.2
+# client would send. The server still implements the extension, so the
+# stream-TLS list still leaves it nothing to select.
+plzn tls "dtls13/dual-version-server/dtls12-clienthello-supported-versions-tls13-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls12, dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/dtls12-clienthello-supported-versions-tls12-only" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls12, dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/dtls12-clienthello-supported-versions-tls13-and-tls12" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls12, dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12] }
+  }
+  expect alert fatal/protocol_version
+}
+
+plzn tls "dtls13/dual-version-server/dtls12-clienthello-supported-versions-tls-then-dtls12" {
+  syntax 1.0
+  rfc 8446 section 4.2.1
+  rfc 9147 section 5.3
+  chain: [default]
+  uut server { versions: [dtls12, dtls13] }
+  flow handshake {
+    send ClientHello { +ext supported_versions = [tls13, tls12, dtls12] }
+    recv ServerHello { legacy_version: 0xfefd, lacks_ext: supported_versions }
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
