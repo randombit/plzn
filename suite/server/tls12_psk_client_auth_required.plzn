@@ -3,6 +3,7 @@
 # certificate authentication. Negotiating one would silently drop the
 # certificate requirement.
 plzn tls "server/tls12-psk-suites-refused-when-client-cert-required" {
+  syntax 1.0
   rfc 4279 section 2
   chain: [default]
   uut server {
@@ -22,6 +23,7 @@ plzn tls "server/tls12-psk-suites-refused-when-client-cert-required" {
 }
 
 plzn tls "server/tls12-certificate-suite-chosen-over-psk-when-client-cert-required" {
+  syntax 1.0
   rfc 4279 section 2
   chain: [default]
   client_chain: [default]

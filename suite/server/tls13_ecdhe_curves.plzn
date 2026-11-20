@@ -3,6 +3,7 @@
 # pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls13-ecdhe-curves/right-0-padded" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -20,6 +21,7 @@ plzn tls "server/tls13-ecdhe-curves/right-0-padded" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/right-truncated" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -37,6 +39,7 @@ plzn tls "server/tls13-ecdhe-curves/right-truncated" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/share-from-other-curve-p256" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -52,6 +55,7 @@ plzn tls "server/tls13-ecdhe-curves/share-from-other-curve-p256" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/share-from-other-curve" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -69,6 +73,7 @@ plzn tls "server/tls13-ecdhe-curves/share-from-other-curve" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/point-at-infinity" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -86,6 +91,7 @@ plzn tls "server/tls13-ecdhe-curves/point-at-infinity" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/point-outside-curve" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -103,6 +109,7 @@ plzn tls "server/tls13-ecdhe-curves/point-outside-curve" {
 }
 
 plzn tls "server/tls13-ecdhe-curves/x-and-y-zero" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {

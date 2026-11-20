@@ -12,6 +12,34 @@
 use crate::ast::*;
 use crate::lex::{Tok, Token};
 
+/// The language revision this parser implements, as `(MAJOR, MINOR)`. Every
+/// test names the revision it was written against with `syntax MAJOR.MINOR`.
+///
+/// The numbers follow SemVer. Raise MINOR when the language gains something
+/// an older plzn would reject, so a test using it can say so. Raise MAJOR, and
+/// reset MINOR, when a test that was valid stops parsing or changes meaning.
+/// There is one grammar: a test from another major revision is rejected, not
+/// parsed under its own rules.
+pub const SYNTAX_VERSION: (u32, u32) = (1, 0);
+
+/// Whether a parser implementing `implemented` can run a test written against
+/// `declared`: the same major revision, and no newer minor revision.
+fn check_syntax_version(declared: (u32, u32), implemented: (u32, u32)) -> Result<(), String> {
+    let (major, minor) = declared;
+    let (our_major, our_minor) = implemented;
+    if major != our_major {
+        Err(format!(
+            "syntax {major}.{minor} is not supported; this plzn implements syntax {our_major}.{our_minor}"
+        ))
+    } else if minor > our_minor {
+        Err(format!(
+            "test requires syntax {major}.{minor}, which is newer than the syntax {our_major}.{our_minor} this plzn implements"
+        ))
+    } else {
+        Ok(())
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct ParseError {
     pub span: Span,
@@ -287,6 +315,9 @@ impl<'a> Parser<'a> {
         let name = self.expect_str()?;
         self.expect(&Tok::LBrace, "`{`")?;
         self.skip_newlines();
+        // First, and checked before anything else is read: the rest of the
+        // body is only meaningful under a revision this parser implements.
+        let syntax = self.parse_syntax_line()?;
 
         let mut header = Vec::new();
         let mut matrix = None;
@@ -302,6 +333,12 @@ impl<'a> Parser<'a> {
         while !self.at(&Tok::RBrace) && !self.eof() {
             if self.eat(&Tok::Newline) {
                 continue;
+            }
+            if self.at_ident("syntax") {
+                return Err(ParseError {
+                    span: self.peek().unwrap().span,
+                    message: "duplicate `syntax` declaration".into(),
+                });
             }
             // T1: `repeat N` -- run the test N times (fresh connection each).
             if self.at_ident("repeat") {
@@ -443,6 +480,7 @@ impl<'a> Parser<'a> {
 
         Ok(Test {
             name,
+            syntax,
             header,
             matrix,
             psk,
@@ -455,6 +493,94 @@ impl<'a> Parser<'a> {
             repeat,
             span: start.join(end),
         })
+    }
+
+    /// `syntax MAJOR.MINOR`, the mandatory first statement of a test.
+    fn parse_syntax_line(&mut self) -> Result<SyntaxVersion, ParseError> {
+        let (our_major, our_minor) = SYNTAX_VERSION;
+        if !self.at_ident("syntax") {
+            let (span, found) = match self.peek() {
+                Some(t) => (t.span, describe_tok(&t.tok)),
+                None => (self.prev_span(), "end of file".into()),
+            };
+            return Err(ParseError {
+                span,
+                message: format!(
+                    "expected `syntax {our_major}.{our_minor}` as the first statement of the test, found {found}"
+                ),
+            });
+        }
+        let start = self.peek().unwrap().span;
+        self.bump(); // syntax
+        let (major, major_span) = self.syntax_component()?;
+        let dot = self.expect(&Tok::Dot, "`.` in the syntax version (`MAJOR.MINOR`)")?;
+        let (minor, minor_span) = self.syntax_component()?;
+        let span = major_span.join(minor_span);
+        // The lexer hands us `1.0` as three tokens; as with an rfc section,
+        // adjacent spans are what make them one version.
+        if dot.start != major_span.end || minor_span.start != dot.end {
+            return Err(ParseError {
+                span,
+                message: format!(
+                    "syntax version must not contain spaces; write `syntax {major}.{minor}`"
+                ),
+            });
+        }
+        if self.at(&Tok::Dot) {
+            return Err(ParseError {
+                span: self.peek().unwrap().span,
+                message: format!(
+                    "syntax version is `MAJOR.MINOR`, with no patch component; write `syntax {major}.{minor}`"
+                ),
+            });
+        }
+        check_syntax_version((major, minor), SYNTAX_VERSION)
+            .map_err(|message| ParseError { span, message })?;
+        self.expect_newline_or_rbrace()?;
+        Ok(SyntaxVersion {
+            major,
+            minor,
+            span: start.join(span),
+        })
+    }
+
+    /// One number of a syntax version: decimal, without leading zeros.
+    fn syntax_component(&mut self) -> Result<(u32, Span), ParseError> {
+        match self.peek() {
+            Some(Token {
+                tok: Tok::Int(n),
+                span,
+            }) => {
+                let span = *span;
+                let Ok(value) = u32::try_from(*n) else {
+                    return Err(ParseError {
+                        span,
+                        message: "syntax version number out of range".into(),
+                    });
+                };
+                // `01` and `1` lex to the same integer; only the span tells
+                // them apart.
+                if value.to_string().len() != span.end - span.start {
+                    return Err(ParseError {
+                        span,
+                        message: "syntax version numbers are written without leading zeros".into(),
+                    });
+                }
+                self.bump();
+                Ok((value, span))
+            }
+            Some(t) => Err(ParseError {
+                span: t.span,
+                message: format!(
+                    "expected a syntax version (`MAJOR.MINOR`), found {}",
+                    describe_tok(&t.tok)
+                ),
+            }),
+            None => Err(ParseError {
+                span: self.prev_span(),
+                message: "expected a syntax version (`MAJOR.MINOR`), found end of file".into(),
+            }),
+        }
     }
 
     fn parse_rfc_line(&mut self) -> Result<HeaderLine, ParseError> {
@@ -3743,4 +3869,26 @@ fn expand_repeats(steps: Vec<Step>) -> Vec<Step> {
         }
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::check_syntax_version;
+
+    #[test]
+    fn syntax_versions_follow_semver() {
+        // A parser at 1.2 runs everything written for 1.0 through 1.2.
+        for minor in 0..=2 {
+            assert_eq!(check_syntax_version((1, minor), (1, 2)), Ok(()));
+        }
+        let newer = check_syntax_version((1, 3), (1, 2)).unwrap_err();
+        assert!(newer.contains("requires syntax 1.3"), "{newer}");
+        assert!(newer.contains("syntax 1.2 this plzn implements"), "{newer}");
+        // No major revision is compatible with another, in either direction.
+        for declared in [(0, 0), (0, 9), (2, 0), (2, 2), (3, 1)] {
+            let other = check_syntax_version(declared, (1, 2)).unwrap_err();
+            assert!(other.contains("is not supported"), "{other}");
+        }
+        assert!(check_syntax_version((1, 0), (2, 0)).is_err());
+    }
 }

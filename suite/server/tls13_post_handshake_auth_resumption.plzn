@@ -1,4 +1,5 @@
 plzn tls "server/tls13-post-handshake-auth-after-resumption" {
+  syntax 1.0
   rfc 8446 section 4.6.2
   chain: [default]
   uut server {

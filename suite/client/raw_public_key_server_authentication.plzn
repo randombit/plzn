@@ -1,4 +1,5 @@
 plzn tls "client/tls12-raw-public-key-server-authentication" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut client {
@@ -15,6 +16,7 @@ plzn tls "client/tls12-raw-public-key-server-authentication" {
 }
 
 plzn tls "client/tls13-raw-public-key-server-authentication" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [ecdsa_p256]
   uut client {
@@ -31,6 +33,7 @@ plzn tls "client/tls13-raw-public-key-server-authentication" {
 }
 
 plzn tls "client/tls12-raw-public-key-offer-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -46,6 +49,7 @@ plzn tls "client/tls12-raw-public-key-offer-selects-x509" {
 }
 
 plzn tls "client/tls13-raw-public-key-offer-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -61,6 +65,7 @@ plzn tls "client/tls13-raw-public-key-offer-selects-x509" {
 }
 
 plzn tls "client/tls12-raw-public-key-offer-defaults-to-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -76,6 +81,7 @@ plzn tls "client/tls12-raw-public-key-offer-defaults-to-x509" {
 }
 
 plzn tls "client/tls13-raw-public-key-offer-defaults-to-x509" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -91,6 +97,7 @@ plzn tls "client/tls13-raw-public-key-offer-defaults-to-x509" {
 }
 
 plzn tls "client/tls12-raw-public-key-only-rejects-x509-selection" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -106,6 +113,7 @@ plzn tls "client/tls12-raw-public-key-only-rejects-x509-selection" {
 }
 
 plzn tls "client/tls13-raw-public-key-only-rejects-x509-selection" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -122,6 +130,7 @@ plzn tls "client/tls13-raw-public-key-only-rejects-x509-selection" {
 }
 
 plzn tls "client/tls12-x509-only-rejects-unsolicited-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -136,6 +145,7 @@ plzn tls "client/tls12-x509-only-rejects-unsolicited-raw-public-key" {
 }
 
 plzn tls "client/tls13-x509-only-rejects-unsolicited-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -150,6 +160,7 @@ plzn tls "client/tls13-x509-only-rejects-unsolicited-raw-public-key" {
 }
 
 plzn tls "client/tls12-raw-public-key-only-rejects-default-x509-selection" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -165,6 +176,7 @@ plzn tls "client/tls12-raw-public-key-only-rejects-default-x509-selection" {
 }
 
 plzn tls "client/tls13-raw-public-key-only-rejects-default-x509-selection" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -180,6 +192,7 @@ plzn tls "client/tls13-raw-public-key-only-rejects-default-x509-selection" {
 }
 
 plzn tls "client/tls12-rejects-x509-certificate-encoded-as-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -194,6 +207,7 @@ plzn tls "client/tls12-rejects-x509-certificate-encoded-as-raw-public-key" {
 }
 
 plzn tls "client/tls13-rejects-x509-certificate-encoded-as-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -208,6 +222,7 @@ plzn tls "client/tls13-rejects-x509-certificate-encoded-as-raw-public-key" {
 }
 
 plzn tls "client/tls12-rejects-raw-public-key-encoded-as-x509-certificate" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -221,6 +236,7 @@ plzn tls "client/tls12-rejects-raw-public-key-encoded-as-x509-certificate" {
 }
 
 plzn tls "client/tls13-rejects-raw-public-key-encoded-as-x509-certificate" {
+  syntax 1.0
   rfc 7250 section 4.2
   chain: [default]
   uut client {
@@ -234,6 +250,7 @@ plzn tls "client/tls13-rejects-raw-public-key-encoded-as-x509-certificate" {
 }
 
 plzn tls "client/tls12-rejects-empty-server-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   uut client {
@@ -248,6 +265,7 @@ plzn tls "client/tls12-rejects-empty-server-raw-public-key" {
 }
 
 plzn tls "client/tls13-rejects-empty-server-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   uut client {
@@ -262,6 +280,7 @@ plzn tls "client/tls13-rejects-empty-server-raw-public-key" {
 }
 
 plzn tls "client/tls13-rejects-empty-server-certificate-list-with-raw-public-key" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   uut client {
@@ -277,6 +296,7 @@ plzn tls "client/tls13-rejects-empty-server-certificate-list-with-raw-public-key
 }
 
 plzn tls "client/tls13-rejects-raw-public-key-without-certificate-verify" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut client {
@@ -291,6 +311,7 @@ plzn tls "client/tls13-rejects-raw-public-key-without-certificate-verify" {
 }
 
 plzn tls "client/tls12-raw-public-key-server-authentication-resumption" {
+  syntax 1.0
   rfc 7250 section 4.2
   rfc 5077 section 3.1
   chain: [ecdsa_p256]
@@ -319,6 +340,7 @@ plzn tls "client/tls12-raw-public-key-server-authentication-resumption" {
 }
 
 plzn tls "client/tls13-raw-public-key-server-authentication-resumption" {
+  syntax 1.0
   rfc 7250 section 4.2
   rfc 8446 section 4.6.1
   chain: [ecdsa_p256]
@@ -352,6 +374,7 @@ plzn tls "client/tls13-raw-public-key-server-authentication-resumption" {
 # contain the DER encoding [X.690] of the SubjectPublicKeyInfo." The entry
 # below holds a PEM framed P-256 SubjectPublicKeyInfo instead.
 plzn tls "client/tls13-rejects-pem-encoded-server-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   uut client {

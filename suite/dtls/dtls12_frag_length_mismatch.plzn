@@ -1,4 +1,5 @@
 plzn tls "dtls12/frag-length-mismatch" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -26,6 +27,7 @@ plzn tls "dtls12/frag-length-mismatch" {
 # changes: Botan's cookie binds the hello, so a stale literal fails at
 # `recv ServerHello` with a second HelloVerifyRequest.
 plzn tls "dtls12/frag-length-mismatch-restart" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -58,6 +60,7 @@ plzn tls "dtls12/frag-length-mismatch-restart" {
 # inconsistency in a server-sent message, or in a client message after the
 # cookie exchange, remains a fatal decode error on Botan.
 plzn tls "dtls12/frag-length-mismatch-to-client" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -71,6 +74,7 @@ plzn tls "dtls12/frag-length-mismatch-to-client" {
 }
 
 plzn tls "dtls12/frag-length-mismatch-after-cookie" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "dtls12/alpn-server" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [ecdsa_p256]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "dtls12/alpn-server" {
 }
 
 plzn tls "dtls12/alpn-client" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [ecdsa_p256]
   uut client {
@@ -43,6 +45,7 @@ plzn tls "dtls12/alpn-client" {
 }
 
 plzn tls "dtls12/alpn-server-decline" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [ecdsa_p256]
   uut server {
@@ -59,6 +62,7 @@ plzn tls "dtls12/alpn-server-decline" {
 }
 
 plzn tls "dtls12/alpn-server-no-common" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [ecdsa_p256]
   uut server {
@@ -72,6 +76,7 @@ plzn tls "dtls12/alpn-server-no-common" {
 }
 
 plzn tls "dtls12/alpn-client-reject-unknown" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [ecdsa_p256]
   uut client {
@@ -86,6 +91,7 @@ plzn tls "dtls12/alpn-client-reject-unknown" {
 }
 
 plzn tls "dtls12/alpn-server-empty-protocol" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [ecdsa_p256]
   uut server {
@@ -100,6 +106,7 @@ plzn tls "dtls12/alpn-server-empty-protocol" {
 }
 
 plzn tls "dtls12/alpn-client-empty-selection" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [ecdsa_p256]
   uut client {
@@ -114,6 +121,7 @@ plzn tls "dtls12/alpn-client-empty-selection" {
 }
 
 plzn tls "dtls12/alpn-server-resumption" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [ecdsa_p256]
   uut server {
@@ -145,6 +153,7 @@ plzn tls "dtls12/alpn-server-resumption" {
 }
 
 plzn tls "dtls12/alpn-client-resumption" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [ecdsa_p256]
   uut client {

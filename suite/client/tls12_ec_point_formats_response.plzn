@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-ec-point-formats-without-uncompressed" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [ecdsa_p256]
   uut client { versions: [tls12] }

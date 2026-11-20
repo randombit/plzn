@@ -1,4 +1,5 @@
 plzn tls "server/tls12-legacy-renegotiation/secure-appdata-crossing-renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [default]
   uut server {
@@ -25,6 +26,7 @@ plzn tls "server/tls12-legacy-renegotiation/secure-appdata-crossing-renegotiatio
 }
 
 plzn tls "server/tls12-legacy-renegotiation/scsv-in-renegotiation" {
+  syntax 1.0
   rfc 5746 section 4.2
   chain: [default]
   uut server {

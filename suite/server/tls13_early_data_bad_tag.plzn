@@ -1,4 +1,5 @@
 plzn tls "server/tls13-early-data-bad-tag" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server {

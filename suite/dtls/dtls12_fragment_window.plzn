@@ -1,4 +1,5 @@
 plzn tls "dtls12/server-discards-fragment-at-window-upper-bound" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [dtls12] }
@@ -12,6 +13,7 @@ plzn tls "dtls12/server-discards-fragment-at-window-upper-bound" {
 }
 
 plzn tls "dtls12/client-discards-fragment-at-window-upper-bound" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client { versions: [dtls12] }
@@ -24,6 +26,7 @@ plzn tls "dtls12/client-discards-fragment-at-window-upper-bound" {
 }
 
 plzn tls "dtls12/server-processes-valid-fragment-packed-with-future-fragment" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [dtls12] }
@@ -41,6 +44,7 @@ plzn tls "dtls12/server-processes-valid-fragment-packed-with-future-fragment" {
 # valid ServerHello. The client must bound the far-future reassembly claim and
 # complete on the valid fragment.
 plzn tls "dtls12/client-processes-valid-fragment-packed-with-future-fragment" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client { versions: [dtls12] }

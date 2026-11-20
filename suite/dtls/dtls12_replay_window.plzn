@@ -1,4 +1,5 @@
 plzn tls "dtls12/replay-window" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut client {
@@ -19,6 +20,7 @@ plzn tls "dtls12/replay-window" {
 }
 
 plzn tls "dtls12/replay-window-large-gaps" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut client {
@@ -39,6 +41,7 @@ plzn tls "dtls12/replay-window-large-gaps" {
 }
 
 plzn tls "dtls12/replay-window-non-monotonic" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut client {
@@ -60,6 +63,7 @@ plzn tls "dtls12/replay-window-non-monotonic" {
 }
 
 plzn tls "dtls12/replay-window-to-server" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut server {

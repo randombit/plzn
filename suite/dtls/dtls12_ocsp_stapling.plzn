@@ -1,4 +1,5 @@
 plzn tls "dtls12/ocsp-stapling-from-server" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut server {
@@ -27,6 +28,7 @@ plzn tls "dtls12/ocsp-stapling-from-server" {
 }
 
 plzn tls "dtls12/ocsp-stapling-to-client" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {
@@ -55,6 +57,7 @@ plzn tls "dtls12/ocsp-stapling-to-client" {
 }
 
 plzn tls "dtls12/skip-certificate-status" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {
@@ -82,6 +85,7 @@ plzn tls "dtls12/skip-certificate-status" {
 }
 
 plzn tls "dtls12/ocsp-stapling-empty-response" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {
@@ -102,6 +106,7 @@ plzn tls "dtls12/ocsp-stapling-empty-response" {
 }
 
 plzn tls "dtls12/ocsp-stapling-unknown-status-type" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {

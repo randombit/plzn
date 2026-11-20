@@ -1,4 +1,5 @@
 plzn tls "server/tls13-malformed-server-name" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls13] }
@@ -11,6 +12,7 @@ plzn tls "server/tls13-malformed-server-name" {
 }
 
 plzn tls "server/tls13-server-name-repeated-unknown-name-type" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server { versions: [tls13] }

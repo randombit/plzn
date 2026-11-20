@@ -438,6 +438,7 @@ fn lower_sessions(test: &Test) -> Result<Vec<Program>, Vec<LowerError>> {
             }
             let synthetic = ast::Test {
                 name: test.name.clone(),
+                syntax: test.syntax,
                 header: test.header.clone(),
                 matrix: None,
                 psk: test.psk.clone(),

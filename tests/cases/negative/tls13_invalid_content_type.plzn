@@ -4,6 +4,7 @@
 # 8446 §5.1 note). This test verifies the handshake still
 # completes — it's a tolerance probe, not a rejection test.
 plzn tls "negative/tls13-invalid-content-type" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

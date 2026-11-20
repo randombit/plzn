@@ -7,6 +7,7 @@
 # content_type=0x15, version=0x0303, length=0x0002,
 # level=warning(1), description=no_renegotiation(100).
 plzn tls "negative/alert-during-handshake" {
+  syntax 1.0
   rfc 5246 section 7.2.2
   chain: [default]
   uut server { versions: [tls12] }

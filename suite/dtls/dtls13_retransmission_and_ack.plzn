@@ -1,4 +1,5 @@
 plzn tls "dtls13/client-retransmits-initial-client-hello" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -25,6 +26,7 @@ plzn tls "dtls13/client-retransmits-initial-client-hello" {
 }
 
 plzn tls "dtls13/client-initial-flight-retransmission-budget-exhausted" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -73,6 +75,7 @@ plzn tls "dtls13/client-initial-flight-retransmission-budget-exhausted" {
 }
 
 plzn tls "dtls13/client-live-timeout-decrease" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -100,6 +103,7 @@ plzn tls "dtls13/client-live-timeout-decrease" {
 }
 
 plzn tls "dtls13/client-live-timeout-fire" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -128,6 +132,7 @@ plzn tls "dtls13/client-live-timeout-fire" {
 }
 
 plzn tls "dtls13/client-live-timeout-increase" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -157,6 +162,7 @@ plzn tls "dtls13/client-live-timeout-increase" {
 }
 
 plzn tls "dtls13/client-timeout-fudge-fires-slightly-early" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -176,6 +182,7 @@ plzn tls "dtls13/client-timeout-fudge-fires-slightly-early" {
 }
 
 plzn tls "dtls13/client-timeout-can-be-advanced-in-steps" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -199,6 +206,7 @@ plzn tls "dtls13/client-timeout-can-be-advanced-in-steps" {
 }
 
 plzn tls "dtls13/server-partial-next-flight-implicitly-acks-previous-flight" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -222,6 +230,7 @@ plzn tls "dtls13/server-partial-next-flight-implicitly-acks-previous-flight" {
 }
 
 plzn tls "dtls13/server-partial-flight-ack-timer-rescaled" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -246,6 +255,7 @@ plzn tls "dtls13/server-partial-flight-ack-timer-rescaled" {
 }
 
 plzn tls "dtls13/client-partial-server-flight-before-version-known" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -273,6 +283,7 @@ plzn tls "dtls13/client-partial-server-flight-before-version-known" {
 }
 
 plzn tls "dtls13/client-final-flight-retransmitted-until-acked" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -295,6 +306,7 @@ plzn tls "dtls13/client-final-flight-retransmitted-until-acked" {
 }
 
 plzn tls "dtls13/client-appdata-does-not-implicitly-ack-final-flight" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -312,6 +324,7 @@ plzn tls "dtls13/client-appdata-does-not-implicitly-ack-final-flight" {
 }
 
 plzn tls "dtls13/client-retransmits-final-flight-after-live-mtu-change" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   client_chain: [default]
@@ -338,6 +351,7 @@ plzn tls "dtls13/client-retransmits-final-flight-after-live-mtu-change" {
 }
 
 plzn tls "dtls13/client-final-flight-retransmission-budget-exhausted" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -374,6 +388,7 @@ plzn tls "dtls13/client-final-flight-retransmission-budget-exhausted" {
 }
 
 plzn tls "dtls13/client-sends-delayed-ack-while-awaiting-flight" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client {
@@ -399,6 +414,7 @@ plzn tls "dtls13/client-sends-delayed-ack-while-awaiting-flight" {
 }
 
 plzn tls "dtls13/server-ticket-flight-retransmitted-until-acked" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {
@@ -422,6 +438,7 @@ plzn tls "dtls13/server-ticket-flight-retransmitted-until-acked" {
 }
 
 plzn tls "dtls13/server-ticket-flight-retransmission-budget-exhausted" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {
@@ -462,6 +479,7 @@ plzn tls "dtls13/server-ticket-flight-retransmission-budget-exhausted" {
 }
 
 plzn tls "dtls13/server-flight-selective-ack" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {
@@ -493,6 +511,7 @@ plzn tls "dtls13/server-flight-selective-ack" {
 }
 
 plzn tls "dtls13/server-flight-progressive-selective-acks" {
+  syntax 1.0
   rfc 9147 section 7
   chain: [default]
   uut server {
@@ -522,6 +541,7 @@ plzn tls "dtls13/server-flight-progressive-selective-acks" {
 }
 
 plzn tls "dtls13/server-ignores-ack-for-previous-flight" {
+  syntax 1.0
   rfc 9147 section 7
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -546,6 +566,7 @@ plzn tls "dtls13/server-ignores-ack-for-previous-flight" {
 }
 
 plzn tls "dtls13/server-ignores-ack-for-forgotten-record" {
+  syntax 1.0
   rfc 9147 section 7
   chain: [default]
   uut server {
@@ -592,6 +613,7 @@ plzn tls "dtls13/server-ignores-ack-for-forgotten-record" {
 }
 
 plzn tls "dtls13/server-acks-retransmitted-finished-after-appdata-until-epoch-expires" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -612,6 +634,7 @@ plzn tls "dtls13/server-acks-retransmitted-finished-after-appdata-until-epoch-ex
 }
 
 plzn tls "dtls13/server-flight-duplicate-ack-is-idempotent" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {
@@ -642,6 +665,7 @@ plzn tls "dtls13/server-flight-duplicate-ack-is-idempotent" {
 }
 
 plzn tls "dtls13/server-rejects-ack-at-lower-epoch" {
+  syntax 1.0
   rfc 9147 section 7
   chain: [default]
   uut server {
@@ -665,6 +689,7 @@ plzn tls "dtls13/server-rejects-ack-at-lower-epoch" {
 }
 
 plzn tls "dtls13/server-rejects-overflowing-ack-epoch" {
+  syntax 1.0
   rfc 9147 section 7
   chain: [default]
   uut server {

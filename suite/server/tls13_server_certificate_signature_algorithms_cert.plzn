@@ -1,4 +1,5 @@
 plzn tls "server/tls13-server-certificate-signature-algorithms-cert/independent-lists" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [rsa_2048_ecdsa_signed]
   uut server { versions: [tls13] }
@@ -16,6 +17,7 @@ plzn tls "server/tls13-server-certificate-signature-algorithms-cert/independent-
 }
 
 plzn tls "server/tls13-server-certificate-signature-algorithms-cert/excludes-certificate" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [rsa_2048_ecdsa_signed]
   uut server { versions: [tls13] }
@@ -30,6 +32,7 @@ plzn tls "server/tls13-server-certificate-signature-algorithms-cert/excludes-cer
 }
 
 plzn tls "server/tls13-server-certificate-signature-algorithms-cert/absent-falls-back" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [rsa_2048_ecdsa_signed]
   uut server { versions: [tls13] }

@@ -15,6 +15,7 @@ fn lint_json_reports_each_file_and_a_summary() {
     std::fs::write(
         &valid,
         r#"plzn tls "report/json-lint" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow handshake {}
@@ -54,6 +55,7 @@ fn run_json_is_a_clean_case_and_summary_stream() {
     std::fs::write(
         &source,
         r#"plzn tls "report/json-run" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   skip mock "reporting fixture"

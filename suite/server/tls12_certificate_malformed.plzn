@@ -1,4 +1,5 @@
 plzn tls "server/tls12-certificate-malformed/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   uut server {
     versions: [tls12], require_client_cert: true
@@ -27,6 +28,7 @@ plzn tls "server/tls12-certificate-malformed/valid-handshake" {
 }
 
 plzn tls "server/tls12-certificate-malformed/no-client-cert" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   uut server {
     versions: [tls12], require_client_cert: true
@@ -50,6 +52,7 @@ plzn tls "server/tls12-certificate-malformed/no-client-cert" {
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-certificates-length" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]
@@ -76,6 +79,7 @@ plzn tls "server/tls12-certificate-malformed/fuzz-certificates-length" {
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-first-certificate-length" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]
@@ -102,6 +106,7 @@ plzn tls "server/tls12-certificate-malformed/fuzz-first-certificate-length" {
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-empty-certificates-length" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]
@@ -127,6 +132,7 @@ plzn tls "server/tls12-certificate-malformed/fuzz-empty-certificates-length" {
 }
 
 plzn tls "server/tls12-certificate-malformed/empty-client-cert-entry" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   uut server {
     versions: [tls12], require_client_cert: true
@@ -150,6 +156,7 @@ plzn tls "server/tls12-certificate-malformed/empty-client-cert-entry" {
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-empty-certificate-lengths" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     i in [1, 2, 3, 4, 6]
@@ -176,6 +183,7 @@ plzn tls "server/tls12-certificate-malformed/fuzz-empty-certificate-lengths" {
 }
 
 plzn tls "server/tls12-certificate-malformed/correct-cert-followed-by-empty" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   uut server {
     versions: [tls12], require_client_cert: true
@@ -206,6 +214,7 @@ plzn tls "server/tls12-certificate-malformed/correct-cert-followed-by-empty" {
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-second-certificate-empty-length" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]
@@ -232,6 +241,7 @@ plzn tls "server/tls12-certificate-malformed/fuzz-second-certificate-empty-lengt
 }
 
 plzn tls "server/tls12-certificate-malformed/fuzz-middle-certificate-empty-length" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   matrix {
     v in [0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0xff]

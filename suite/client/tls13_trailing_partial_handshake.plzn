@@ -1,4 +1,5 @@
 plzn tls "client/tls13-rejects-server-hello-prefix-after-hello-retry-request" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   rfc 8446 section 5.1
   chain: [default]
@@ -28,6 +29,7 @@ plzn tls "client/tls13-rejects-server-hello-prefix-after-hello-retry-request" {
 }
 
 plzn tls "client/tls13-rejects-trailing-partial-message-after-finished" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -42,6 +44,7 @@ plzn tls "client/tls13-rejects-trailing-partial-message-after-finished" {
 }
 
 plzn tls "client/tls13-rejects-trailing-partial-message-after-resumed-finished" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {
@@ -70,6 +73,7 @@ plzn tls "client/tls13-rejects-trailing-partial-message-after-resumed-finished" 
 }
 
 plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -89,6 +93,7 @@ plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello" {
 }
 
 plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello-without-ccs" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -107,6 +112,7 @@ plzn tls "client/tls13-rejects-encrypted-extensions-prefix-after-server-hello-wi
 }
 
 plzn tls "client/tls13-rejects-next-key-update-prefix-before-key-change" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }

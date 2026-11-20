@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-rejects-corrupt-resumption-psk-binder" {
+  syntax 1.0
   rfc 8446 section 4.2.11.2
   chain: [default]
   uut server { versions: [dtls13] }
@@ -20,6 +21,7 @@ plzn tls "dtls13/server-rejects-corrupt-resumption-psk-binder" {
 }
 
 plzn tls "dtls13/server-rejects-resumption-pre-shared-key-not-last" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut server { versions: [dtls13] }

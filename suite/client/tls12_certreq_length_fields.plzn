@@ -1,4 +1,5 @@
 plzn tls "client/tls12-certificate-request-length/message" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -13,6 +14,7 @@ plzn tls "client/tls12-certificate-request-length/message" {
 }
 
 plzn tls "client/tls12-certificate-request-length/certificate-types" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -26,6 +28,7 @@ plzn tls "client/tls12-certificate-request-length/certificate-types" {
 }
 
 plzn tls "client/tls12-certificate-request-length/signature-algorithms" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut client { versions: [tls12] }
@@ -40,6 +43,7 @@ plzn tls "client/tls12-certificate-request-length/signature-algorithms" {
 }
 
 plzn tls "client/tls12-certificate-request-length/certificate-authorities" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut client { versions: [tls12] }

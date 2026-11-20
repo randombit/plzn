@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-name-matcher" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut client {

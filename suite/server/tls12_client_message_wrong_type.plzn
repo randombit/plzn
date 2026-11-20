@@ -1,4 +1,5 @@
 plzn tls "server/tls12-wrong-type-clienthello" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }
@@ -9,6 +10,7 @@ plzn tls "server/tls12-wrong-type-clienthello" {
 }
 
 plzn tls "server/tls12-wrong-type-client-certificate" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -22,6 +24,7 @@ plzn tls "server/tls12-wrong-type-client-certificate" {
 }
 
 plzn tls "server/tls12-wrong-type-client-certificateverify" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -35,6 +38,7 @@ plzn tls "server/tls12-wrong-type-client-certificateverify" {
 }
 
 plzn tls "server/tls12-wrong-type-client-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }

@@ -1,4 +1,5 @@
 plzn tls "server/tls-downgrade-protection/tls12-sentinel" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut server {
@@ -23,6 +24,7 @@ plzn tls "server/tls-downgrade-protection/tls12-sentinel" {
 }
 
 plzn tls "server/tls13-non-support/draft-version-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server {
@@ -47,6 +49,7 @@ plzn tls "server/tls13-non-support/draft-version-only" {
 }
 
 plzn tls "server/tls13-non-support/several-draft-versions-only" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server {
@@ -71,6 +74,7 @@ plzn tls "server/tls13-non-support/several-draft-versions-only" {
 }
 
 plzn tls "server/tls13-non-support/draft-versions-alone" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server {

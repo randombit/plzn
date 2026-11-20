@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-mutate-ske-ecdh-point" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: [ecdsa_p256]
   uut client {
@@ -13,6 +14,7 @@ plzn tls "dtls12/client-mutate-ske-ecdh-point" {
 }
 
 plzn tls "dtls12/client-mutate-certificate-list" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   chain: [ecdsa_p256]
   uut client {

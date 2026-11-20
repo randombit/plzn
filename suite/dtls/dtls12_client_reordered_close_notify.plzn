@@ -4,6 +4,7 @@
 # AFTER it. Unlike sending new data after closing, this is ordinary network
 # reordering. The peer must neither echo the late data nor send a fatal alert.
 plzn tls "dtls12/client-ignores-data-reordered-behind-close-notify" {
+  syntax 1.0
   rfc 5246 section 7.2.1
   chain: [ecdsa_p256]
   uut client { versions: [dtls12] }

@@ -1,4 +1,5 @@
 plzn tls "client/tls12-rejects-grease-version-selection" {
+  syntax 1.0
   rfc 8701
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -12,6 +13,7 @@ plzn tls "client/tls12-rejects-grease-version-selection" {
 }
 
 plzn tls "client/tls12-rejects-grease-cipher-selection" {
+  syntax 1.0
   rfc 8701
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -27,6 +29,7 @@ plzn tls "client/tls12-rejects-grease-cipher-selection" {
 }
 
 plzn tls "client/tls12-rejects-grease-serverhello-extension" {
+  syntax 1.0
   rfc 8701
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -45,6 +48,7 @@ plzn tls "client/tls12-rejects-grease-serverhello-extension" {
 }
 
 plzn tls "client/tls12-rejects-grease-server-key-exchange-group" {
+  syntax 1.0
   rfc 8701
   chain: [rsa_2048]
   uut client { versions: [tls12] }
@@ -60,6 +64,7 @@ plzn tls "client/tls12-rejects-grease-server-key-exchange-group" {
 }
 
 plzn tls "client/tls12-rejects-grease-server-key-exchange-signature" {
+  syntax 1.0
   rfc 8701
   chain: [rsa_2048]
   uut client { versions: [tls12] }

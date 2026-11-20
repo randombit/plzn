@@ -36,6 +36,7 @@ exit 99
         std::fs::write(
             &case,
             r#"plzn tls "external/sidecar" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow handshake {

@@ -2,6 +2,7 @@
 # a TLS 1.2 handshake. The raw bytes form a complete TLS record:
 # content_type=0xFF, version=0x0303, length=5, body=deadbeefca.
 plzn tls "negative/send-raw-bad-record" {
+  syntax 1.0
   rfc 5246 section 6.2
   chain: [default]
   uut server { versions: [tls12] }

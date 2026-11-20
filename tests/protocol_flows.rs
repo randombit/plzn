@@ -4,6 +4,7 @@ use plzn::{format::format_source, lex::lex, parse::parse};
 use std::process::Command;
 
 const TLS: &str = r#"plzn tls "tls/selected" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   skip mock "protocol selection fixture"
@@ -75,11 +76,11 @@ fn tls_headers_accept_horizontal_whitespace() {
 #[test]
 fn tls_errors_keep_original_locations_after_foreign_flows() {
     for (body, category) in [("  ?", "lex error"), ("  unsupported", "parse error")] {
-        let source = format!("{FOREIGN}plzn tls \"bad\" {{\n{body}\n}}\n");
+        let source = format!("{FOREIGN}plzn tls \"bad\" {{\n  syntax 1.0\n{body}\n}}\n");
         let diags = plzn::lint("mixed.plzn", &source);
         assert_eq!(diags.len(), 1, "{diags:?}");
         assert_eq!(diags[0].category, category);
-        assert_eq!(diags[0].line, FOREIGN.lines().count() + 2);
+        assert_eq!(diags[0].line, FOREIGN.lines().count() + 3);
         assert_eq!(diags[0].col, 3);
         assert_eq!(diags[0].excerpt, body);
     }
@@ -139,10 +140,14 @@ fn formatting_preserves_foreign_bytes_in_mixed_files() {
 
 #[test]
 fn formatting_preserves_shared_lines_and_tracks_tls_indentation() {
-    let source =
-        "plzn http \"other\" {?;} plzn tls \"tls\" {\nexpect close\n} plzn quic \"other\" {~;}";
+    let source = "plzn http \"other\" {?;} plzn tls \"tls\" {\nsyntax 1.0\nexpect close\n} plzn quic \"other\" {~;}";
     let formatted = format_source("mixed.plzn", source).unwrap();
-    assert_eq!(formatted, source.replace("\nexpect", "\n  expect"));
+    assert_eq!(
+        formatted,
+        source
+            .replace("\nsyntax", "\n  syntax")
+            .replace("\nexpect", "\n  expect")
+    );
     assert_eq!(format_source("mixed.plzn", &formatted).unwrap(), formatted);
 }
 

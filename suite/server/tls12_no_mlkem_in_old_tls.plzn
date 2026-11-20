@@ -1,4 +1,5 @@
 plzn tls "server/tls12-no-mlkem-in-old-tls/normal-groups-with-mlkem" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [default]
   uut server {
@@ -24,6 +25,7 @@ plzn tls "server/tls12-no-mlkem-in-old-tls/normal-groups-with-mlkem" {
 }
 
 plzn tls "server/tls12-no-mlkem-in-old-tls/only-x25519mlkem768" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [default]
   uut server {
@@ -38,6 +40,7 @@ plzn tls "server/tls12-no-mlkem-in-old-tls/only-x25519mlkem768" {
 }
 
 plzn tls "server/tls12-no-mlkem-in-old-tls/only-mlkem768" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [default]
   uut server {
@@ -52,6 +55,7 @@ plzn tls "server/tls12-no-mlkem-in-old-tls/only-mlkem768" {
 }
 
 plzn tls "server/tls12-no-mlkem-in-old-tls/only-mlkem-hybrids" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [default]
   uut server {

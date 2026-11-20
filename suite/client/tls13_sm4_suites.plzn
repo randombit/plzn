@@ -4,6 +4,7 @@
 # protection. Only OpenSSL 4 implements the suites; the other shims skip.
 
 plzn tls "client/tls13-sm4-suites/negotiated" {
+  syntax 1.0
   rfc 8998 section 3.5
   chain: [default]
   uut client {
@@ -21,6 +22,7 @@ plzn tls "client/tls13-sm4-suites/negotiated" {
 # The client offers AES-GCM ahead of SM4; plzn's server accepts only the SM4
 # suite, so the client must take SM4 out of a mixed offer.
 plzn tls "client/tls13-sm4-suites/selected-from-mixed-offer" {
+  syntax 1.0
   rfc 8998 section 3.3.1.2
   chain: [default]
   uut client {

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-psk-empty-identity" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   psk {
@@ -13,6 +14,7 @@ plzn tls "server/tls13-psk-empty-identity" {
 }
 
 plzn tls "server/tls13-unknown-psk-identity-falls-back-to-certificate" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   psk {
@@ -36,6 +38,7 @@ plzn tls "server/tls13-unknown-psk-identity-falls-back-to-certificate" {
 }
 
 plzn tls "server/tls13-psk-modes-ignore-unknown-values" {
+  syntax 1.0
   rfc 8446 section 4.2.9
   chain: []
   psk {
@@ -55,6 +58,7 @@ plzn tls "server/tls13-psk-modes-ignore-unknown-values" {
 # RFC 8446 4.2.9: psk_dhe_ke requires a key_share; without supported_groups
 # and key_share only psk_ke would remain, which servers need not support.
 plzn tls "server/tls13-psk-dhe-ke-without-key-share" {
+  syntax 1.0
   rfc 8446 section 4.2.9
   chain: [default]
   psk {

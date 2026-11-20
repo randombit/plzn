@@ -1,4 +1,5 @@
 plzn tls "client/tls13-resume-declined" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: [default]
   uut client { versions: [tls13] }

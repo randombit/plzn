@@ -1,4 +1,5 @@
 plzn tls "server/tls13-hrr-conformant-retry-keeps-negotiated-cipher-suite" {
+  syntax 1.0
   rfc 9846 section 4.2.4
   chain: [default]
   uut server {
@@ -28,6 +29,7 @@ plzn tls "server/tls13-hrr-conformant-retry-keeps-negotiated-cipher-suite" {
 }
 
 plzn tls "server/tls13-hrr-retry-keeps-negotiated-cipher-suite-offered" {
+  syntax 1.0
   rfc 9846 section 4.2.4
   chain: [default]
   uut server {

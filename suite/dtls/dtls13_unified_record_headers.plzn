@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-accepts-lengthless-unified-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut server { versions: [dtls13] }
@@ -10,6 +11,7 @@ plzn tls "dtls13/server-accepts-lengthless-unified-header" {
 }
 
 plzn tls "dtls13/client-accepts-lengthless-unified-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut client { versions: [dtls13] }
@@ -21,6 +23,7 @@ plzn tls "dtls13/client-accepts-lengthless-unified-header" {
 }
 
 plzn tls "dtls13/server-accepts-short-record-number" {
+  syntax 1.0
   rfc 9147 section 4.2.2
   chain: [default]
   uut server { versions: [dtls13] }
@@ -32,6 +35,7 @@ plzn tls "dtls13/server-accepts-short-record-number" {
 }
 
 plzn tls "dtls13/client-accepts-short-record-number" {
+  syntax 1.0
   rfc 9147 section 4.2.2
   chain: [default]
   uut client { versions: [dtls13] }
@@ -43,6 +47,7 @@ plzn tls "dtls13/client-accepts-short-record-number" {
 }
 
 plzn tls "dtls13/server-discards-unnegotiated-cid-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut server { versions: [dtls13] }
@@ -55,6 +60,7 @@ plzn tls "dtls13/server-discards-unnegotiated-cid-header" {
 }
 
 plzn tls "dtls13/client-discards-unnegotiated-cid-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut client { versions: [dtls13] }
@@ -67,6 +73,7 @@ plzn tls "dtls13/client-discards-unnegotiated-cid-header" {
 }
 
 plzn tls "dtls13/server-discards-protected-record-with-legacy-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut server { versions: [dtls13] }
@@ -79,6 +86,7 @@ plzn tls "dtls13/server-discards-protected-record-with-legacy-header" {
 }
 
 plzn tls "dtls13/client-discards-protected-record-with-legacy-header" {
+  syntax 1.0
   rfc 9147 section 4.2.1
   chain: [default]
   uut client { versions: [dtls13] }

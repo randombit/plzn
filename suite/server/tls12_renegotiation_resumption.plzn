@@ -1,4 +1,5 @@
 plzn tls "server/tls12-renegotiation-resumption/session-id" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   chain: [default]
   uut server { versions: [tls12] }
@@ -14,6 +15,7 @@ plzn tls "server/tls12-renegotiation-resumption/session-id" {
 }
 
 plzn tls "server/tls12-renegotiation-resumption/session-ticket" {
+  syntax 1.0
   rfc 5077 section 3.4
   chain: [default]
   uut server { versions: [tls12] }
@@ -29,6 +31,7 @@ plzn tls "server/tls12-renegotiation-resumption/session-ticket" {
 }
 
 plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -44,6 +47,7 @@ plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms" {
 }
 
 plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls12] }
@@ -60,6 +64,7 @@ plzn tls "server/tls12-renegotiation-resumption/omitted-signature-algorithms-cer
 }
 
 plzn tls "server/tls12-renegotiation-resumption/omitted-both-signature-algorithm-extensions" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -79,6 +84,7 @@ plzn tls "server/tls12-renegotiation-resumption/omitted-both-signature-algorithm
 }
 
 plzn tls "server/tls12-renegotiation-resumption/scsv-is-forbidden" {
+  syntax 1.0
   rfc 5746 section 4.2
   chain: [rsa_2048]
   uut server {
@@ -99,6 +105,7 @@ plzn tls "server/tls12-renegotiation-resumption/scsv-is-forbidden" {
 }
 
 plzn tls "server/tls12-renegotiation/session-ticket-removal-forces-full-handshake" {
+  syntax 1.0
   rfc 5077 section 3.4
   chain: [default]
   uut server { versions: [tls12] }

@@ -4,6 +4,7 @@
 # Exercise Certificate as well as the existing ClientHello case; Finished
 # verification and an application round trip check the reassembled transcript.
 plzn tls "dtls12/client-reassembles-duplicate-certificate-fragments" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client { versions: [dtls12] }
@@ -19,6 +20,7 @@ plzn tls "dtls12/client-reassembles-duplicate-certificate-fragments" {
 # in-sequence message": the first Certificate fragment is insufficient, even
 # when the later ServerKeyExchange and ServerHelloDone have already arrived.
 plzn tls "dtls12/client-waits-for-incomplete-certificate" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client { versions: [dtls12] }
@@ -47,6 +49,7 @@ plzn tls "dtls12/client-waits-for-incomplete-certificate" {
 }
 
 plzn tls "dtls12/server-reassembles-duplicate-client-certificate-fragments" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -66,6 +69,7 @@ plzn tls "dtls12/server-reassembles-duplicate-client-certificate-fragments" {
 # so the flow contains a real handshake message. This checks successful
 # reassembly, not Botan's internal allocation accounting or policy ceiling.
 plzn tls "dtls12/client-reassembles-large-certificate-tail-first" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [rsa_2048]
   uut client { versions: [dtls12] }

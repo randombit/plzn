@@ -1,4 +1,5 @@
 plzn tls "dtls12/invalid-record-type-to-server" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "dtls12/invalid-record-type-to-server" {
 }
 
 plzn tls "dtls12/invalid-record-type-to-client" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut client {
@@ -29,6 +31,7 @@ plzn tls "dtls12/invalid-record-type-to-client" {
 }
 
 plzn tls "dtls12/invalid-client-hello-record-type" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut server {
@@ -43,6 +46,7 @@ plzn tls "dtls12/invalid-client-hello-record-type" {
 }
 
 plzn tls "dtls12/invalid-server-hello-record-type" {
+  syntax 1.0
   rfc 6347 section 4.1
   chain: [ecdsa_p256]
   uut client {

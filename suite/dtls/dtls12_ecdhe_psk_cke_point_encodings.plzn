@@ -1,4 +1,5 @@
 plzn tls "dtls12/ecdhe-psk-cke-point-zero" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: []
   uut server {
@@ -16,6 +17,7 @@ plzn tls "dtls12/ecdhe-psk-cke-point-zero" {
 }
 
 plzn tls "dtls12/ecdhe-psk-cke-point-truncated" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: []
   uut server {
@@ -33,6 +35,7 @@ plzn tls "dtls12/ecdhe-psk-cke-point-truncated" {
 }
 
 plzn tls "dtls12/ecdhe-psk-cke-point-padded" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: []
   uut server {
@@ -50,6 +53,7 @@ plzn tls "dtls12/ecdhe-psk-cke-point-padded" {
 }
 
 plzn tls "dtls12/ecdhe-psk-cke-point-compressed" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: []
   uut server {

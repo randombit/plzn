@@ -75,6 +75,7 @@ fn dial_rejects_client_uuts_without_connecting() {
     std::fs::write(
         &case,
         r#"plzn tls "dial/client-role" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls12] }
   flow handshake {
@@ -144,6 +145,7 @@ fn dial_runs_a_server_test_and_writes_a_capture() {
     std::fs::write(
         &case,
         r#"plzn tls "dial/tls12-appdata" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow handshake {

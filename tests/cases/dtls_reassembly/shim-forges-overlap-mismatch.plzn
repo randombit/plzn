@@ -1,4 +1,5 @@
 plzn tls "selftest/dtls-reassembly/shim-forges-overlap-mismatch" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {

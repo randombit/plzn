@@ -8,6 +8,7 @@
 # Botan <= 3.11.0 accepted this, serving content to unauthenticated
 # clients. Fixed in 3.11.1.
 plzn tls "negative/tls13-client-auth-bypass" {
+  syntax 1.0
   rfc 8446 section 4.4
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }

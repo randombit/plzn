@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-certificate-selection-type-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [ecdsa_p256, rsa_2048]
@@ -17,6 +18,7 @@ plzn tls "dtls12/client-certificate-selection-type-rsa" {
 }
 
 plzn tls "dtls12/client-certificate-selection-type-ecdsa" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [rsa_2048, ecdsa_p256]
@@ -35,6 +37,7 @@ plzn tls "dtls12/client-certificate-selection-type-ecdsa" {
 }
 
 plzn tls "dtls12/client-certificate-selection-type-ecdsa-ed25519" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [rsa_2048, ed25519]
@@ -54,6 +57,7 @@ plzn tls "dtls12/client-certificate-selection-type-ecdsa-ed25519" {
 }
 
 plzn tls "dtls12/client-certificate-selection-preserves-preference" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   client_chain: [ecdsa_p384, ecdsa_p256]

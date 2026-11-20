@@ -1,4 +1,5 @@
 plzn tls "dtls13/client-hrr-generates-fresh-key-share" {
+  syntax 1.0
   rfc 9147 section 5.1
   chain: [default]
   uut client {
@@ -18,6 +19,7 @@ plzn tls "dtls13/client-hrr-generates-fresh-key-share" {
 }
 
 plzn tls "dtls13/client-hrr-cookie-is-connection-specific" {
+  syntax 1.0
   rfc 9147 section 5.1
   chain: [default]
   uut client {

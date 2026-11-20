@@ -1,4 +1,5 @@
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-zero" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-zero" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-one" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -29,6 +31,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-one" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -44,6 +47,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p-minus-1" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -59,6 +63,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-p-minus-1" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-truncated" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -74,6 +79,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-truncated" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-padded" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -89,6 +95,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-padded" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-missing" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {
@@ -105,6 +112,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-missing" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-with-bad-messages/dh-Yc-oversized" {
+  syntax 1.0
   rfc 5246 section 7.4.7.2
   chain: [rsa_2048]
   uut server {

@@ -28,6 +28,7 @@ fn run_case(name: &str, src: &str) -> String {
 
 const CLIENT_SIDE: &str = r#"
 plzn tls "dtls-matchers/client-side" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12]
@@ -44,6 +45,7 @@ plzn tls "dtls-matchers/client-side" {
 
 const SERVER_SIDE: &str = r#"
 plzn tls "dtls-matchers/server-side" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]

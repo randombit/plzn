@@ -1,4 +1,5 @@
 plzn tls "server/tls13-psk-binder-corrupt" {
+  syntax 1.0
   rfc 8446 section 4.2.11.2
   chain: []
   uut server { versions: [tls13] }

@@ -1,4 +1,5 @@
 plzn tls "client/tls13-server-keyupdate-fragment-interleaved-app-data" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }

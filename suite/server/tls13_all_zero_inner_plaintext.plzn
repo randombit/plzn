@@ -1,4 +1,5 @@
 plzn tls "server/tls13-all-zero-inner-plaintext" {
+  syntax 1.0
   rfc 8446 section 5.4
   chain: [default]
   uut server { versions: [tls13] }

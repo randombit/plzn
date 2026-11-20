@@ -1,4 +1,5 @@
 plzn tls "dtls12/server-exporter" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [default]
   uut server { versions: [dtls12] }
@@ -9,6 +10,7 @@ plzn tls "dtls12/server-exporter" {
 }
 
 plzn tls "dtls12/client-exporter" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [default]
   uut client { versions: [dtls12] }
@@ -19,6 +21,7 @@ plzn tls "dtls12/client-exporter" {
 }
 
 plzn tls "dtls13/server-exporter" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut server { versions: [dtls13] }
@@ -29,6 +32,7 @@ plzn tls "dtls13/server-exporter" {
 }
 
 plzn tls "dtls13/client-exporter" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut client { versions: [dtls13] }
@@ -39,6 +43,7 @@ plzn tls "dtls13/client-exporter" {
 }
 
 plzn tls "dtls12/server-exporter-after-resumption" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [default]
   uut server { versions: [dtls12] }
@@ -59,6 +64,7 @@ plzn tls "dtls12/server-exporter-after-resumption" {
 }
 
 plzn tls "dtls12/client-exporter-after-resumption" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [default]
   uut client { versions: [dtls12] }
@@ -80,6 +86,7 @@ plzn tls "dtls12/client-exporter-after-resumption" {
 }
 
 plzn tls "dtls13/server-exporter-after-resumption" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut server { versions: [dtls13] }
@@ -101,6 +108,7 @@ plzn tls "dtls13/server-exporter-after-resumption" {
 }
 
 plzn tls "dtls13/client-exporter-after-resumption" {
+  syntax 1.0
   rfc 9147 section 5.10
   chain: [default]
   uut client { versions: [dtls13] }

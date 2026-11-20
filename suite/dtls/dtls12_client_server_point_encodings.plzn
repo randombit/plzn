@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-server-point-zero" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: [ecdsa_p256]
   uut client {
@@ -13,6 +14,7 @@ plzn tls "dtls12/client-server-point-zero" {
 }
 
 plzn tls "dtls12/client-server-point-truncated" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [ecdsa_p256]
   uut client {
@@ -27,6 +29,7 @@ plzn tls "dtls12/client-server-point-truncated" {
 }
 
 plzn tls "dtls12/client-server-point-padded" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [ecdsa_p256]
   uut client {

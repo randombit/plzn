@@ -1,4 +1,5 @@
 plzn tls "server/tls13-available-share-preferred-over-hrr" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   skip rustls "sends a HelloRetryRequest for its preferred group instead of using the offered share; see the _rustls sibling"

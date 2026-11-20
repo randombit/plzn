@@ -1,4 +1,5 @@
 plzn tls "server/tls12-certificate-request/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut server {
@@ -26,6 +27,7 @@ plzn tls "server/tls12-certificate-request/valid-handshake" {
 }
 
 plzn tls "server/tls12-certificate-request/with-certificate" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut server {
@@ -54,6 +56,7 @@ plzn tls "server/tls12-certificate-request/with-certificate" {
 }
 
 plzn tls "server/tls12-certificate-request/check-sigalgs-in-cert-request" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut server {
@@ -81,6 +84,7 @@ plzn tls "server/tls12-certificate-request/check-sigalgs-in-cert-request" {
 }
 
 plzn tls "server/tls12-certificate-request/check-cert-types-in-cert-request" {
+  syntax 1.0
   rfc 5246 section 7.4.4
   chain: [default]
   uut server {

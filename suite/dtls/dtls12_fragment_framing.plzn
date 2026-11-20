@@ -1,4 +1,5 @@
 plzn tls "dtls12/reorder-overlap-small-dtls12-to-server" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -9,6 +10,7 @@ plzn tls "dtls12/reorder-overlap-small-dtls12-to-server" {
 }
 
 plzn tls "dtls12/reorder-overlap-small-dtls12-to-client" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -19,6 +21,7 @@ plzn tls "dtls12/reorder-overlap-small-dtls12-to-client" {
 }
 
 plzn tls "dtls12/reorder-overlap-large" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -29,6 +32,7 @@ plzn tls "dtls12/reorder-overlap-large" {
 }
 
 plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-server" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -39,6 +43,7 @@ plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-server" {
 }
 
 plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-client" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -49,6 +54,7 @@ plzn tls "dtls12/mix-complete-message-with-fragments-dtls12-to-client" {
 }
 
 plzn tls "dtls12/send-empty-fragments-dtls12-to-server" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -61,6 +67,7 @@ plzn tls "dtls12/send-empty-fragments-dtls12-to-server" {
 }
 
 plzn tls "dtls12/send-empty-fragments-dtls12-to-client" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -73,6 +80,7 @@ plzn tls "dtls12/send-empty-fragments-dtls12-to-client" {
 }
 
 plzn tls "dtls12/split-fragment-header" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -85,6 +93,7 @@ plzn tls "dtls12/split-fragment-header" {
 }
 
 plzn tls "dtls12/split-fragment-boundary" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -96,6 +105,7 @@ plzn tls "dtls12/split-fragment-boundary" {
 }
 
 plzn tls "dtls12/split-fragment-body" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut client {
@@ -106,6 +116,7 @@ plzn tls "dtls12/split-fragment-body" {
 }
 
 plzn tls "dtls12/send-split-alert" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut client {

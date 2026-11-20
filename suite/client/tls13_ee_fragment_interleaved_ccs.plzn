@@ -1,4 +1,5 @@
 plzn tls "client/tls13-ee-fragment-interleaved-ccs" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   xfail botan "rejects the compatibility ChangeCipherSpec instead of dropping it while the fragmented handshake message is pending"

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ecdsa-in-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -21,6 +22,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-works" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -43,6 +45,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-works"
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha1-is-refused" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -63,6 +66,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha1-is-refused" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha224-is-refused" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -83,6 +87,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_sha224-is-refused" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp521r1_sha512-is-refused" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -104,6 +109,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp521r1_sha512-is-ref
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-is-refused" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -125,6 +131,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-is-ref
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/mismatched-hash" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -144,6 +151,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/mismatched-hash" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/corrupted-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   # handshake.signature includes a two-byte length; offsets from 2 address the DER signature.
   matrix {
@@ -168,6 +176,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/corrupted-signature" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/p384-credential" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }
@@ -190,6 +199,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/p384-credential" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/p521-credential" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server {
@@ -215,6 +225,7 @@ plzn tls "server/tls13-ecdsa-in-certificate-verify/p521-credential" {
 }
 
 plzn tls "server/tls13-ecdsa-in-certificate-verify/p384-credential-labelled-p256" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server { versions: [tls13], require_client_cert: true }

@@ -3,6 +3,7 @@
 # internal_error pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -31,6 +32,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa-pss-only" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -59,6 +61,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa-pss-only" {
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha256-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -83,6 +86,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha256-wit
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha384-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -107,6 +111,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha384-wit
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha512-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -131,6 +136,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_pss_sha512-wit
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha256-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -159,6 +165,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha256-wi
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha256-incorrect-salt-len" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -183,6 +190,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha256-in
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha384-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -211,6 +219,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha384-wi
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha384-incorrect-salt-len" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -235,6 +244,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha384-in
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha512-with-rsa-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -263,6 +273,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha512-wi
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha512-incorrect-salt-len" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -287,6 +298,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsa_pss_rsae_sha512-in
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsae-signature-with-pkcs1-id" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -311,6 +323,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/rsae-signature-with-pk
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/short-sig" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12], require_client_cert: true
@@ -335,6 +348,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/short-sig" {
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/corrupted-encoded-message" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   matrix {
     pos in [0, 1, 100, 223, 224, 254, 255]
@@ -363,6 +377,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/corrupted-encoded-mess
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/id-rsassa-pss-client-key" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -394,6 +409,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/id-rsassa-pss-client-k
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -421,6 +437,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_s
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -448,6 +465,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_s
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -475,6 +493,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_rsae_s
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -506,6 +525,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sh
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -537,6 +557,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sh
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"
@@ -568,6 +589,7 @@ plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-rsa_pss_pss_sh
 }
 
 plzn tls "server/tls12-rsa-pss-sigs-on-certificate-verify/pss-key-pkcs1-signature" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   skip botan "no rsa_pss_pss_* signature schemes: an id-RSASSA-PSS client key cannot be verified"
   skip rustls "ring lists no rsa_pss_pss_* scheme in its CertificateRequest: an id-RSASSA-PSS client key cannot be verified"

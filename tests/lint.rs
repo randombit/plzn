@@ -47,6 +47,7 @@ fn all_corpus_cases_lint_clean() {
 fn unknown_uut_version_reports_suggestion() {
     let src = r#"
 plzn tls "unknown-cfg" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls31],
@@ -76,6 +77,7 @@ fn uut_versions_are_required_and_cannot_mix_tls_with_dtls() {
     let missing_role = lint_err(
         r#"
 plzn tls "uut/missing-role" {
+  syntax 1.0
   chain: [default]
   uut { versions: [tls13] }
   flow handshake {}
@@ -91,6 +93,7 @@ plzn tls "uut/missing-role" {
     let unknown_role = lint_err(
         r#"
 plzn tls "uut/unknown-role" {
+  syntax 1.0
   chain: [default]
   uut proxy { versions: [tls13] }
   flow handshake {}
@@ -103,6 +106,7 @@ plzn tls "uut/unknown-role" {
     let empty = lint_err(
         r#"
 plzn tls "versions/empty" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: []
@@ -120,6 +124,7 @@ plzn tls "versions/empty" {
     let mixed = lint_err(
         r#"
 plzn tls "versions/mixed" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12, dtls12]
@@ -137,6 +142,7 @@ fn legacy_role_and_cfg_lines_point_to_the_uut_migration() {
     let rendered = lint_err(
         r#"
 plzn tls "legacy/testing" {
+  syntax 1.0
   testing server
   chain: [default]
   flow handshake {}
@@ -152,6 +158,7 @@ plzn tls "legacy/testing" {
     let rendered = lint_err(
         r#"
 plzn tls "legacy/cfg" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   cfg tls12, ecdhe
@@ -168,6 +175,7 @@ plzn tls "legacy/cfg" {
 fn unknown_message_reports_suggestion() {
     let src = r#"
 plzn tls "unknown-message" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -197,6 +205,7 @@ plzn tls "unknown-message" {
 fn unknown_alert_code_reports_suggestion() {
     let src = r#"
 plzn tls "bad-alert" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -224,6 +233,7 @@ plzn tls "bad-alert" {
 fn matrix_var_must_be_declared() {
     let src = r#"
 plzn tls "bad-matrix-var" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -251,6 +261,7 @@ plzn tls "bad-matrix-var" {
 fn bad_byte_path_reports_suggestion() {
     let src = r#"
 plzn tls "bad-byte-path" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -283,6 +294,7 @@ plzn tls "bad-byte-path" {
 fn multi_send_rejected_in_non_anchored_flow() {
     let src = r#"
 plzn tls "multi-send-non-anchored" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -307,6 +319,7 @@ plzn tls "multi-send-non-anchored" {
 fn multi_send_rejects_body() {
     let src = r#"
 plzn tls "multi-send-with-body" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -331,6 +344,7 @@ plzn tls "multi-send-with-body" {
 fn multi_send_rejects_appdata_mix() {
     let src = r#"
 plzn tls "multi-send-with-appdata" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -369,11 +383,110 @@ fn lint_err(src: &str) -> String {
     diags.iter().map(|d| format!("{}", d)).collect()
 }
 
+/// A valid client test whose opening lines are `head`.
+fn with_head(head: &str) -> String {
+    format!(
+        "plzn tls \"syntax/decl\" {{\n{head}\n  chain: [default]\n  uut client {{ versions: [tls13] }}\n  flow handshake {{}}\n  expect ok\n}}\n"
+    )
+}
+
+#[test]
+fn syntax_declaration_is_required_first_and_once() {
+    lint_ok(&with_head("  syntax 1.0"));
+    lint_ok(&with_head(
+        "  # comments and blank lines may precede it\n\n  syntax 1.0",
+    ));
+
+    for head in ["", "  rfc 8446 section 4.1.2\n  syntax 1.0"] {
+        let rendered = lint_err(&with_head(head));
+        assert!(
+            rendered.contains("expected `syntax 1.0` as the first statement of the test"),
+            "{head:?}: {rendered}"
+        );
+    }
+    let empty = lint_err("plzn tls \"syntax/empty\" {}\n");
+    assert!(
+        empty.contains("expected `syntax 1.0`") && empty.contains("found `}`"),
+        "{empty}"
+    );
+    let duplicate = lint_err(&with_head("  syntax 1.0\n  syntax 1.0"));
+    assert!(
+        duplicate.contains("duplicate `syntax` declaration"),
+        "{duplicate}"
+    );
+}
+
+#[test]
+fn unsupported_syntax_versions_are_rejected_before_the_body_is_read() {
+    // The body of a test from another revision is not ours to interpret: one
+    // diagnostic about the version, none about the constructs after it. (The
+    // body still has to tokenize: the whole file is lexed before any parsing.)
+    for (version, expected) in [
+        (
+            "1.1",
+            "test requires syntax 1.1, which is newer than the syntax 1.0 this plzn implements",
+        ),
+        (
+            "2.0",
+            "syntax 2.0 is not supported; this plzn implements syntax 1.0",
+        ),
+        (
+            "0.1",
+            "syntax 0.1 is not supported; this plzn implements syntax 1.0",
+        ),
+    ] {
+        let source = format!(
+            "plzn tls \"syntax/future\" {{\n  syntax {version}\n  flux capacitor [1.21]\n}}\n{}",
+            with_head("  syntax 1.0")
+        );
+        let diags = plzn::lint("snippet", &source);
+        assert_eq!(diags.len(), 1, "{version}: {diags:?}");
+        assert_eq!(diags[0].message, expected);
+        assert_eq!((diags[0].line, diags[0].col), (2, 10));
+        assert_eq!(diags[0].caret.trim(), "^^^");
+    }
+}
+
+#[test]
+fn malformed_syntax_versions_name_the_expected_form() {
+    for (declaration, expected) in [
+        (
+            "syntax",
+            "expected a syntax version (`MAJOR.MINOR`), found newline",
+        ),
+        (
+            "syntax 1",
+            "expected `.` in the syntax version (`MAJOR.MINOR`)",
+        ),
+        (
+            "syntax 1.",
+            "expected a syntax version (`MAJOR.MINOR`), found newline",
+        ),
+        ("syntax 1.0.0", "no patch component; write `syntax 1.0`"),
+        ("syntax 1 .0", "must not contain spaces; write `syntax 1.0`"),
+        ("syntax 1. 0", "must not contain spaces; write `syntax 1.0`"),
+        ("syntax 01.0", "without leading zeros"),
+        ("syntax 1.00", "without leading zeros"),
+        ("syntax 4294967296.0", "out of range"),
+        ("syntax 0x1.0", "found hex `0x1`"),
+        ("syntax \"1.0\"", "found string"),
+        ("syntax v1.0", "found `v1`"),
+        (
+            "syntax 1.0 rfc 8446",
+            "expected newline or `}` to end statement",
+        ),
+    ] {
+        let rendered = lint_err(&with_head(&format!("  {declaration}")));
+        assert!(rendered.contains(expected), "{declaration:?}: {rendered}");
+    }
+}
+
 #[test]
 fn client_auth_policy_belongs_to_the_server_role() {
     lint_ok(
         r#"
 plzn tls "owner/client-uut" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13], client_cert: none
@@ -387,6 +500,7 @@ plzn tls "owner/client-uut" {
     lint_ok(
         r#"
 plzn tls "owner/server-uut" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -400,6 +514,7 @@ plzn tls "owner/server-uut" {
     let rendered = lint_err(
         r#"
 plzn tls "owner/client-cannot-require" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -415,6 +530,7 @@ plzn tls "owner/client-cannot-require" {
     let rendered = lint_err(
         r#"
 plzn tls "owner/legacy-capability" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -446,6 +562,7 @@ fn client_certificate_credential_selector() {
     lint_ok(
         r#"
 plzn tls "cred/tls12-untrusted" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -461,6 +578,7 @@ plzn tls "cred/tls12-untrusted" {
     lint_ok(
         r#"
 plzn tls "cred/dtls-none" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12], require_client_cert: true
@@ -477,6 +595,7 @@ plzn tls "cred/dtls-none" {
     let rendered = lint_err(
         r#"
 plzn tls "cred/bad" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -499,6 +618,7 @@ fn dtls_session_resumption_lints_clean() {
     lint_ok(
         r#"
 plzn tls "dtls/resume-client-side" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -532,6 +652,7 @@ plzn tls "dtls/resume-client-side" {
     lint_ok(
         r#"
 plzn tls "dtls/resume-server-side" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12],
@@ -563,6 +684,7 @@ fn dtls_structured_paths_resolve_on_mapped_fields() {
     lint_ok(
         r#"
 plzn tls "dtls/mapped-paths" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12], require_client_cert: true
@@ -582,6 +704,7 @@ plzn tls "dtls/mapped-paths" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/unmapped-path" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -602,6 +725,7 @@ plzn tls "dtls/unmapped-path" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/unmapped-message" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -624,6 +748,7 @@ fn ext_delta_without_value_is_an_empty_body() {
     lint_ok(
         r#"
 plzn tls "ext/empty-value" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -648,6 +773,7 @@ fn terminal_receive_matcher_satisfies_expect_ok_liveness() {
     lint_ok(
         r#"
 plzn tls "liveness/terminal-matcher" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake until recv Certificate {
@@ -661,6 +787,7 @@ plzn tls "liveness/terminal-matcher" {
     let rendered = lint_err(
         r#"
 plzn tls "liveness/empty-recv" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake until recv Certificate {
@@ -681,6 +808,7 @@ fn ext_delta_accepts_typed_value_forms() {
     lint_ok(
         r#"
 plzn tls "ext/typed-forms" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -708,6 +836,7 @@ fn ext_delta_wrong_value_form_is_reported() {
     let rendered = lint_err(
         r#"
 plzn tls "ext/wrong-form" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -734,6 +863,7 @@ fn ext_delta_on_message_no_driver_applies_is_rejected() {
     let rendered = lint_err(
         r#"
 plzn tls "ext/on-finished" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -756,6 +886,7 @@ plzn tls "ext/on-finished" {
     let rendered = lint_err(
         r#"
 plzn tls "ext/on-server-hello-done" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls12]
@@ -775,6 +906,7 @@ plzn tls "ext/on-server-hello-done" {
     lint_ok(
         r#"
 plzn tls "ext/on-ee" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -795,6 +927,7 @@ fn key_share_list_form_is_client_hello_only() {
     let rendered = lint_err(
         r#"
 plzn tls "ks/on-server-hello" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -814,6 +947,7 @@ plzn tls "ks/on-server-hello" {
     lint_ok(
         r#"
 plzn tls "ks/on-client-hello" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -834,6 +968,7 @@ fn key_share_for_x448_is_accepted() {
     lint_ok(
         r#"
 plzn tls "ks/x448" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -851,6 +986,7 @@ plzn tls "ks/x448" {
     lint_ok(
         r#"
 plzn tls "ks/cfg-x448-first" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -868,6 +1004,7 @@ plzn tls "ks/cfg-x448-first" {
     lint_ok(
         r#"
 plzn tls "ks/cfg-x448-second" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -888,6 +1025,7 @@ fn key_share_point_takes_a_symbolic_recipe() {
     lint_ok(
         r#"
 plzn tls "ks/point-compressed" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -903,6 +1041,7 @@ plzn tls "ks/point-compressed" {
     let rendered = lint_err(
         r#"
 plzn tls "ks/point-typo" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -924,6 +1063,7 @@ plzn tls "ks/point-typo" {
     let rendered = lint_err(
         r#"
 plzn tls "ks/point-number" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -943,6 +1083,7 @@ fn key_share_byte_path_is_known() {
     lint_ok(
         r#"
 plzn tls "ks/point-flip" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -958,6 +1099,7 @@ plzn tls "ks/point-flip" {
     let rendered = lint_err(
         r#"
 plzn tls "ks/point-typo-path" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -977,6 +1119,7 @@ fn key_share_list_accepts_p521_ffdhe_and_x448() {
     lint_ok(
         r#"
 plzn tls "ks/p521-ffdhe" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -993,6 +1136,7 @@ plzn tls "ks/p521-ffdhe" {
     lint_ok(
         r#"
 plzn tls "ks/cfg-ffdhe-first" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -1009,6 +1153,7 @@ plzn tls "ks/cfg-ffdhe-first" {
     lint_ok(
         r#"
 plzn tls "ks/x448-in-list" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1029,6 +1174,7 @@ fn key_share_point_bounds_are_named_recipes() {
     lint_ok(
         r#"
 plzn tls "ks/ffdhe-one" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -1044,6 +1190,7 @@ plzn tls "ks/ffdhe-one" {
     let rendered = lint_err(
         r#"
 plzn tls "ks/ffdhe-bad-bound" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -1067,6 +1214,7 @@ fn uut_policy_knobs_parse() {
     lint_ok(
         r#"
 plzn tls "uut/knobs" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -1106,6 +1254,7 @@ fn uut_peer_knob_values_are_checked() {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-client-cert" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -1126,6 +1275,7 @@ plzn tls "uut/bad-client-cert" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-psk-secret" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -1141,6 +1291,7 @@ plzn tls "uut/bad-psk-secret" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-half-rtt" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1159,6 +1310,7 @@ fn uut_policy_knob_values_are_checked() {
     let rendered = lint_err(
         r#"
 plzn tls "uut/conflicting-alpn-selection" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -1178,6 +1330,7 @@ plzn tls "uut/conflicting-alpn-selection" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-reneg" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1197,6 +1350,7 @@ plzn tls "uut/bad-reneg" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-ems" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1215,6 +1369,7 @@ plzn tls "uut/bad-ems" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/bad-sigalg" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1233,6 +1388,7 @@ plzn tls "uut/bad-sigalg" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/unknown-key" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1256,6 +1412,7 @@ fn rfc_section_is_written_bare() {
     // `rfc <n> section <sec>`: a dotted number, or a letter for an appendix.
     let src = r#"
 plzn tls "rfc/sections" {
+  syntax 1.0
   rfc 8446
   rfc 5246 section 7.4.1.4.1
   rfc 8446 section B.4
@@ -1290,6 +1447,7 @@ fn quoted_rfc_section_names_its_replacement() {
     let rendered = lint_err(
         r#"
 plzn tls "rfc/quoted" {
+  syntax 1.0
   rfc 8446 "§4.1.2"
   chain: [default]
   uut server {
@@ -1307,6 +1465,7 @@ plzn tls "rfc/quoted" {
 fn skip_directive_takes_an_optional_reason() {
     let src = r#"
 plzn tls "skip/reason" {
+  syntax 1.0
   chain: [default]
   skip rustls "does not enforce the record limit"
   skip openssl, botan
@@ -1340,6 +1499,7 @@ plzn tls "skip/reason" {
 fn xfail_directive_lowers_separately_from_skip() {
     let src = r#"
 plzn tls "xfail/reason" {
+  syntax 1.0
   chain: [default]
   xfail rustls "accepts an invalid record"
   xfail openssl, botan
@@ -1394,6 +1554,7 @@ fn cipher_family_capabilities_lint() {
         let src = format!(
             r#"
 plzn tls "suites/token-{tok}" {{
+  syntax 1.0
   chain: [rsa_2048]
   uut server {{ versions: [tls12] }}
   peer {{ capabilities: [{tok}] }}
@@ -1416,6 +1577,7 @@ fn dtls_flight_steps_and_knobs_parse() {
     lint_ok(
         r#"
 plzn tls "dtls/steps" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]
@@ -1457,6 +1619,7 @@ plzn tls "dtls/steps" {
     lint_ok(
         r#"
 plzn tls "dtls/client-steps" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1479,6 +1642,7 @@ fn dtls_timer_controls_reject_tls_and_fractional_millisecond_updates() {
     let rendered = lint_err(
         r#"
 plzn tls "tls/timer-control" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [tls12],
@@ -1499,6 +1663,7 @@ plzn tls "tls/timer-control" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/fractional-update" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1521,6 +1686,7 @@ fn max_datagram_size_assert_needs_dtls() {
     let rendered = lint_err(
         r#"
 plzn tls "tls/datagram-size" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [tls12],
@@ -1547,6 +1713,7 @@ fn dtls_flight_steps_need_dtls12_version() {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/steps-on-tls" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1562,6 +1729,7 @@ plzn tls "dtls/steps-on-tls" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/alert-needs-code" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1583,6 +1751,7 @@ fn dtls_fragmentation_schemes_parse() {
     lint_ok(
         r#"
 plzn tls "dtls/frag-client" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1600,6 +1769,7 @@ plzn tls "dtls/frag-client" {
     lint_ok(
         r#"
 plzn tls "dtls/frag-server" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12],
@@ -1638,6 +1808,7 @@ plzn tls "dtls/frag-server" {
     lint_ok(
         r#"
 plzn tls "dtls/frag-and-mutation" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1657,6 +1828,7 @@ fn dtls13_header_ack_and_previous_epoch_controls_parse() {
     lint_ok(
         r#"
 plzn tls "dtls13/new-controls" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls13] }
   flow handshake until send Finished {
@@ -1678,6 +1850,7 @@ plzn tls "dtls13/new-controls" {
     let rendered = lint_err(
         r#"
 plzn tls "tls13/dtls-header-control" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake { send AppData @ dtls13_set_cid_bit }
@@ -1698,6 +1871,7 @@ fn dtls_fragmentation_scheme_needs_dtls12_version() {
     let rendered = lint_err(
         r#"
 plzn tls "tls/frag" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1714,6 +1888,7 @@ plzn tls "tls/frag" {
     let rendered = lint_err(
         r#"
 plzn tls "tls/flood" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1730,6 +1905,7 @@ plzn tls "tls/flood" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/frag-appdata" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1751,6 +1927,7 @@ fn large_length_fragment_bounds_and_guard() {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/too-large" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1767,6 +1944,7 @@ plzn tls "dtls/too-large" {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/zero" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1783,6 +1961,7 @@ plzn tls "dtls/zero" {
     let rendered = lint_err(
         r#"
 plzn tls "tls/large" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -1801,6 +1980,7 @@ plzn tls "tls/large" {
 fn uut_cipher_suites_accept_matrix_variables() {
     let src = r#"
 plzn tls "uut/suite-var" {
+  syntax 1.0
   chain: [ecdsa_p256]
   matrix {
     suite in [ECDHE_ECDSA_WITH_AES_128_GCM_SHA256, ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256]
@@ -1831,6 +2011,7 @@ plzn tls "uut/suite-var" {
     let rendered = lint_err(
         r#"
 plzn tls "uut/suite-var-unbound" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]
@@ -1853,6 +2034,7 @@ fn dtls_matchers_and_overrides_on_the_parsed_messages() {
     lint_ok(
         r#"
 plzn tls "dtls/matchers-server-flight" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12]
@@ -1876,6 +2058,7 @@ plzn tls "dtls/matchers-server-flight" {
     lint_ok(
         r#"
 plzn tls "dtls/overrides-client-side" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [dtls12],
@@ -1897,6 +2080,7 @@ fn dtls12_rejects_an_unimplemented_finished_matcher() {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/matcher-on-finished" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1917,6 +2101,7 @@ plzn tls "dtls/matcher-on-finished" {
     lint_ok(
         r#"
 plzn tls "dtls/matcher-on-server-hello" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -1938,6 +2123,7 @@ plzn tls "dtls/matcher-on-server-hello" {
 fn tls12_parity_syntax_lints_clean() {
     let src = r#"
 plzn tls "parity/tls12-server-side" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -1955,6 +2141,7 @@ plzn tls "parity/tls12-server-side" {
 }
 
 plzn tls "parity/tls12-psk-client-side" {
+  syntax 1.0
   chain: []
   uut server {
     versions: [tls12],
@@ -1983,6 +2170,7 @@ plzn tls "parity/tls12-psk-client-side" {
 fn unknown_signature_scheme_name_is_rejected() {
     let src = r#"
 plzn tls "parity/bad-scheme-name" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls12]
@@ -2012,6 +2200,7 @@ fn tls13_client_matchers_on_encrypted_flight_lint() {
     lint_ok(
         r#"
 plzn tls "lint/tls13-client-matchers" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2036,6 +2225,7 @@ fn session_block_expect_override_and_psk_mode_lint() {
     lint_ok(
         r#"
 plzn tls "lint/session-overrides" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -2065,6 +2255,7 @@ fn send_alert_step_lint() {
     lint_ok(
         r#"
 plzn tls "lint/send-alert" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2087,6 +2278,7 @@ fn tls12_session_ticket_syntax_lints_clean() {
     lint_ok(
         r#"
 plzn tls "lint/tls12-tickets" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -2110,6 +2302,7 @@ plzn tls "lint/tls12-tickets" {
 }
 
 plzn tls "lint/tls12-nst-override" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -2143,6 +2336,7 @@ plzn tls "lint/tls12-nst-override" {
 fn dtls_psk_families_sni_and_server_knobs_lint_clean() {
     let src = r#"
 plzn tls "parity/dtls12-ecdhe-psk-client-side" {
+  syntax 1.0
   chain: []
   uut server {
     versions: [dtls12],
@@ -2165,6 +2359,7 @@ plzn tls "parity/dtls12-ecdhe-psk-client-side" {
 }
 
 plzn tls "parity/dtls12-server-side" {
+  syntax 1.0
   chain: []
   psk {
     identity: "id"
@@ -2197,6 +2392,7 @@ fn fragmentation_controls_lint_clean_on_tls() {
     lint_ok(
         r#"
 plzn tls "frag/tls13-client" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2218,6 +2414,7 @@ plzn tls "frag/tls13-client" {
 }
 
 plzn tls "frag/tls12-server" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -2253,6 +2450,7 @@ fn fragment_keyword_means_handshake_fragmentation_over_dtls() {
     lint_ok(
         r#"
 plzn tls "lint/dtls-fragment" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -2268,6 +2466,7 @@ plzn tls "lint/dtls-fragment" {
     let rendered = lint_err(
         r#"
 plzn tls "lint/dtls-fragment-hold" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -2292,6 +2491,7 @@ fn dtls_accepts_explicit_records_but_rejects_stream_record_controls() {
     lint_ok(
         r#"
 plzn tls "frag/dtls-records" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -2308,6 +2508,7 @@ plzn tls "frag/dtls-records" {
     let rendered = lint_err(
         r#"
 plzn tls "frag/dtls-steps" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12],
@@ -2336,6 +2537,7 @@ fn fragment_requires_a_positive_record_size() {
     let rendered = lint_err(
         r#"
 plzn tls "frag/zero" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2361,6 +2563,7 @@ fn empty_record_rejects_an_unknown_content_type() {
     let rendered = lint_err(
         r#"
 plzn tls "frag/empty-heartbeat" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2386,6 +2589,7 @@ fn coalesce_blocks_do_not_nest() {
     let rendered = lint_err(
         r#"
 plzn tls "frag/nested" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -2415,6 +2619,7 @@ fn rotate_cookie_secret_is_a_dtls_step() {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/rotate-tls" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2439,6 +2644,7 @@ fn rotate_cookie_secret_needs_uut_server() {
     let rendered = lint_err(
         r#"
 plzn tls "dtls/rotate-client" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12],
@@ -2466,6 +2672,7 @@ fn shim_reassembly_self_test_controls_are_not_uut_policy() {
     ] {
         let source = r#"
 plzn tls "dtls/self-test-control" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [dtls12]
@@ -2495,6 +2702,7 @@ fn dtls_client_initiated_renegotiation_lints_clean() {
     lint_ok(
         r#"
 plzn tls "dtls/client-reneg-cookie" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]
@@ -2523,6 +2731,7 @@ plzn tls "dtls/client-reneg-cookie" {
 }
 
 plzn tls "dtls/client-reneg-refused" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut client {
     versions: [dtls12]
@@ -2551,6 +2760,7 @@ fn certificate_verify_signing_controls_lint_clean() {
     lint_ok(
         r#"
 plzn tls "cv/controls" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2573,6 +2783,7 @@ plzn tls "cv/controls" {
 }
 
 plzn tls "cv/tls13-composed" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2600,6 +2811,7 @@ fn certificate_verify_controls_reject_bad_values() {
     let err = lint_err(
         r#"
 plzn tls "cv/bad-format" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2616,6 +2828,7 @@ plzn tls "cv/bad-format" {
     let err = lint_err(
         r#"
 plzn tls "cv/bad-credential" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12], require_client_cert: true
@@ -2632,6 +2845,7 @@ plzn tls "cv/bad-credential" {
     let err = lint_err(
         r#"
 plzn tls "cv/bad-mgf1" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2657,6 +2871,7 @@ fn t6_heartbeat_steps_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t6/heartbeat" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2680,6 +2895,7 @@ fn t6_certificate_status_and_compression_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t6/ocsp-and-compression" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -2705,6 +2921,7 @@ plzn tls "t6/ocsp-and-compression" {
 }
 
 plzn tls "t6/compressed-certificate" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13], require_client_cert: true
@@ -2732,6 +2949,7 @@ fn t6_post_handshake_auth_and_close_reset_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t6/pha" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -2758,6 +2976,7 @@ fn t6_sslv2_format_repeat_and_recv_alert_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t6/sslv2-hello" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2771,6 +2990,7 @@ plzn tls "t6/sslv2-hello" {
 }
 
 plzn tls "t6/repeat-and-recv-alert" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2788,6 +3008,7 @@ plzn tls "t6/repeat-and-recv-alert" {
 }
 
 plzn tls "t6/literal-hello" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2808,6 +3029,7 @@ fn t6_recv_alert_rejects_an_unknown_code_and_repeat_needs_a_count() {
     let rendered = lint_err(
         r#"
 plzn tls "t6/bad-alert" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2827,6 +3049,7 @@ plzn tls "t6/bad-alert" {
     let rendered = lint_err(
         r#"
 plzn tls "t6/bad-repeat" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -2855,6 +3078,7 @@ fn key_share_point_forms_lint_clean_on_hello_and_cke() {
     lint_ok(
         r#"
 plzn tls "lint/ksp-forms" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -2867,6 +3091,7 @@ plzn tls "lint/ksp-forms" {
   expect alert fatal/illegal_parameter
 }
 plzn tls "lint/ksp-other-group" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -2879,6 +3104,7 @@ plzn tls "lint/ksp-other-group" {
   expect alert fatal/illegal_parameter
 }
 plzn tls "lint/ksp-literal-and-fill" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -2891,6 +3117,7 @@ plzn tls "lint/ksp-literal-and-fill" {
   expect alert fatal/illegal_parameter
 }
 plzn tls "lint/cke-encodings" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2912,6 +3139,7 @@ fn pkcs1_paths_and_rsa_overrides_lint_clean() {
     lint_ok(
         r#"
 plzn tls "lint/pkcs1" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2925,6 +3153,7 @@ plzn tls "lint/pkcs1" {
   expect alert fatal/bad_record_mac
 }
 plzn tls "lint/rsa-plaintext-and-modulus" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2938,6 +3167,7 @@ plzn tls "lint/rsa-plaintext-and-modulus" {
   expect alert fatal/bad_record_mac
 }
 plzn tls "lint/modulus-and-leading-zeros" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2964,6 +3194,7 @@ fn pkcs1_path_is_rejected_off_the_client_key_exchange() {
     let err = lint_err(
         r#"
 plzn tls "lint/pkcs1-wrong-message" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -2984,6 +3215,7 @@ fn kem_and_brainpool_groups_are_capabilities() {
     lint_ok(
         r#"
 plzn tls "lint/pq-groups" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -2997,6 +3229,7 @@ plzn tls "lint/pq-groups" {
   expect ok
 }
 plzn tls "lint/brainpool-tls12" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client {
     versions: [tls12],
@@ -3020,6 +3253,7 @@ fn t5_decorated_renegotiate_lints_clean() {
     lint_ok(
         r#"
 plzn tls "reneg/decorated" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3037,6 +3271,7 @@ plzn tls "reneg/decorated" {
 }
 
 plzn tls "reneg/insecure" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3054,6 +3289,7 @@ plzn tls "reneg/insecure" {
 }
 
 plzn tls "reneg/resumed" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3070,6 +3306,7 @@ plzn tls "reneg/resumed" {
 }
 
 plzn tls "session/cross-version" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server { versions: [tls12, tls13] }
   peer { capabilities: [session_ticket] }
@@ -3090,6 +3327,7 @@ plzn tls "session/cross-version" {
 }
 
 plzn tls "session/forced-cross-version" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12, tls13] }
   session initial [version: tls12] {
@@ -3113,6 +3351,7 @@ fn forced_cross_version_resumption_is_narrowly_scoped() {
     let no_source = lint_err(
         r#"
 plzn tls "session/no-source" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls12, tls13] }
   session initial [version: tls12, force_resume: true] {
@@ -3127,6 +3366,7 @@ plzn tls "session/no-source" {
     let same_version = lint_err(
         r#"
 plzn tls "session/same-version" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls13] }
   session initial {
@@ -3151,6 +3391,7 @@ plzn tls "session/same-version" {
     let wrong_role = lint_err(
         r#"
 plzn tls "session/wrong-role" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12, tls13] }
   session initial [version: tls12] {
@@ -3175,6 +3416,7 @@ fn t5_stepped_renegotiation_over_tls() {
     lint_ok(
         r#"
 plzn tls "reneg/stepped" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3205,6 +3447,7 @@ plzn tls "reneg/stepped" {
     let rendered = lint_err(
         r#"
 plzn tls "reneg/stepped-tls13" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3229,6 +3472,7 @@ fn session_id_resumption_lints_in_the_tls12_client_role() {
     lint_ok(
         r#"
 plzn tls "t" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3255,6 +3499,7 @@ plzn tls "t" {
     let err = lint_err(
         r#"
 plzn tls "t" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13],
@@ -3278,6 +3523,7 @@ fn hello_request_and_ticket_count_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -3299,6 +3545,7 @@ plzn tls "t" {
     lint_ok(
         r#"
 plzn tls "t" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3319,6 +3566,7 @@ plzn tls "t" {
     let err = lint_err(
         r#"
 plzn tls "t" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3344,6 +3592,7 @@ fn explicit_tls12_dh_parameters_lint_and_are_bounded() {
     lint_ok(
         r#"
 plzn tls "dh/explicit" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3362,6 +3611,7 @@ plzn tls "dh/explicit" {
     let bad_recipe = lint_err(
         r#"
 plzn tls "dh/bad-recipe" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3375,6 +3625,7 @@ plzn tls "dh/bad-recipe" {
     lint_ok(
         r#"
 plzn tls "dh/small-subgroup" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3388,6 +3639,7 @@ plzn tls "dh/small-subgroup" {
     let bad_prime = lint_err(
         r#"
 plzn tls "dh/bad-prime-name" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3401,6 +3653,7 @@ plzn tls "dh/bad-prime-name" {
     let conflicting = lint_err(
         r#"
 plzn tls "dh/conflicting-prime" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3417,6 +3670,7 @@ plzn tls "dh/conflicting-prime" {
     let oversized = lint_err(
         r#"
 plzn tls "dh/oversized-prime" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls12] }
   peer { capabilities: [dhe_rsa] }
@@ -3439,6 +3693,7 @@ fn dtls_record_header_mutations_and_app_data_records_assert_lint_clean() {
     lint_ok(
         r#"
 plzn tls "dtls/header-mutations" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   uut server {
@@ -3463,6 +3718,7 @@ fn app_data_records_assert_rejects_negative_and_non_integer() {
     let err = lint_err(
         r#"
 plzn tls "dtls/bad-assert" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12]
@@ -3491,6 +3747,7 @@ fn record_length_is_not_a_mutation_target() {
     let err = lint_err(
         r#"
 plzn tls "dtls/record-length" {
+  syntax 1.0
   chain: [ecdsa_p256]
   uut server {
     versions: [dtls12]
@@ -3517,6 +3774,7 @@ fn record_layer_shaping_syntax_lints_clean_tls12() {
     lint_ok(
         r#"
 plzn tls "t2/shaping-tls12" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3555,6 +3813,7 @@ fn record_layer_shaping_syntax_lints_clean_tls13() {
     lint_ok(
         r#"
 plzn tls "t2/shaping-tls13" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3582,6 +3841,7 @@ fn atomic_and_coalesce_blocks_do_not_nest() {
     let rendered = lint_err(
         r#"
 plzn tls "t2/nested-atomic" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3609,6 +3869,7 @@ fn ext_matcher_needs_a_comparison() {
     let rendered = lint_err(
         r#"
 plzn tls "t2/ext-matcher-form" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3634,6 +3895,7 @@ fn recv_appdata_size_and_close_reset_lint_clean() {
     lint_ok(
         r#"
 plzn tls "t2/appdata-size" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3657,6 +3919,7 @@ fn recv_appdata_takes_only_size() {
     let rendered = lint_err(
         r#"
 plzn tls "t2/appdata-bad-matcher" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3681,6 +3944,7 @@ plzn tls "t2/appdata-bad-matcher" {
 fn send_appdata_defaults_and_length_contract_lower() {
     let src = r#"
 plzn tls "appdata/length-contract" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake {
@@ -3714,6 +3978,7 @@ plzn tls "appdata/length-contract" {
 fn early_data_steps_lower_with_lengths_and_end_marker() {
     let src = r#"
 plzn tls "early-data/steps" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13], max_early_data: 1024 }
   flow {
@@ -3758,6 +4023,7 @@ plzn tls "early-data/steps" {
 fn client_hello_after_sent_hrr_gets_retry_matchers() {
     let src = r#"
 plzn tls "early-data/hrr-retry-matchers" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls13] }
   flow {
@@ -3797,6 +4063,7 @@ fn early_data_is_tls13_only() {
     let rendered = lint_err(
         r#"
 plzn tls "early-data/tls12" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow {
@@ -3819,6 +4086,7 @@ plzn tls "early-data/tls12" {
     let rendered = lint_err(
         r#"
 plzn tls "early-data/client-policy" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls13], max_early_data: 1024 }
   flow handshake {}
@@ -3834,6 +4102,7 @@ fn send_appdata_rejects_literals_and_invalid_length_contracts() {
     let literal = lint_err(
         r#"
 plzn tls "appdata/literal" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake { send AppData "old payload" }
@@ -3871,6 +4140,7 @@ plzn tls "appdata/literal" {
         let source = format!(
             r#"
 plzn tls "appdata/invalid" {{
+  syntax 1.0
   chain: [default]
   uut server {{ versions: [tls13] }}
   flow handshake {{ {body} }}
@@ -3893,6 +4163,7 @@ fn generators_and_numeric_ids_in_typed_lists_lint_clean() {
     lint_ok(
         r#"
 plzn tls "gen/all-forms" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3925,6 +4196,7 @@ fn repeat_capture_and_cross_run_asserts_lint_clean() {
     lint_ok(
         r#"
 plzn tls "gen/repeat-capture" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -3961,6 +4233,7 @@ plzn tls "gen/repeat-capture" {
 }
 
 plzn tls "gen/close-reset" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -3981,6 +4254,7 @@ fn assert_unique_needs_a_capture() {
     let err = lint_err(
         r#"
 plzn tls "gen/unique-without-capture" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4003,6 +4277,7 @@ fn negotiated_assertions_are_typed_and_version_checked() {
     lint_ok(
         r#"
 plzn tls "assert/negotiated" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake {
@@ -4019,6 +4294,7 @@ plzn tls "assert/negotiated" {
     let named = lint_err(
         r#"
 plzn tls "assert/named-suite" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow { close }
@@ -4032,6 +4308,7 @@ plzn tls "assert/named-suite" {
     let version = lint_err(
         r#"
 plzn tls "assert/early-data-version" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow { close }
@@ -4048,6 +4325,7 @@ fn extension_flood_is_bounded_by_the_u16_block() {
     let err = lint_err(
         r#"
 plzn tls "gen/too-many-extensions" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls12]
@@ -4067,6 +4345,7 @@ fn key_share_entry_forms_are_checked() {
     let err = lint_err(
         r#"
 plzn tls "gen/key-share-bare-number" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4082,6 +4361,7 @@ plzn tls "gen/key-share-bare-number" {
     let err = lint_err(
         r#"
 plzn tls "gen/app-data-size-only" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4103,6 +4383,7 @@ plzn tls "gen/app-data-size-only" {
 fn repeated_string_is_one_string_and_repeated_list_is_entries() {
     let src = r#"
 plzn tls "alpn-repeat" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -4137,6 +4418,7 @@ fn chain_line_is_required() {
     let rendered = lint_err(
         r#"
 plzn tls "chains/missing" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4162,6 +4444,7 @@ fn chain_lines_lint_clean() {
     lint_ok(
         r#"
 plzn tls "chains/tls13-ecdsa" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4174,6 +4457,7 @@ plzn tls "chains/tls13-ecdsa" {
 }
 
 plzn tls "chains/ecdhe-follows-the-chain" {
+  syntax 1.0
   uut server {
     versions: [tls12],
   }
@@ -4188,6 +4472,7 @@ plzn tls "chains/ecdhe-follows-the-chain" {
 }
 
 plzn tls "chains/no-chain-with-psk" {
+  syntax 1.0
   uut server {
     versions: [tls12],
   }
@@ -4205,6 +4490,7 @@ plzn tls "chains/no-chain-with-psk" {
 }
 
 plzn tls "chains/server-holds-two" {
+  syntax 1.0
   uut client {
     versions: [tls13]
   }
@@ -4225,6 +4511,7 @@ fn chain_lines_reject_unknown_names_and_contradictions() {
     let rendered = lint_err(
         r#"
 plzn tls "chains/unknown" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4250,6 +4537,7 @@ plzn tls "chains/unknown" {
     let rendered = lint_err(
         r#"
 plzn tls "chains/static-rsa-needs-rsa" {
+  syntax 1.0
   uut server {
     versions: [tls12],
   }
@@ -4271,6 +4559,7 @@ plzn tls "chains/static-rsa-needs-rsa" {
     let rendered = lint_err(
         r#"
 plzn tls "chains/ecdsa-needs-ecdsa" {
+  syntax 1.0
   uut server {
     versions: [tls12],
   }
@@ -4292,6 +4581,7 @@ plzn tls "chains/ecdsa-needs-ecdsa" {
     let rendered = lint_err(
         r#"
 plzn tls "chains/empty-needs-psk" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4312,6 +4602,7 @@ plzn tls "chains/empty-needs-psk" {
     let rendered = lint_err(
         r#"
 plzn tls "chains/twice" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4343,6 +4634,7 @@ fn named_forms_lint_clean_in_every_domain() {
     lint_ok(
         r#"
 plzn tls "names/ok" {
+  syntax 1.0
   chain: [rsa_2048]
   matrix {
     suite in [ECDHE_RSA_WITH_AES_128_GCM_SHA256, TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA]
@@ -4447,7 +4739,7 @@ fn numeric_literal_with_a_name_is_rejected_per_domain() {
     ];
     for (step, lit, name) in cases {
         let src = format!(
-            "plzn tls \"names/bad\" {{\n  chain: [rsa_2048]\n  uut server {{ versions: [tls12] }}\n  peer {{ capabilities: [ecdhe_rsa] }}\n  flow handshake {{\n    {}\n  }}\n  expect handshake-fails\n}}\n",
+            "plzn tls \"names/bad\" {{\n  syntax 1.0\n  chain: [rsa_2048]\n  uut server {{ versions: [tls12] }}\n  peer {{ capabilities: [ecdhe_rsa] }}\n  flow handshake {{\n    {}\n  }}\n  expect handshake-fails\n}}\n",
             step
         );
         let rendered = lint_err(&src);
@@ -4467,6 +4759,7 @@ fn matrix_literals_are_checked_with_the_domain_they_flow_into() {
     let rendered = lint_err(
         r#"
 plzn tls "names/matrix" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12],
@@ -4496,6 +4789,7 @@ plzn tls "names/matrix" {
     let rendered = lint_err(
         r#"
 plzn tls "names/matrix-uut" {
+  syntax 1.0
   chain: [rsa_2048]
   matrix { s in [0xc02b] }
   uut server {
@@ -4522,6 +4816,7 @@ fn unassigned_and_grease_values_stay_numeric_and_ranges_are_not_checked() {
     lint_ok(
         r#"
 plzn tls "names/unassigned" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4555,6 +4850,7 @@ fn matrix_set_names_must_be_known_and_unambiguous() {
     let rendered = lint_err(
         r#"
 plzn tls "names/matrix-unknown" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4575,6 +4871,7 @@ fn uut_versions_accept_a_version_matrix_axis() {
     lint_ok(
         r#"
 plzn tls "versions/matrix" {
+  syntax 1.0
   chain: [rsa_2048]
   matrix { version in [tls10, tls11, tls12] }
   uut server { versions: [$version] }
@@ -4594,6 +4891,7 @@ fn legacy_signature_wire_fields_require_an_explicit_tls12_format() {
     let rendered = lint_err(
         r#"
 plzn tls "legacy/sigalg-format" {
+  syntax 1.0
   chain: [rsa_2048]
   uut client { versions: [tls10] }
   peer { capabilities: [ecdhe_rsa, aes128_cbc_sha] }
@@ -4612,6 +4910,7 @@ fn tls13_psk_age_and_mapped_binder_controls_lint_clean() {
     lint_ok(
         r#"
 plzn tls "psk/clienthello-controls" {
+  syntax 1.0
   chain: []
   uut server { versions: [tls13] }
   matrix { age in [1, 4294967295] }
@@ -4636,6 +4935,7 @@ fn tls13_multiple_external_psk_offers_lint_clean() {
     lint_ok(
         r#"
 plzn tls "psk/multiple-identities" {
+  syntax 1.0
   chain: []
   uut server { versions: [tls13] }
   psk {
@@ -4668,6 +4968,7 @@ fn leaf_key_matcher_lints_clean_and_rejects_unknown_kinds() {
     lint_ok(
         r#"
 plzn tls "c/leaf-key" {
+  syntax 1.0
   uut server {
     versions: [tls13]
   }
@@ -4687,6 +4988,7 @@ plzn tls "c/leaf-key" {
 }
 
 plzn tls "c/leaf-key-client" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls12],
@@ -4717,6 +5019,7 @@ plzn tls "c/leaf-key-client" {
     let err = lint_err(
         r#"
 plzn tls "c/leaf-key-bad" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -4736,6 +5039,7 @@ fn trailing_handshake_prefix_controls_lint_clean() {
     lint_ok(
         r#"
 plzn tls "stream/trailing-prefix" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake until send ClientHello {
@@ -4758,6 +5062,7 @@ fn trailing_handshake_prefix_controls_reject_invalid_uses() {
     let empty = lint_err(
         r#"
 plzn tls "stream/empty-trailer" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake until send ClientHello {
@@ -4775,6 +5080,7 @@ plzn tls "stream/empty-trailer" {
     let zero = lint_err(
         r#"
 plzn tls "stream/zero-prefix" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake until send ClientHello {
@@ -4789,6 +5095,7 @@ plzn tls "stream/zero-prefix" {
     let dtls = lint_err(
         r#"
 plzn tls "stream/dtls" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls13] }
   flow handshake until send ClientHello {
@@ -4806,6 +5113,7 @@ plzn tls "stream/dtls" {
     let app_data = lint_err(
         r#"
 plzn tls "stream/application-data" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake {

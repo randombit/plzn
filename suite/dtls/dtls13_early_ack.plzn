@@ -20,6 +20,7 @@
 # instead; still so on master as of 2026-11-18.
 
 plzn tls "dtls13/server-tolerates-ack-of-complete-flight-before-finished" {
+  syntax 1.0
   rfc 9147 section 7.1
   chain: [default]
   uut server { versions: [dtls13] }
@@ -44,6 +45,7 @@ plzn tls "dtls13/server-tolerates-ack-of-complete-flight-before-finished" {
 # after EncryptedExtensions covers only part of it: the case RFC 9147 7.1
 # recommends an ACK for when the rest of the flight does not arrive at once.
 plzn tls "dtls13/server-tolerates-ack-of-partial-flight-before-finished" {
+  syntax 1.0
   rfc 9147 section 7.1
   chain: [default]
   uut server {
@@ -71,6 +73,7 @@ plzn tls "dtls13/server-tolerates-ack-of-partial-flight-before-finished" {
 # (an epoch 0 ACK) before answering it. The client's Finished is then ACKed
 # explicitly too, since suppress_ack also stops the automatic one.
 plzn tls "dtls13/client-tolerates-ack-of-client-hello-before-server-hello" {
+  syntax 1.0
   rfc 9147 section 7.1
   chain: [default]
   uut client { versions: [dtls13] }

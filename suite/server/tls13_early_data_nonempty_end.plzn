@@ -1,4 +1,5 @@
 plzn tls "server/tls13-early-data-nonempty-end-of-early-data" {
+  syntax 1.0
   rfc 8446 section 4.5
   chain: [default]
   uut server {

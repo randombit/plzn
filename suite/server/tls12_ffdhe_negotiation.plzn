@@ -2,6 +2,7 @@
 # advertises/honours them in TLS 1.2 as well (e9e0480e5d); 3.6 served its
 # automatic MODP parameters instead.
 plzn tls "server/tls12-ffdhe-negotiation/dhe-preferred" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -29,6 +30,7 @@ plzn tls "server/tls12-ffdhe-negotiation/dhe-preferred" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-negotiation" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -55,6 +57,7 @@ plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-negotiation" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe3072-negotiation" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -81,6 +84,7 @@ plzn tls "server/tls12-ffdhe-negotiation/ffdhe3072-negotiation" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/unassigned-tolerance" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -107,6 +111,7 @@ plzn tls "server/tls12-ffdhe-negotiation/unassigned-tolerance" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ecc-curve-tolerated-without-ecc-cipher" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -133,6 +138,7 @@ plzn tls "server/tls12-ffdhe-negotiation/ecc-curve-tolerated-without-ecc-cipher"
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-or-ffdhe3072" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut server {
@@ -159,6 +165,7 @@ plzn tls "server/tls12-ffdhe-negotiation/ffdhe2048-or-ffdhe3072" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe" {
+  syntax 1.0
   rfc 7919 section 3
   uut server {
     versions: [tls12]
@@ -183,6 +190,7 @@ plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe" {
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe-with-secp256r1-advertised" {
+  syntax 1.0
   rfc 7919 section 3
   uut server {
     versions: [tls12]
@@ -207,6 +215,7 @@ plzn tls "server/tls12-ffdhe-negotiation/fallback-to-non-ffdhe-with-secp256r1-ad
 }
 
 plzn tls "server/tls12-ffdhe-negotiation/no-overlap-between-groups" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [default]
   uut server {

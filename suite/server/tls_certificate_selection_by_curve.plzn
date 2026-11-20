@@ -1,4 +1,5 @@
 plzn tls "server/tls12-certificate-selection-p256-curve-match-first" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p256, ecdsa_p384]
   uut server {
@@ -21,6 +22,7 @@ plzn tls "server/tls12-certificate-selection-p256-curve-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-p256-curve-match-second" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p384, ecdsa_p256]
   xfail botan "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
@@ -45,6 +47,7 @@ plzn tls "server/tls12-certificate-selection-p256-curve-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-p384-curve-match-first" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p384, ecdsa_p256]
   uut server {
@@ -67,6 +70,7 @@ plzn tls "server/tls12-certificate-selection-p384-curve-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-p384-curve-match-second" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p256, ecdsa_p384]
   xfail botan "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
@@ -91,6 +95,7 @@ plzn tls "server/tls12-certificate-selection-p384-curve-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-curve-no-match" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p384]
   xfail gnutls "accepts a TLS 1.2 ECDSA certificate on a curve the client did not offer"
@@ -114,6 +119,7 @@ plzn tls "server/tls12-certificate-selection-curve-no-match" {
 }
 
 plzn tls "server/tls12-certificate-selection-ed25519-ignores-curve-list" {
+  syntax 1.0
   rfc 8422 section 5.1.1
   chain: [ecdsa_p384, ed25519]
   xfail botan "does not treat Ed25519 as ECDHE_ECDSA-compatible in TLS 1.2"
@@ -137,6 +143,7 @@ plzn tls "server/tls12-certificate-selection-ed25519-ignores-curve-list" {
 }
 
 plzn tls "server/tls13-certificate-selection-ignores-supported-groups" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [ecdsa_p256, ecdsa_p384]
   uut server {

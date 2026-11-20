@@ -1,4 +1,5 @@
 plzn tls "server/tls12-invalid-version/version-below-3-0" {
+  syntax 1.0
   rfc 5246 section E.1
   chain: [default]
   uut server {

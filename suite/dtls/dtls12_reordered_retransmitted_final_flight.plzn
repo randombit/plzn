@@ -1,4 +1,5 @@
 plzn tls "dtls12/reordered-retransmitted-final-flight" {
+  syntax 1.0
   rfc 6347 section 4.2.4
   chain: [ecdsa_p256]
   skip openssl "answers a partial retransmitted flight at once (RFC 6347 4.2.4 read-retransmit); Botan waits for the complete flight"

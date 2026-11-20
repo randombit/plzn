@@ -2,6 +2,7 @@
 # A correct server MUST reject this — no application data
 # should be accepted before the handshake completes.
 plzn tls "negative/tls13-appdata-before-finished" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut server { versions: [tls13] }

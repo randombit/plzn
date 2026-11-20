@@ -1,4 +1,5 @@
 plzn tls "server/legacy-cbc-mac-sweep" {
+  syntax 1.0
   rfc 2246 section 6.2.3.2
   rfc 4346 section 6.2.3.2
   rfc 5246 section 6.2.3.2

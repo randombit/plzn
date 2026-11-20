@@ -1,4 +1,5 @@
 plzn tls "server/tls13-mlkem/basic-connection-with-hrr" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   chain: [default]
   uut server {
@@ -20,6 +21,7 @@ plzn tls "server/tls13-mlkem/basic-connection-with-hrr" {
 }
 
 plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-classical-part" {
+  syntax 1.0
   rfc 7748 section 6.1
   chain: [default]
   uut server {
@@ -36,6 +38,7 @@ plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-classical-part" {
 }
 
 plzn tls "server/tls13-mlkem/nist-hybrid-malformed-classical-part" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -53,6 +56,7 @@ plzn tls "server/tls13-mlkem/nist-hybrid-malformed-classical-part" {
 }
 
 plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-0" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -69,6 +73,7 @@ plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-0" {
 }
 
 plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-1" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -84,6 +89,7 @@ plzn tls "server/tls13-mlkem/x25519mlkem768-malformed-pqc-part-variable-1" {
 }
 
 plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-0" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -99,6 +105,7 @@ plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-0" {
 }
 
 plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-1" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -113,6 +120,7 @@ plzn tls "server/tls13-mlkem/secp256r1mlkem768-malformed-pqc-part-variable-1" {
 }
 
 plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-0" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -128,6 +136,7 @@ plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-0" {
 }
 
 plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-1" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -142,6 +151,7 @@ plzn tls "server/tls13-mlkem/secp384r1mlkem1024-malformed-pqc-part-variable-1" {
 }
 
 plzn tls "server/tls13-mlkem/truncated-key-share" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -159,6 +169,7 @@ plzn tls "server/tls13-mlkem/truncated-key-share" {
 }
 
 plzn tls "server/tls13-mlkem/padded-key-share" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -176,6 +187,7 @@ plzn tls "server/tls13-mlkem/padded-key-share" {
 }
 
 plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-compressed" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -195,6 +207,7 @@ plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-compressed" {
 }
 
 plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-hybrid" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -215,6 +228,7 @@ plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-hybrid" {
 }
 
 plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-xy" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server {
@@ -234,6 +248,7 @@ plzn tls "server/tls13-mlkem/invalid-ecdh-point-format-xy" {
 }
 
 plzn tls "server/tls13-mlkem/share-from-other-group" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {

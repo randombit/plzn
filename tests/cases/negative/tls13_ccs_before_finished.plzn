@@ -3,6 +3,7 @@
 # server Finished but before sending client Finished.
 # Most servers tolerate this (middlebox compat), so expect ok.
 plzn tls "negative/tls13-ccs-before-finished" {
+  syntax 1.0
   rfc 8446 section D.4
   chain: [default]
   uut server { versions: [tls13] }

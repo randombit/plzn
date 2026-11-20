@@ -1,4 +1,5 @@
 plzn tls "server/keyupdate-update-requested" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server {

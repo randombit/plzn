@@ -10,6 +10,7 @@ client responds with a fatal `decrypt_error`:
 
 ```
 plzn tls "client/tls12-server-finished-corrupt" {
+  syntax 1.0
   rfc 5246 section 7.4.9
   chain: [default]
   uut client {

@@ -19,6 +19,7 @@
 # CCS is not sent.
 
 plzn tls "client/tls13-ccs-flood/after-server-hello-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -39,6 +40,7 @@ plzn tls "client/tls13-ccs-flood/after-server-hello-two" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-server-hello-three-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -62,6 +64,7 @@ plzn tls "client/tls13-ccs-flood/after-server-hello-three-to-sixteen" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-server-hello-seventeen-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -86,6 +89,7 @@ plzn tls "client/tls13-ccs-flood/after-server-hello-seventeen-to-thirty-two" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-server-hello-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -113,6 +117,7 @@ plzn tls "client/tls13-ccs-flood/after-server-hello-thirty-three-to-two-hundred"
 }
 
 plzn tls "client/tls13-ccs-flood/after-server-hello-over-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client { versions: [tls13] }
@@ -141,6 +146,7 @@ plzn tls "client/tls13-ccs-flood/after-server-hello-over-two-hundred" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-hello-retry-request-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client {
@@ -169,6 +175,7 @@ plzn tls "client/tls13-ccs-flood/after-hello-retry-request-two" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-hello-retry-request-three-to-sixteen" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client {
@@ -200,6 +207,7 @@ plzn tls "client/tls13-ccs-flood/after-hello-retry-request-three-to-sixteen" {
 }
 
 plzn tls "client/tls13-ccs-flood/after-hello-retry-request-seventeen-to-thirty-two" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client {
@@ -232,6 +240,7 @@ plzn tls "client/tls13-ccs-flood/after-hello-retry-request-seventeen-to-thirty-t
 }
 
 plzn tls "client/tls13-ccs-flood/after-hello-retry-request-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client {
@@ -267,6 +276,7 @@ plzn tls "client/tls13-ccs-flood/after-hello-retry-request-thirty-three-to-two-h
 }
 
 plzn tls "client/tls13-ccs-flood/after-hello-retry-request-over-two-hundred" {
+  syntax 1.0
   rfc 8446 section 5
   chain: [default]
   uut client {

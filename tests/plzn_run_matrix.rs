@@ -38,6 +38,7 @@ fn lower_source(source: &str) -> Vec<Program> {
 
 const TWO_AXIS_SOURCE: &str = r#"
 plzn tls "matrix/two-axis" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   matrix {
@@ -56,6 +57,7 @@ fn suite_axis_uses_names_in_case_ids() {
     let programs = lower_source(
         r#"
 plzn tls "matrix/suite-labels" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   matrix {
@@ -82,6 +84,7 @@ fn version_axis_selects_driver_and_uut_version() {
     let programs = lower_source(
         r#"
 plzn tls "matrix/version" {
+  syntax 1.0
   chain: [rsa_2048]
   matrix { version in [tls10, tls11, tls12] }
   uut server { versions: [$version] }
@@ -119,6 +122,7 @@ fn group_axis_uses_names_and_hex_in_case_ids() {
     let programs = lower_source(
         r#"
 plzn tls "matrix/group-labels" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   matrix {
@@ -175,6 +179,7 @@ fn signature_scheme_axis_uses_names_and_hex_for_unknown_values() {
     let programs = lower_source(
         r#"
 plzn tls "matrix/signature-scheme-labels" {
+  syntax 1.0
   chain: [default]
   uut client { versions: [tls13] }
   matrix { scheme in [rsa_pss_rsae_sha512, ecdsa_secp521r1_sha512, 0x0a0a] }
@@ -277,6 +282,7 @@ fn session_matrix_expands_each_complete_sequence_per_binding() {
     let programs = lower_source(
         r#"
 plzn tls "matrix/session-cartesian" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]

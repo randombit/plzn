@@ -1,4 +1,5 @@
 plzn tls "server/tls-fallback-scsv/reject-downgrade-last" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "server/tls-fallback-scsv/reject-downgrade-last" {
 }
 
 plzn tls "server/tls-fallback-scsv/reject-downgrade-first" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server {
@@ -33,6 +35,7 @@ plzn tls "server/tls-fallback-scsv/reject-downgrade-first" {
 }
 
 plzn tls "server/tls-fallback-scsv/noop-at-tls12-maximum" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server {
@@ -51,6 +54,7 @@ plzn tls "server/tls-fallback-scsv/noop-at-tls12-maximum" {
 }
 
 plzn tls "server/tls-fallback-scsv/reject-tls11-fallback-to-tls12" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server { versions: [tls11, tls12] }
@@ -64,6 +68,7 @@ plzn tls "server/tls-fallback-scsv/reject-tls11-fallback-to-tls12" {
 }
 
 plzn tls "server/tls-fallback-scsv/reject-tls10-fallback-to-tls11" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server { versions: [tls10, tls11] }
@@ -77,6 +82,7 @@ plzn tls "server/tls-fallback-scsv/reject-tls10-fallback-to-tls11" {
 }
 
 plzn tls "server/tls-fallback-scsv/noop-at-tls11-maximum" {
+  syntax 1.0
   rfc 7507 section 3
   chain: [rsa_2048]
   uut server { versions: [tls11] }

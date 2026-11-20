@@ -1,4 +1,5 @@
 plzn tls "server/tls13-record-padding/set-fixed-length-padding" {
+  syntax 1.0
   rfc 8446 section 5.4
   chain: [default]
   uut server {
@@ -19,6 +20,7 @@ plzn tls "server/tls13-record-padding/set-fixed-length-padding" {
 }
 
 plzn tls "server/tls13-record-padding/large-padding" {
+  syntax 1.0
   rfc 8446 section 5.4
   chain: [default]
   uut server {

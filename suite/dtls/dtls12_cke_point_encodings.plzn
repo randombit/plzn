@@ -1,4 +1,5 @@
 plzn tls "dtls12/cke-point-zero" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: [ecdsa_p256]
   uut server {
@@ -13,6 +14,7 @@ plzn tls "dtls12/cke-point-zero" {
 }
 
 plzn tls "dtls12/cke-point-truncated" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [ecdsa_p256]
   uut server {
@@ -27,6 +29,7 @@ plzn tls "dtls12/cke-point-truncated" {
 }
 
 plzn tls "dtls12/cke-point-padded" {
+  syntax 1.0
   rfc 8422 section 5.7
   chain: [ecdsa_p256]
   uut server {
@@ -41,6 +44,7 @@ plzn tls "dtls12/cke-point-padded" {
 }
 
 plzn tls "dtls12/cke-point-not-on-curve" {
+  syntax 1.0
   rfc 8422 section 5.11
   chain: [ecdsa_p256]
   uut server {
@@ -61,6 +65,7 @@ plzn tls "dtls12/cke-point-not-on-curve" {
 }
 
 plzn tls "dtls12/cke-point-compressed" {
+  syntax 1.0
   rfc 8422 section 5.1.2
   chain: [ecdsa_p256]
   uut server {

@@ -1,6 +1,7 @@
 # The ChangeCipherSpec is its own record type; a handshake record cannot
 # stand in for it, even one using the library's internal CCS type value.
 plzn tls "server/tls12-client-ccs-as-handshake-message" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [default]
   uut server { versions: [tls12] }

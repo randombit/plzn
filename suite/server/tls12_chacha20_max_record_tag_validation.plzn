@@ -1,4 +1,5 @@
 plzn tls "server/tls12-chacha20-max-record-tag-validation/valid-handshake" {
+  syntax 1.0
   rfc 7905 section 2
   chain: [default]
   uut server {
@@ -13,6 +14,7 @@ plzn tls "server/tls12-chacha20-max-record-tag-validation/valid-handshake" {
 }
 
 plzn tls "server/tls12-chacha20-max-record-tag-validation/tag-bit-flip" {
+  syntax 1.0
   rfc 7905 section 2
   chain: [default]
   uut server {

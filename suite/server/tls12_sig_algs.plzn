@@ -1,4 +1,5 @@
 plzn tls "server/tls12-sig-algs/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -26,6 +27,7 @@ plzn tls "server/tls12-sig-algs/valid-handshake" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha256-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -53,6 +55,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha256-only" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha384-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -80,6 +83,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha384-only" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha512-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -107,6 +111,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_rsae_sha512-only" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha256-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -123,6 +128,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha256-only" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha384-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -139,6 +145,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha384-only" {
 }
 
 plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha512-only" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -155,6 +162,7 @@ plzn tls "server/tls12-sig-algs/rsa_pss_pss_sha512-only" {
 }
 
 plzn tls "server/tls12-sig-algs/md5-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -182,6 +190,7 @@ plzn tls "server/tls12-sig-algs/md5-first" {
 }
 
 plzn tls "server/tls12-sig-algs/md5-first-no-sha1" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -209,6 +218,7 @@ plzn tls "server/tls12-sig-algs/md5-first-no-sha1" {
 }
 
 plzn tls "server/tls12-sig-algs/no-sha1" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -236,6 +246,7 @@ plzn tls "server/tls12-sig-algs/no-sha1" {
 }
 
 plzn tls "server/tls12-sig-algs/extra-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -263,6 +274,7 @@ plzn tls "server/tls12-sig-algs/extra-sigalgs" {
 }
 
 plzn tls "server/tls12-sig-algs/only-undefined-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -279,6 +291,7 @@ plzn tls "server/tls12-sig-algs/only-undefined-sigalgs" {
 }
 
 plzn tls "server/tls12-sig-algs/empty-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -295,6 +308,7 @@ plzn tls "server/tls12-sig-algs/empty-sigalgs" {
 }
 
 plzn tls "server/tls12-sig-algs/fuzz-length-of-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -310,6 +324,7 @@ plzn tls "server/tls12-sig-algs/fuzz-length-of-sigalgs" {
 }
 
 plzn tls "server/tls12-sig-algs/truncate-sigalgs-extension" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -325,6 +340,7 @@ plzn tls "server/tls12-sig-algs/truncate-sigalgs-extension" {
 }
 
 plzn tls "server/tls12-sig-algs/odd-length-of-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -340,6 +356,7 @@ plzn tls "server/tls12-sig-algs/odd-length-of-sigalgs" {
 }
 
 plzn tls "server/tls12-sig-algs/padded-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {

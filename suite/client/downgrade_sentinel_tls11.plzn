@@ -1,4 +1,5 @@
 plzn tls "client/downgrade-sentinel-tls11" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   xfail rustls "checks only the DOWNGRD 01 sentinel when negotiating TLS 1.2; the DOWNGRD 00 one is ignored (RFC 8446 4.1.3: MUST check either)"
@@ -20,6 +21,7 @@ plzn tls "client/downgrade-sentinel-tls11" {
 }
 
 plzn tls "client/downgrade-sentinel-negotiated-tls11" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [rsa_2048]
   uut client { versions: [tls11, tls12, tls13] }

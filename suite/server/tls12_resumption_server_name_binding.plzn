@@ -10,6 +10,7 @@
 # skipped with their reason rather than marked as failing.
 
 plzn tls "server/tls12-resumption-server-name-binding/ticket-same-name-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -34,6 +35,7 @@ plzn tls "server/tls12-resumption-server-name-binding/ticket-same-name-resumes" 
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/ticket-different-name-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -64,6 +66,7 @@ plzn tls "server/tls12-resumption-server-name-binding/ticket-different-name-full
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/ticket-name-omitted-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -91,6 +94,7 @@ plzn tls "server/tls12-resumption-server-name-binding/ticket-name-omitted-resume
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/ticket-name-added-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -121,6 +125,7 @@ plzn tls "server/tls12-resumption-server-name-binding/ticket-name-added-full-han
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/ticket-case-only-difference-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -148,6 +153,7 @@ plzn tls "server/tls12-resumption-server-name-binding/ticket-case-only-differenc
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/session-id-same-name-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -173,6 +179,7 @@ plzn tls "server/tls12-resumption-server-name-binding/session-id-same-name-resum
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/session-id-different-name-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -204,6 +211,7 @@ plzn tls "server/tls12-resumption-server-name-binding/session-id-different-name-
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/session-id-name-omitted-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -232,6 +240,7 @@ plzn tls "server/tls12-resumption-server-name-binding/session-id-name-omitted-re
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/session-id-name-added-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -263,6 +272,7 @@ plzn tls "server/tls12-resumption-server-name-binding/session-id-name-added-full
 }
 
 plzn tls "server/tls12-resumption-server-name-binding/session-id-case-only-difference-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {

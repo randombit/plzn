@@ -1,4 +1,5 @@
 plzn tls "server/tls12-ske-ecdsa-p256-group-sweep" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [ecdsa_p256]
   uut server {
@@ -18,6 +19,7 @@ plzn tls "server/tls12-ske-ecdsa-p256-group-sweep" {
 }
 
 plzn tls "server/tls12-ske-ecdsa-p256-other-groups" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [ecdsa_p256]
   uut server {

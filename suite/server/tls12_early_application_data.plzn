@@ -1,4 +1,5 @@
 plzn tls "server/tls12-early-application-data/before-client-key-exchange" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -12,6 +13,7 @@ plzn tls "server/tls12-early-application-data/before-client-key-exchange" {
 }
 
 plzn tls "server/tls12-early-application-data/before-change-cipher-spec" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {
@@ -25,6 +27,7 @@ plzn tls "server/tls12-early-application-data/before-change-cipher-spec" {
 }
 
 plzn tls "server/tls12-early-application-data/before-finished" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server {

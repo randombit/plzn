@@ -1,4 +1,5 @@
 plzn tls "client/tls13-hrr-bogus-cipher" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut client {
@@ -14,6 +15,7 @@ plzn tls "client/tls13-hrr-bogus-cipher" {
 }
 
 plzn tls "client/tls13-hrr-tls12-cipher" {
+  syntax 1.0
   rfc 8446 section 4.1.3
   chain: [default]
   uut client { versions: [tls13] }

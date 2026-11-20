@@ -1,4 +1,5 @@
 plzn tls "client/tls12-ske-unoffered-group" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [rsa_2048]
   uut client {

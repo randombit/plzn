@@ -1,4 +1,5 @@
 plzn tls "dtls12/wrong-type-client-hello" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -12,6 +13,7 @@ plzn tls "dtls12/wrong-type-client-hello" {
 }
 
 plzn tls "dtls12/wrong-type-hello-verify-request" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut client {
@@ -24,6 +26,7 @@ plzn tls "dtls12/wrong-type-hello-verify-request" {
 }
 
 plzn tls "dtls12/wrong-type-server-hello" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -36,6 +39,7 @@ plzn tls "dtls12/wrong-type-server-hello" {
 }
 
 plzn tls "dtls12/wrong-type-server-certificate" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -48,6 +52,7 @@ plzn tls "dtls12/wrong-type-server-certificate" {
 }
 
 plzn tls "dtls12/wrong-type-certificate-status" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [ecdsa_p256]
   uut client {
@@ -68,6 +73,7 @@ plzn tls "dtls12/wrong-type-certificate-status" {
 }
 
 plzn tls "dtls12/wrong-type-server-key-exchange" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -81,6 +87,7 @@ plzn tls "dtls12/wrong-type-server-key-exchange" {
 }
 
 plzn tls "dtls12/wrong-type-certificate-request" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -94,6 +101,7 @@ plzn tls "dtls12/wrong-type-certificate-request" {
 }
 
 plzn tls "dtls12/wrong-type-server-hello-done" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {
@@ -106,6 +114,7 @@ plzn tls "dtls12/wrong-type-server-hello-done" {
 }
 
 plzn tls "dtls12/wrong-type-client-certificate" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -119,6 +128,7 @@ plzn tls "dtls12/wrong-type-client-certificate" {
 }
 
 plzn tls "dtls12/wrong-type-certificate-verify" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -132,6 +142,7 @@ plzn tls "dtls12/wrong-type-certificate-verify" {
 }
 
 plzn tls "dtls12/wrong-type-client-key-exchange" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -145,6 +156,7 @@ plzn tls "dtls12/wrong-type-client-key-exchange" {
 }
 
 plzn tls "dtls12/wrong-type-client-finished" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut server {
@@ -157,6 +169,7 @@ plzn tls "dtls12/wrong-type-client-finished" {
 }
 
 plzn tls "dtls12/wrong-type-new-session-ticket" {
+  syntax 1.0
   rfc 5077 section 3.1
   chain: [ecdsa_p256]
   uut client {
@@ -170,6 +183,7 @@ plzn tls "dtls12/wrong-type-new-session-ticket" {
 }
 
 plzn tls "dtls12/wrong-type-server-finished" {
+  syntax 1.0
   rfc 6347 section 4.2.2
   chain: [ecdsa_p256]
   uut client {

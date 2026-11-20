@@ -1,4 +1,5 @@
 plzn tls "server/tls12-key-exchange-handshakes/valid-rsa" {
+  syntax 1.0
   rfc 5246 section 7.3
   chain: [rsa_2048]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls12-key-exchange-handshakes/valid-rsa" {
 }
 
 plzn tls "server/tls12-key-exchange-handshakes/valid-dhe" {
+  syntax 1.0
   rfc 5246 section 7.3
   chain: [rsa_2048]
   uut server {
@@ -31,6 +33,7 @@ plzn tls "server/tls12-key-exchange-handshakes/valid-dhe" {
 }
 
 plzn tls "server/tls12-key-exchange-handshakes/valid-ems" {
+  syntax 1.0
   rfc 7627 section 5.1
   chain: [rsa_2048]
   uut server {
@@ -49,6 +52,7 @@ plzn tls "server/tls12-key-exchange-handshakes/valid-ems" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [rsa_2048]
   uut server {
@@ -66,6 +70,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange/valid-handshake" {
 }
 
 plzn tls "server/tls12-ecdhe-rsa-key-exchange/valid-handshake" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [default]
   uut server {
@@ -83,6 +88,7 @@ plzn tls "server/tls12-ecdhe-rsa-key-exchange/valid-handshake" {
 }
 
 plzn tls "server/tls12-unsupported-curve-fallback/secp160k1-only-falls-back-to-dhe" {
+  syntax 1.0
   rfc 8422 section 5.1
   uut server {
     versions: [tls12]

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-key-share-low-order-x25519" {
+  syntax 1.0
   rfc 8446 section 7.4.2
   chain: [default]
   uut server {

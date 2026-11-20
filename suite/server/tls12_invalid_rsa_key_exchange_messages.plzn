@@ -1,4 +1,5 @@
 plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-128" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all
 }
 
 plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-256" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -30,6 +32,7 @@ plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all
 }
 
 plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-384" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -46,6 +49,7 @@ plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all
 }
 
 plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all-zero-512" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -62,6 +66,7 @@ plzn tls "server/tls12-invalid-rsa-key-exchange-messages/encrypted-premaster-all
 }
 
 plzn tls "server/tls12-invalid-rsa-key-exchange-messages/modulus-as-encrypted-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {

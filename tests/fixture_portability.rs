@@ -22,6 +22,7 @@ fn program(subject: &str, policy: &str) -> plzn::ir::Program {
     };
     let source = format!(
         "plzn tls \"portable\" {{\n\
+         syntax 1.0\n\
          rfc 8446 section 4.3.2\n\
          chain: [default]\n\
          uut {subject} {{ versions: [tls13], {policy} }}\n\

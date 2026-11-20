@@ -1,4 +1,5 @@
 plzn tls "dtls12/client-appdata-before-finished" {
+  syntax 1.0
   rfc 6347 section 4.1.2.7
   chain: [ecdsa_p256]
   xfail openssl "buffers application data received before Finished and delivers it afterwards (RFC 6347 4.2.4 permits buffering); this flow asserts the discard alternative"

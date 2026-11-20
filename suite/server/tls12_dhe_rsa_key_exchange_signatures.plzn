@@ -1,4 +1,5 @@
 plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha1" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   matrix {
     suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
@@ -15,6 +16,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha1" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha224" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   matrix {
     suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
@@ -44,6 +46,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha224" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha256" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   matrix {
     suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
@@ -71,6 +74,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha256" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha384" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   matrix {
     suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]
@@ -98,6 +102,7 @@ plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha384" {
 }
 
 plzn tls "server/tls12-dhe-rsa-key-exchange-signatures/sha512" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   matrix {
     suite in [0x0016, 0x0033, 0x0039, 0x0067, 0x006b]

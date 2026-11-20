@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-resume-psk" {
+  syntax 1.0
   rfc 9147 section 5.10
   rfc 8446 section 4.6.1
   chain: [default]
@@ -22,6 +23,7 @@ plzn tls "dtls13/server-resume-psk" {
 }
 
 plzn tls "dtls13/client-resume-psk" {
+  syntax 1.0
   rfc 9147 section 5.10
   rfc 8446 section 4.6.1
   chain: [default]

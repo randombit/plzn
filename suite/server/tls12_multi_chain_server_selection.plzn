@@ -1,4 +1,5 @@
 plzn tls "server/tls12-multi-chain-ecdsa-scheme-does-not-constrain-curve" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   xfail rustls "its signing keys bind the TLS 1.2 ECDSA scheme to the certificate curve"
   uut server {
@@ -28,6 +29,7 @@ plzn tls "server/tls12-multi-chain-ecdsa-scheme-does-not-constrain-curve" {
 }
 
 plzn tls "server/tls12-multi-chain-picks-p256" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   xfail botan "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
   xfail gnutls "does not apply supported_groups to TLS 1.2 ECDSA credential selection"
@@ -55,6 +57,7 @@ plzn tls "server/tls12-multi-chain-picks-p256" {
 }
 
 plzn tls "server/tls12-multi-chain-picks-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -79,6 +82,7 @@ plzn tls "server/tls12-multi-chain-picks-rsa" {
 }
 
 plzn tls "server/tls12-multi-chain-both-families-ecdsa-only-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -106,6 +110,7 @@ plzn tls "server/tls12-multi-chain-both-families-ecdsa-only-sigalgs" {
 }
 
 plzn tls "server/tls12-multi-chain-none-fits" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -124,6 +129,7 @@ plzn tls "server/tls12-multi-chain-none-fits" {
 }
 
 plzn tls "server/tls12-no-chain-certificate-suite" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   uut server {
     versions: [tls12]

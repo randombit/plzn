@@ -1,4 +1,5 @@
 plzn tls "dtls12/server-hello-unoffered-suite" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [ecdsa_p256]
   uut client {
@@ -12,6 +13,7 @@ plzn tls "dtls12/server-hello-unoffered-suite" {
 }
 
 plzn tls "dtls12/server-hello-dtls10-version" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut client {
@@ -24,6 +26,7 @@ plzn tls "dtls12/server-hello-dtls10-version" {
 }
 
 plzn tls "dtls12/server-hello-unoffered-compression" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [ecdsa_p256]
   uut client {

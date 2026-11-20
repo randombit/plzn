@@ -1,4 +1,5 @@
 plzn tls "server/tls12-signature-algorithms/implicit-sha1" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   skip botan "Botan TLS does not implement the TLS 1.2 implicit SHA-1 signature fallback"
@@ -17,6 +18,7 @@ plzn tls "server/tls12-signature-algorithms/implicit-sha1" {
 }
 
 plzn tls "server/tls12-signature-algorithms/explicit-sha1-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {
@@ -31,6 +33,7 @@ plzn tls "server/tls12-signature-algorithms/explicit-sha1-rsa" {
 }
 
 plzn tls "server/tls12-signature-algorithms/explicit-sha256-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -55,6 +58,7 @@ plzn tls "server/tls12-signature-algorithms/explicit-sha256-rsa" {
 }
 
 plzn tls "server/tls12-signature-algorithms/tolerance-one-unknown" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -85,6 +89,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-one-unknown" {
 # handshake_failure. LibreSSL caps the list too (32 entries before 4.4.1, 256
 # since) and answers decode_error when it is exceeded.
 plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -114,6 +119,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown" {
 # 215 unknown entries: above OpenSSL's 128-entry truncation, below LibreSSL
 # 4.4.1's 256-entry cap.
 plzn tls "server/tls12-signature-algorithms/tolerance-215-unknown" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut server {
     versions: [tls12]
@@ -139,6 +145,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-215-unknown" {
 }
 
 plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server {
     versions: [tls12]
@@ -168,6 +175,7 @@ plzn tls "server/tls12-signature-algorithms/tolerance-n-unknown-with-sig-alg-cer
 }
 
 plzn tls "server/tls12-signature-algorithms/empty-list" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [default]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [tls12] }
@@ -20,6 +21,7 @@ plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [tls12] }
@@ -41,6 +43,7 @@ plzn tls "server/tls12-certificate-selection-ecdsa-suite-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [tls12] }
@@ -62,6 +65,7 @@ plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [tls12] }
@@ -83,6 +87,7 @@ plzn tls "server/tls12-certificate-selection-ecdhe-rsa-suite-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [tls12] }
@@ -103,6 +108,7 @@ plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [tls12] }
@@ -123,6 +129,7 @@ plzn tls "server/tls12-certificate-selection-dhe-rsa-suite-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-first" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048, ecdsa_p256]
   uut server { versions: [tls12] }
@@ -143,6 +150,7 @@ plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-first" {
 }
 
 plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-second" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server { versions: [tls12] }
@@ -163,6 +171,7 @@ plzn tls "server/tls12-certificate-selection-static-rsa-suite-match-second" {
 }
 
 plzn tls "server/tls12-certificate-selection-ecdsa-suite-no-match" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -182,6 +191,7 @@ plzn tls "server/tls12-certificate-selection-ecdsa-suite-no-match" {
 }
 
 plzn tls "server/tls12-certificate-selection-rsa-suite-no-match" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256]
   uut server {
@@ -201,6 +211,7 @@ plzn tls "server/tls12-certificate-selection-rsa-suite-no-match" {
 }
 
 plzn tls "server/tls12-certificate-selection-static-rsa-ignores-sigalgs" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   xfail openssl "applies signature_algorithms to static-RSA certificate selection"
@@ -222,6 +233,7 @@ plzn tls "server/tls12-certificate-selection-static-rsa-ignores-sigalgs" {
 }
 
 plzn tls "server/tls12-certificate-selection-no-ecdhe-falls-back-to-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server {
@@ -244,6 +256,7 @@ plzn tls "server/tls12-certificate-selection-no-ecdhe-falls-back-to-rsa" {
 }
 
 plzn tls "server/tls12-certificate-selection-requires-mutually-enabled-suite" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [ecdsa_p256, rsa_2048]
   uut server {

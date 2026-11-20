@@ -1,4 +1,5 @@
 plzn tls "dtls12/duplicate-clienthello-extension" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [ecdsa_p256]
   uut server {
@@ -11,6 +12,7 @@ plzn tls "dtls12/duplicate-clienthello-extension" {
 }
 
 plzn tls "dtls12/duplicate-serverhello-extension" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [ecdsa_p256]
   uut client {
@@ -23,6 +25,7 @@ plzn tls "dtls12/duplicate-serverhello-extension" {
 }
 
 plzn tls "dtls12/empty-server-certificate-list" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   chain: [ecdsa_p256]
   uut client {
@@ -35,6 +38,7 @@ plzn tls "dtls12/empty-server-certificate-list" {
 }
 
 plzn tls "dtls12/minor-version-tolerance" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -49,6 +53,7 @@ plzn tls "dtls12/minor-version-tolerance" {
 }
 
 plzn tls "dtls12/major-version-tolerance" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -64,6 +69,7 @@ plzn tls "dtls12/major-version-tolerance" {
 }
 
 plzn tls "dtls12/version-too-low" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {

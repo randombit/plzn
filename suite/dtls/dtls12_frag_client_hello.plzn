@@ -1,4 +1,5 @@
 plzn tls "dtls12/frag-client-hello-1" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -9,6 +10,7 @@ plzn tls "dtls12/frag-client-hello-1" {
 }
 
 plzn tls "dtls12/frag-client-hello-5" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -19,6 +21,7 @@ plzn tls "dtls12/frag-client-hello-5" {
 }
 
 plzn tls "dtls12/frag-client-hello-16" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -29,6 +32,7 @@ plzn tls "dtls12/frag-client-hello-16" {
 }
 
 plzn tls "dtls12/frag-client-hello-64" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {
@@ -39,6 +43,7 @@ plzn tls "dtls12/frag-client-hello-64" {
 }
 
 plzn tls "dtls12/frag-client-hello-255" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [ecdsa_p256]
   uut server {

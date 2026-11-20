@@ -1,4 +1,5 @@
 plzn tls "client/tls13-multi-chain-picks-p384" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -22,6 +23,7 @@ plzn tls "client/tls13-multi-chain-picks-p384" {
 }
 
 plzn tls "client/tls13-multi-chain-picks-p256" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -45,6 +47,7 @@ plzn tls "client/tls13-multi-chain-picks-p256" {
 }
 
 plzn tls "client/tls13-multi-chain-picks-rsa" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -68,6 +71,7 @@ plzn tls "client/tls13-multi-chain-picks-rsa" {
 }
 
 plzn tls "client/tls13-multi-chain-none-fits" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -90,6 +94,7 @@ plzn tls "client/tls13-multi-chain-none-fits" {
 }
 
 plzn tls "client/tls13-single-credential-wrong-curve" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -115,6 +120,7 @@ plzn tls "client/tls13-single-credential-wrong-curve" {
 }
 
 plzn tls "client/tls13-multi-chain-preserves-credential-preference" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [default]
   client_chain: [ecdsa_p384, ecdsa_p256]

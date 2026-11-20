@@ -4,6 +4,7 @@
 # certificate requirement, so the server must decline the PSK and run a full
 # handshake that requests a certificate.
 plzn tls "server/tls13-external-psk-not-selected-when-client-cert-required" {
+  syntax 1.0
   rfc 8446 section 4.3.2
   chain: [default]
   client_chain: [default]

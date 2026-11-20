@@ -1,4 +1,5 @@
 plzn tls "server/tls13-rejects-second-client-hello-prefix-after-first-client-hello" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   rfc 8446 section 5.1
   chain: [default]
@@ -26,6 +27,7 @@ plzn tls "server/tls13-rejects-second-client-hello-prefix-after-first-client-hel
 }
 
 plzn tls "server/tls13-rejects-trailing-partial-message-after-finished" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -38,6 +40,7 @@ plzn tls "server/tls13-rejects-trailing-partial-message-after-finished" {
 }
 
 plzn tls "server/tls13-rejects-trailing-partial-message-after-resumed-finished" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server {
@@ -64,6 +67,7 @@ plzn tls "server/tls13-rejects-trailing-partial-message-after-resumed-finished" 
 }
 
 plzn tls "server/tls13-rejects-finished-prefix-after-client-hello" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -83,6 +87,7 @@ plzn tls "server/tls13-rejects-finished-prefix-after-client-hello" {
 }
 
 plzn tls "server/tls13-rejects-finished-prefix-after-client-hello-without-ccs" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -101,6 +106,7 @@ plzn tls "server/tls13-rejects-finished-prefix-after-client-hello-without-ccs" {
 }
 
 plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   rfc 8446 section 5.1
   chain: [default]
@@ -127,6 +133,7 @@ plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello" {
 }
 
 plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello-without-ccs" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   rfc 8446 section 5.1
   chain: [default]
@@ -152,6 +159,7 @@ plzn tls "server/tls13-rejects-finished-prefix-after-retry-client-hello-without-
 }
 
 plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello" {
+  syntax 1.0
   rfc 8446 section 2.3
   rfc 8446 section 5.1
   chain: [default]
@@ -186,6 +194,7 @@ plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello" {
 }
 
 plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello-without-ccs" {
+  syntax 1.0
   rfc 8446 section 2.3
   rfc 8446 section 5.1
   chain: [default]
@@ -219,6 +228,7 @@ plzn tls "server/tls13-rejects-end-of-early-data-prefix-after-client-hello-witho
 }
 
 plzn tls "server/tls13-rejects-next-key-update-prefix-before-key-change" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

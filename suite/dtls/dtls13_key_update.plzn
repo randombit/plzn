@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-accepts-key-update-and-old-epoch-data-before-ack" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -16,6 +17,7 @@ plzn tls "dtls13/server-accepts-key-update-and-old-epoch-data-before-ack" {
 }
 
 plzn tls "dtls13/client-accepts-key-update-and-old-epoch-data-before-ack" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut client { versions: [dtls13], session_tickets: 0 }
@@ -33,6 +35,7 @@ plzn tls "dtls13/client-accepts-key-update-and-old-epoch-data-before-ack" {
 }
 
 plzn tls "dtls13/server-accepts-repeated-key-updates" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -50,6 +53,7 @@ plzn tls "dtls13/server-accepts-repeated-key-updates" {
 }
 
 plzn tls "dtls13/client-accepts-repeated-key-updates" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut client { versions: [dtls13], session_tickets: 0 }
@@ -67,6 +71,7 @@ plzn tls "dtls13/client-accepts-repeated-key-updates" {
 }
 
 plzn tls "dtls13/server-reciprocates-requested-key-update" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -85,6 +90,7 @@ plzn tls "dtls13/server-reciprocates-requested-key-update" {
 }
 
 plzn tls "dtls13/client-reciprocates-requested-key-update" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut client { versions: [dtls13], session_tickets: 0 }
@@ -103,6 +109,7 @@ plzn tls "dtls13/client-reciprocates-requested-key-update" {
 }
 
 plzn tls "dtls13/server-key-update-waits-for-ack-and-retransmits" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut server {
@@ -128,6 +135,7 @@ plzn tls "dtls13/server-key-update-waits-for-ack-and-retransmits" {
 }
 
 plzn tls "dtls13/client-key-update-waits-for-ack-and-retransmits" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut client {
@@ -153,6 +161,7 @@ plzn tls "dtls13/client-key-update-waits-for-ack-and-retransmits" {
 }
 
 plzn tls "dtls13/server-rejects-key-update-with-extra-data" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
@@ -163,6 +172,7 @@ plzn tls "dtls13/server-rejects-key-update-with-extra-data" {
 }
 
 plzn tls "dtls13/client-rejects-key-update-with-extra-data" {
+  syntax 1.0
   rfc 9147 section 8
   chain: [default]
   uut client { versions: [dtls13], session_tickets: 0 }
@@ -173,6 +183,7 @@ plzn tls "dtls13/client-rejects-key-update-with-extra-data" {
 }
 
 plzn tls "dtls13/server-rejects-unknown-key-update-request" {
+  syntax 1.0
   rfc 9147 section 8
   rfc 9846 section 4.7.3
   chain: [default]
@@ -185,6 +196,7 @@ plzn tls "dtls13/server-rejects-unknown-key-update-request" {
 }
 
 plzn tls "dtls13/client-rejects-unknown-key-update-request" {
+  syntax 1.0
   rfc 9147 section 8
   rfc 9846 section 4.7.3
   chain: [default]

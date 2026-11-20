@@ -1,4 +1,5 @@
 plzn tls "server/tls13-early-data-rejected-after-cipher-suite-change" {
+  syntax 1.0
   rfc 8446 section 4.2.10
   chain: [default]
   uut server {
@@ -38,6 +39,7 @@ plzn tls "server/tls13-early-data-rejected-after-cipher-suite-change" {
 }
 
 plzn tls "server/tls13-early-data-rejected-for-skewed-ticket-age" {
+  syntax 1.0
   rfc 8446 section 4.2.10
   rfc 8446 section 8.3
   chain: [default]

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-rsa-pss-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [rsa_pss]
   uut server {

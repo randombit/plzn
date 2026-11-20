@@ -1,4 +1,5 @@
 plzn tls "client/tls13-ignores-ciphertext-legacy-record-version" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut client { versions: [tls13] }
@@ -19,6 +20,7 @@ plzn tls "client/tls13-ignores-ciphertext-legacy-record-version" {
 }
 
 plzn tls "client/tls13-ignores-server-hello-legacy-record-version" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client { versions: [tls13] }
@@ -39,6 +41,7 @@ plzn tls "client/tls13-ignores-server-hello-legacy-record-version" {
 }
 
 plzn tls "client/tls13-ignores-post-hrr-server-hello-legacy-record-version" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut client {

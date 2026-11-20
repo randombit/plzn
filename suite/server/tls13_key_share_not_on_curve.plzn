@@ -3,6 +3,7 @@
 # pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls13-key-share-not-on-curve" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server { versions: [tls13] }

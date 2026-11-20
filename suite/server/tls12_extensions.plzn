@@ -1,4 +1,5 @@
 plzn tls "server/tls12-extensions/n-extensions" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -18,6 +19,7 @@ plzn tls "server/tls12-extensions/n-extensions" {
 }
 
 plzn tls "server/tls12-extensions/16300-extensions" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -36,6 +38,7 @@ plzn tls "server/tls12-extensions/16300-extensions" {
 }
 
 plzn tls "server/tls12-extensions/n-extensions-last-empty" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -56,6 +59,7 @@ plzn tls "server/tls12-extensions/n-extensions-last-empty" {
 }
 
 plzn tls "server/tls12-extensions/16300-extensions-last-empty" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -75,6 +79,7 @@ plzn tls "server/tls12-extensions/16300-extensions-last-empty" {
 }
 
 plzn tls "server/tls12-extensions/valid-handshake" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {

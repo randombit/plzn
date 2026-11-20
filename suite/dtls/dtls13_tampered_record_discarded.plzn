@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-tampered-record-discarded" {
+  syntax 1.0
   rfc 9147 section 4.5.2
   chain: [default]
   uut server { versions: [dtls13] }

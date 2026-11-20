@@ -1,4 +1,5 @@
 plzn tls "server/legacy-cbc-accepts-maximum-padding" {
+  syntax 1.0
   rfc 2246 section 6.2.3.2
   rfc 4346 section 6.2.3.2
   rfc 5246 section 6.2.3.2
@@ -18,6 +19,7 @@ plzn tls "server/legacy-cbc-accepts-maximum-padding" {
 }
 
 plzn tls "server/tls12-cbc-accepts-maximum-padding-sha256" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [rsa_2048]
   uut server {
@@ -34,6 +36,7 @@ plzn tls "server/tls12-cbc-accepts-maximum-padding-sha256" {
 }
 
 plzn tls "server/tls12-cbc-accepts-maximum-padding-sha384" {
+  syntax 1.0
   rfc 5246 section 6.2.3.2
   chain: [rsa_2048]
   uut server {
@@ -50,6 +53,7 @@ plzn tls "server/tls12-cbc-accepts-maximum-padding-sha384" {
 }
 
 plzn tls "server/legacy-cbc-rejects-corrupt-first-byte-of-maximum-padding" {
+  syntax 1.0
   rfc 2246 section 6.2.3.2
   rfc 4346 section 6.2.3.2
   rfc 5246 section 6.2.3.2

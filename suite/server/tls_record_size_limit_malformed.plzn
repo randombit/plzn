@@ -1,4 +1,5 @@
 plzn tls "server/tls12-record-size-limit/value-below-minimum" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -16,6 +17,7 @@ plzn tls "server/tls12-record-size-limit/value-below-minimum" {
 }
 
 plzn tls "server/tls13-record-size-limit/value-below-minimum" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls13] }
@@ -33,6 +35,7 @@ plzn tls "server/tls13-record-size-limit/value-below-minimum" {
 }
 
 plzn tls "server/tls12-record-size-limit/empty-extension" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -50,6 +53,7 @@ plzn tls "server/tls12-record-size-limit/empty-extension" {
 }
 
 plzn tls "server/tls13-record-size-limit/empty-extension" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls13] }
@@ -67,6 +71,7 @@ plzn tls "server/tls13-record-size-limit/empty-extension" {
 }
 
 plzn tls "server/tls12-record-size-limit/trailing-byte" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls12] }
@@ -84,6 +89,7 @@ plzn tls "server/tls12-record-size-limit/trailing-byte" {
 }
 
 plzn tls "server/tls13-record-size-limit/trailing-byte" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut server { versions: [tls13] }

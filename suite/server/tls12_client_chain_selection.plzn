@@ -1,4 +1,5 @@
 plzn tls "server/tls12-client-chain-picks-rsa" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: [ecdsa_p256, rsa_2048]
@@ -16,6 +17,7 @@ plzn tls "server/tls12-client-chain-picks-rsa" {
 }
 
 plzn tls "server/tls12-client-chain-picks-ecdsa" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: [rsa_2048, ecdsa_p256]
@@ -33,6 +35,7 @@ plzn tls "server/tls12-client-chain-picks-ecdsa" {
 }
 
 plzn tls "server/tls13-client-chain-picks-rsa" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256, rsa_2048]
@@ -50,6 +53,7 @@ plzn tls "server/tls13-client-chain-picks-rsa" {
 }
 
 plzn tls "server/tls12-client-single-credential-presented-as-is" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -67,6 +71,7 @@ plzn tls "server/tls12-client-single-credential-presented-as-is" {
 }
 
 plzn tls "server/tls12-client-chain-none" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: []

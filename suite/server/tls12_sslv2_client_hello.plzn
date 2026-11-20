@@ -2,6 +2,7 @@
 # read as a TLS record header with an impossible version and the connection is
 # closed without an alert (3.6 answered handshake_failure or decode_error).
 plzn tls "server/tls12-sslv2-client-hello" {
+  syntax 1.0
   rfc 5246 section E.2
   chain: [rsa_2048]
   uut server {
@@ -28,6 +29,7 @@ plzn tls "server/tls12-sslv2-client-hello" {
 }
 
 plzn tls "server/tls12-sslv2-empty-record" {
+  syntax 1.0
   rfc 5246 section E.2
   chain: [rsa_2048]
   uut server {
@@ -45,6 +47,7 @@ plzn tls "server/tls12-sslv2-empty-record" {
 }
 
 plzn tls "server/tls12-sslv2-empty-record-type-0" {
+  syntax 1.0
   rfc 5246 section E.2
   chain: [rsa_2048]
   uut server {
@@ -62,6 +65,7 @@ plzn tls "server/tls12-sslv2-empty-record-type-0" {
 }
 
 plzn tls "server/tls12-sslv2-empty-record-type-1" {
+  syntax 1.0
   rfc 5246 section E.2
   chain: [rsa_2048]
   uut server {
@@ -79,6 +83,7 @@ plzn tls "server/tls12-sslv2-empty-record-type-1" {
 }
 
 plzn tls "server/tls12-sslv2-just-version" {
+  syntax 1.0
   rfc 5246 section E.2
   chain: [rsa_2048]
   uut server {

@@ -2,6 +2,7 @@
 # without sending a TLS alert. The integration test points this at
 # a ClosingOracle that accepts and immediately closes.
 plzn tls "negative/close-without-alert" {
+  syntax 1.0
   rfc 5246
   chain: [default]
   uut server { versions: [tls12] }

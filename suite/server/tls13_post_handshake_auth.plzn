@@ -1,4 +1,5 @@
 plzn tls "server/tls13-post-handshake-auth" {
+  syntax 1.0
   rfc 8446 section 4.6.2
   chain: [default]
   uut server {
@@ -24,6 +25,7 @@ plzn tls "server/tls13-post-handshake-auth" {
 }
 
 plzn tls "server/tls13-post-handshake-auth-with-key-update" {
+  syntax 1.0
   rfc 8446 section 4.6.2
   chain: [default]
   uut server {
@@ -50,6 +52,7 @@ plzn tls "server/tls13-post-handshake-auth-with-key-update" {
 }
 
 plzn tls "server/tls13-post-handshake-auth-no-client-cert" {
+  syntax 1.0
   rfc 8446 section 4.4.2.4
   chain: [default]
   uut server {
@@ -74,6 +77,7 @@ plzn tls "server/tls13-post-handshake-auth-no-client-cert" {
 }
 
 plzn tls "server/tls13-post-handshake-auth-no-client-cert-required" {
+  syntax 1.0
   rfc 8446 section 4.4.2.4
   chain: [default]
   uut server {
@@ -98,6 +102,7 @@ plzn tls "server/tls13-post-handshake-auth-no-client-cert-required" {
 }
 
 plzn tls "server/tls13-post-handshake-auth-required-finished-without-certificate" {
+  syntax 1.0
   rfc 8446 section 4.6.2
   chain: [default]
   uut server {
@@ -119,6 +124,7 @@ plzn tls "server/tls13-post-handshake-auth-required-finished-without-certificate
 }
 
 plzn tls "server/tls13-post-handshake-auth-bad-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   uut server {
@@ -143,6 +149,7 @@ plzn tls "server/tls13-post-handshake-auth-bad-signature" {
 }
 
 plzn tls "server/tls13-post-handshake-auth-certificate-trailing-byte" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   uut server {

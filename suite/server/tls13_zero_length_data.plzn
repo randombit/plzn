@@ -1,4 +1,5 @@
 plzn tls "server/tls13-zero-length-data/zero-length-app-data" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -16,6 +17,7 @@ plzn tls "server/tls13-zero-length-data/zero-length-app-data" {
 }
 
 plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding" {
+  syntax 1.0
   rfc 8446 section 5.4
   chain: [default]
   uut server { versions: [tls13] }
@@ -33,6 +35,7 @@ plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding" {
 }
 
 plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-large-padding" {
+  syntax 1.0
   rfc 8446 section 5.4
   chain: [default]
   uut server { versions: [tls13] }
@@ -50,6 +53,7 @@ plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-large-padding"
 }
 
 plzn tls "server/tls13-zero-length-data/zero-length-app-data-during-handshake" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -62,6 +66,7 @@ plzn tls "server/tls13-zero-length-data/zero-length-app-data-during-handshake" {
 }
 
 plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding-interleaved-in-handshake" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -77,6 +82,7 @@ plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-padding-interl
 }
 
 plzn tls "server/tls13-zero-length-data/zero-length-app-data-with-large-padding-interleaved-in-handshake" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

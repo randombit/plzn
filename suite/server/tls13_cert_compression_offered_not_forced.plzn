@@ -1,4 +1,5 @@
 plzn tls "server/tls13-cert-compression-offered-not-forced" {
+  syntax 1.0
   rfc 8879 section 3
   chain: [default]
   uut server { versions: [tls13] }

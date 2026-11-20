@@ -1,4 +1,5 @@
 plzn tls "selftest/local-rejection/tls13-no-signing-scheme" {
+  syntax 1.0
   rfc 8446 section 4.4.2.2
   chain: [rsa_2048]
   uut client {

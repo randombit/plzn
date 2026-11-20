@@ -1,4 +1,5 @@
 plzn tls "server/tls13-early-data-exceeds-ticket-limit" {
+  syntax 1.0
   rfc 8446 section 4.2.10
   chain: [default]
   uut server {

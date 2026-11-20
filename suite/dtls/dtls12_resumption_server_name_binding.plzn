@@ -6,6 +6,7 @@
 # reports the outcome through `assert resumed`.
 
 plzn tls "dtls12/resumption-server-name-binding/same-name-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -31,6 +32,7 @@ plzn tls "dtls12/resumption-server-name-binding/same-name-resumes" {
 }
 
 plzn tls "dtls12/resumption-server-name-binding/different-name-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -58,6 +60,7 @@ plzn tls "dtls12/resumption-server-name-binding/different-name-full-handshake" {
 }
 
 plzn tls "dtls12/resumption-server-name-binding/name-omitted-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -83,6 +86,7 @@ plzn tls "dtls12/resumption-server-name-binding/name-omitted-resumes" {
 }
 
 plzn tls "dtls12/resumption-server-name-binding/name-added-full-handshake" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {
@@ -110,6 +114,7 @@ plzn tls "dtls12/resumption-server-name-binding/name-added-full-handshake" {
 }
 
 plzn tls "dtls12/resumption-server-name-binding/case-only-difference-resumes" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [ecdsa_p256]
   uut server {

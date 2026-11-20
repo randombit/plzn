@@ -1,4 +1,5 @@
 plzn tls "client/tls13-client-key-update" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   skip rustls "no automatic key-update policy (records_per_traffic_key)"

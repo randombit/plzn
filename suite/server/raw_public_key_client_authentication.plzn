@@ -1,4 +1,5 @@
 plzn tls "server/tls12-raw-public-key-client-authentication" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -21,6 +22,7 @@ plzn tls "server/tls12-raw-public-key-client-authentication" {
 }
 
 plzn tls "server/tls13-raw-public-key-client-authentication" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -43,6 +45,7 @@ plzn tls "server/tls13-raw-public-key-client-authentication" {
 }
 
 plzn tls "server/tls12-client-certificate-types-prefers-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -61,6 +64,7 @@ plzn tls "server/tls12-client-certificate-types-prefers-raw-public-key" {
 }
 
 plzn tls "server/tls13-client-certificate-types-prefers-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -79,6 +83,7 @@ plzn tls "server/tls13-client-certificate-types-prefers-raw-public-key" {
 }
 
 plzn tls "server/tls12-client-certificate-types-prefers-x509" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -99,6 +104,7 @@ plzn tls "server/tls12-client-certificate-types-prefers-x509" {
 }
 
 plzn tls "server/tls13-client-certificate-types-prefers-x509" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -119,6 +125,7 @@ plzn tls "server/tls13-client-certificate-types-prefers-x509" {
 }
 
 plzn tls "server/tls12-client-certificate-type-ignores-unknown-value" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -141,6 +148,7 @@ plzn tls "server/tls12-client-certificate-type-ignores-unknown-value" {
 }
 
 plzn tls "server/tls13-client-certificate-type-ignores-unknown-value" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -163,6 +171,7 @@ plzn tls "server/tls13-client-certificate-type-ignores-unknown-value" {
 }
 
 plzn tls "server/tls12-client-certificate-type-absence-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -179,6 +188,7 @@ plzn tls "server/tls12-client-certificate-type-absence-selects-x509" {
 }
 
 plzn tls "server/tls13-client-certificate-type-absence-selects-x509" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -195,6 +205,7 @@ plzn tls "server/tls13-client-certificate-type-absence-selects-x509" {
 }
 
 plzn tls "server/tls12-raw-public-key-only-rejects-absent-client-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -210,6 +221,7 @@ plzn tls "server/tls12-raw-public-key-only-rejects-absent-client-certificate-typ
 }
 
 plzn tls "server/tls13-raw-public-key-only-rejects-absent-client-certificate-type" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -225,6 +237,7 @@ plzn tls "server/tls13-raw-public-key-only-rejects-absent-client-certificate-typ
 }
 
 plzn tls "server/tls12-rejects-empty-client-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -240,6 +253,7 @@ plzn tls "server/tls12-rejects-empty-client-certificate-type-list" {
 }
 
 plzn tls "server/tls13-rejects-empty-client-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -255,6 +269,7 @@ plzn tls "server/tls13-rejects-empty-client-certificate-type-list" {
 }
 
 plzn tls "server/tls12-rejects-default-only-client-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -272,6 +287,7 @@ plzn tls "server/tls12-rejects-default-only-client-certificate-type-list" {
 }
 
 plzn tls "server/tls13-rejects-default-only-client-certificate-type-list" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -289,6 +305,7 @@ plzn tls "server/tls13-rejects-default-only-client-certificate-type-list" {
 }
 
 plzn tls "server/tls12-rejects-x509-client-certificate-encoded-as-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -305,6 +322,7 @@ plzn tls "server/tls12-rejects-x509-client-certificate-encoded-as-raw-public-key
 }
 
 plzn tls "server/tls13-rejects-x509-client-certificate-encoded-as-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -321,6 +339,7 @@ plzn tls "server/tls13-rejects-x509-client-certificate-encoded-as-raw-public-key
 }
 
 plzn tls "server/tls12-rejects-raw-public-key-encoded-as-x509-client-certificate" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -341,6 +360,7 @@ plzn tls "server/tls12-rejects-raw-public-key-encoded-as-x509-client-certificate
 }
 
 plzn tls "server/tls13-rejects-raw-public-key-encoded-as-x509-client-certificate" {
+  syntax 1.0
   rfc 7250 section 4.1
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -361,6 +381,7 @@ plzn tls "server/tls13-rejects-raw-public-key-encoded-as-x509-client-certificate
 }
 
 plzn tls "server/tls12-rejects-empty-client-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -377,6 +398,7 @@ plzn tls "server/tls12-rejects-empty-client-raw-public-key" {
 }
 
 plzn tls "server/tls13-rejects-empty-client-raw-public-key" {
+  syntax 1.0
   rfc 7250 section 3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -393,6 +415,7 @@ plzn tls "server/tls13-rejects-empty-client-raw-public-key" {
 }
 
 plzn tls "server/tls13-rejects-raw-public-key-without-certificate-verify" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   client_chain: [ecdsa_p256]

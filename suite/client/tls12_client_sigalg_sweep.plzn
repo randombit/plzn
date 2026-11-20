@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-rsa-sigalg-sweep" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   uut client {
     versions: [tls12]

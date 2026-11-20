@@ -1,4 +1,5 @@
 plzn tls "client/tls13-encrypted-extensions-padding" {
+  syntax 1.0
   rfc 8446 section 4.2
   rfc 7685 section 3
   chain: [default]

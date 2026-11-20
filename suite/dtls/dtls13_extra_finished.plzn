@@ -1,4 +1,5 @@
 plzn tls "dtls13/server-rejects-extra-finished" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -11,6 +12,7 @@ plzn tls "dtls13/server-rejects-extra-finished" {
 }
 
 plzn tls "dtls13/client-rejects-extra-finished" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -22,6 +24,7 @@ plzn tls "dtls13/client-rejects-extra-finished" {
 }
 
 plzn tls "dtls13/server-rejects-extra-finished-packed" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -38,6 +41,7 @@ plzn tls "dtls13/server-rejects-extra-finished-packed" {
 }
 
 plzn tls "dtls13/client-rejects-extra-finished-packed" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -54,6 +58,7 @@ plzn tls "dtls13/client-rejects-extra-finished-packed" {
 }
 
 plzn tls "dtls13/server-rejects-extra-finished-reordered" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server { versions: [dtls13] }
@@ -62,6 +67,7 @@ plzn tls "dtls13/server-rejects-extra-finished-reordered" {
 }
 
 plzn tls "dtls13/client-rejects-extra-finished-reordered" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut client { versions: [dtls13] }
@@ -70,6 +76,7 @@ plzn tls "dtls13/client-rejects-extra-finished-reordered" {
 }
 
 plzn tls "dtls13/server-rejects-new-finished-at-previous-epoch-after-appdata" {
+  syntax 1.0
   rfc 9147 section 5.8
   chain: [default]
   uut server {

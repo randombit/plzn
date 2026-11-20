@@ -1,4 +1,5 @@
 plzn tls "client/tls13-client-certificate-signature-algorithms-cert/independent-lists" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   client_chain: [rsa_2048]
@@ -25,6 +26,7 @@ plzn tls "client/tls13-client-certificate-signature-algorithms-cert/independent-
 }
 
 plzn tls "client/tls13-client-certificate-signature-algorithms-cert/excludes-certificate" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   client_chain: [rsa_2048]
@@ -56,6 +58,7 @@ plzn tls "client/tls13-client-certificate-signature-algorithms-cert/excludes-cer
 }
 
 plzn tls "client/tls13-client-certificate-signature-algorithms-cert/absent-falls-back" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   client_chain: [rsa_2048]

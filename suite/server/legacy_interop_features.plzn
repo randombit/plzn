@@ -1,4 +1,5 @@
 plzn tls "server/legacy-signature-algorithms-extension-is-ignored" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4.1
   chain: [rsa_2048]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/legacy-signature-algorithms-extension-is-ignored" {
 }
 
 plzn tls "server/tls10-without-extended-master-secret" {
+  syntax 1.0
   rfc 2246 section 8.1
   chain: [rsa_2048]
   uut server {
@@ -32,6 +34,7 @@ plzn tls "server/tls10-without-extended-master-secret" {
 }
 
 plzn tls "server/legacy-exporter" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -47,6 +50,7 @@ plzn tls "server/legacy-exporter" {
 }
 
 plzn tls "server/legacy-tls-unique" {
+  syntax 1.0
   rfc 5929 section 3
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -60,6 +64,7 @@ plzn tls "server/legacy-tls-unique" {
 }
 
 plzn tls "server/legacy-encrypt-then-mac" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -79,6 +84,7 @@ plzn tls "server/legacy-encrypt-then-mac" {
 }
 
 plzn tls "server/legacy-empty-and-one-byte-record-splits" {
+  syntax 1.0
   rfc 2246 section 6.2.1
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }

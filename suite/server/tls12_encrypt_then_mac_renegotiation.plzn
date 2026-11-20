@@ -1,4 +1,5 @@
 plzn tls "server/tls12-encrypt-then-mac-renegotiation/valid-handshake" {
+  syntax 1.0
   rfc 7366
   chain: [default]
   uut server {
@@ -13,6 +14,7 @@ plzn tls "server/tls12-encrypt-then-mac-renegotiation/valid-handshake" {
 }
 
 plzn tls "server/tls12-encrypt-then-mac-renegotiation/crash" {
+  syntax 1.0
   rfc 7366
   chain: [default]
   uut server {

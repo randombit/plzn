@@ -1,4 +1,5 @@
 plzn tls "server/tls12-ecdhe-follows-ecdsa-chain" {
+  syntax 1.0
   rfc 8422 section 5.1.3
   uut server {
     versions: [tls12]
@@ -15,6 +16,7 @@ plzn tls "server/tls12-ecdhe-follows-ecdsa-chain" {
 }
 
 plzn tls "server/tls12-ecdhe-follows-rsa-chain" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   uut server {
     versions: [tls12]

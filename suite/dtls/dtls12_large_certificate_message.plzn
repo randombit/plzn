@@ -1,4 +1,5 @@
 plzn tls "dtls12/large-message" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [rsa_2048]
   uut client {
@@ -13,6 +14,7 @@ plzn tls "dtls12/large-message" {
 }
 
 plzn tls "dtls12/large-message-reject" {
+  syntax 1.0
   rfc 6347 section 4.2.3
   chain: [rsa_2048]
   uut client {

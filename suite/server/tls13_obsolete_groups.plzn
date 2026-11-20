@@ -1,4 +1,5 @@
 plzn tls "server/tls13-obsolete-groups/only-obsolete-share" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -19,6 +20,7 @@ plzn tls "server/tls13-obsolete-groups/only-obsolete-share" {
 }
 
 plzn tls "server/tls13-obsolete-groups/only-obsolete-group-empty-key-share" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -39,6 +41,7 @@ plzn tls "server/tls13-obsolete-groups/only-obsolete-group-empty-key-share" {
 }
 
 plzn tls "server/tls13-obsolete-groups/valid-share-after-obsolete-group" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -63,6 +66,7 @@ plzn tls "server/tls13-obsolete-groups/valid-share-after-obsolete-group" {
 }
 
 plzn tls "server/tls13-obsolete-groups/obsolete-share-before-valid-share" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }
@@ -87,6 +91,7 @@ plzn tls "server/tls13-obsolete-groups/obsolete-share-before-valid-share" {
 }
 
 plzn tls "server/tls13-obsolete-groups/obsolete-share-after-valid-share" {
+  syntax 1.0
   rfc 8446 section 4.2.7
   chain: [default]
   uut server { versions: [tls13], curves: [secp256r1] }

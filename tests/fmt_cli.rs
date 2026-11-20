@@ -8,7 +8,7 @@ fn fmt_formats_directories_and_check_is_read_only() {
     let case = nested.join("case.plzn");
     std::fs::write(
         &case,
-        "plzn tls \"fmt/cli\" {  \r\n      chain: [default]\r\n uut server { versions: [tls12] }\r\n flow {\r\n        send AppData\r\n }\r\n expect close\r\n}\r\n\r\n",
+        "plzn tls \"fmt/cli\" {  \r\n   syntax 1.0\r\n      chain: [default]\r\n uut server { versions: [tls12] }\r\n flow {\r\n        send AppData\r\n }\r\n expect close\r\n}\r\n\r\n",
     )
     .unwrap();
 
@@ -30,6 +30,7 @@ fn fmt_formats_directories_and_check_is_read_only() {
         std::fs::read_to_string(&case).unwrap(),
         concat!(
             "plzn tls \"fmt/cli\" {\n",
+            "  syntax 1.0\n",
             "  chain: [default]\n",
             "  uut server { versions: [tls12] }\n",
             "  flow {\n",

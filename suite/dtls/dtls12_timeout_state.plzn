@@ -1,4 +1,5 @@
 plzn tls "dtls12/server-no-timeout-before-cookie-exchange" {
+  syntax 1.0
   rfc 6347 section 4.2.1
   chain: [ecdsa_p256]
   uut server {
@@ -23,6 +24,7 @@ plzn tls "dtls12/server-no-timeout-before-cookie-exchange" {
 }
 
 plzn tls "dtls12/client-no-timeout-after-handshake" {
+  syntax 1.0
   rfc 6347 section 4.2.4
   chain: [ecdsa_p256]
   uut client {
@@ -37,6 +39,7 @@ plzn tls "dtls12/client-no-timeout-after-handshake" {
 }
 
 plzn tls "dtls12/client-timeout-cap-does-not-refire" {
+  syntax 1.0
   rfc 6347 section 4.2.4.1
   chain: [ecdsa_p256]
   uut client {
@@ -79,6 +82,7 @@ plzn tls "dtls12/client-timeout-cap-does-not-refire" {
 }
 
 plzn tls "dtls12/client-forward-progress-resets-timeout-budget" {
+  syntax 1.0
   rfc 6347 section 4.2.4.1
   chain: [ecdsa_p256]
   uut client {
@@ -114,6 +118,7 @@ plzn tls "dtls12/client-forward-progress-resets-timeout-budget" {
 }
 
 plzn tls "dtls12/handle-timeout-in-steps" {
+  syntax 1.0
   rfc 6347 section 4.2.4.1
   chain: [ecdsa_p256]
   uut client {
@@ -145,6 +150,7 @@ plzn tls "dtls12/handle-timeout-in-steps" {
 }
 
 plzn tls "dtls12/timeout-fudge" {
+  syntax 1.0
   rfc 6347 section 4.2.4.1
   chain: [ecdsa_p256]
   uut client {

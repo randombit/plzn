@@ -1,4 +1,5 @@
 plzn tls "client/tls10-rejects-tls12-server-key-exchange-format" {
+  syntax 1.0
   rfc 2246 section 7.4.3
   chain: [rsa_2048]
   uut client { versions: [tls10] }
@@ -13,6 +14,7 @@ plzn tls "client/tls10-rejects-tls12-server-key-exchange-format" {
 }
 
 plzn tls "client/tls10-rejects-tls12-certificate-request-format" {
+  syntax 1.0
   rfc 2246 section 7.4.4
   chain: [rsa_2048]
   client_chain: [rsa_2048]

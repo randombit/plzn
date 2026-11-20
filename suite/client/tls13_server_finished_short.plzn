@@ -1,4 +1,5 @@
 plzn tls "client/tls13-server-finished-short" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut client { versions: [tls13] }

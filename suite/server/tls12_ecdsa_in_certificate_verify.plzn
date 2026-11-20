@@ -3,6 +3,7 @@
 # internal_error pins below are that alert choice, not an internal failure.
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -31,6 +32,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/md5-ecdsa-forced" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -55,6 +57,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/md5-ecdsa-forced" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -79,6 +82,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -104,6 +108,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -132,6 +137,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -160,6 +166,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -189,6 +196,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa" {
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha224" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -214,6 +222,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha256" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -238,6 +247,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha384" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -262,6 +272,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as-sha512" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -287,6 +298,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha1-ecdsa-advertised-as
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha1" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -311,6 +323,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha256" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -335,6 +348,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha384" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -359,6 +373,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-as-sha512" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -384,6 +399,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha224-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha1" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -408,6 +424,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha224" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -433,6 +450,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha384" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -457,6 +475,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-as-sha512" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -482,6 +501,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha256-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha1" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -506,6 +526,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha224" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -531,6 +552,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha256" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -555,6 +577,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-as-sha512" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -580,6 +603,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha384-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha1" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -604,6 +628,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha224" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -629,6 +654,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha256" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -653,6 +679,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-as-sha384" {
+  syntax 1.0
   rfc 4492 section 5.10
   chain: [default]
   uut server {
@@ -677,6 +704,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/make-sha512-ecdsa-advertised-
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-advertised-as-brainpool-tls13" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [default]
   uut server {
@@ -706,6 +734,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp256r1_sha256-advert
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-advertised-as-brainpool-tls13" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [default]
   uut server {
@@ -735,6 +764,7 @@ plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp384r1_sha384-advert
 }
 
 plzn tls "server/tls12-ecdsa-in-certificate-verify/ecdsa_secp521r1_sha512-advertised-as-brainpool-tls13" {
+  syntax 1.0
   rfc 8734 section 3
   chain: [default]
   uut server {

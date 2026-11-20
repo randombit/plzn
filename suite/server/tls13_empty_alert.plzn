@@ -1,4 +1,5 @@
 plzn tls "server/tls13-empty-alert/empty-alert-using-handshake-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -13,6 +14,7 @@ plzn tls "server/tls13-empty-alert/empty-alert-using-handshake-keys" {
 }
 
 plzn tls "server/tls13-empty-alert/empty-alert-with-2-bytes-of-padding-using-handshake-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -27,6 +29,7 @@ plzn tls "server/tls13-empty-alert/empty-alert-with-2-bytes-of-padding-using-han
 }
 
 plzn tls "server/tls13-empty-alert/empty-alert-with-30-bytes-of-padding-using-handshake-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -41,6 +44,7 @@ plzn tls "server/tls13-empty-alert/empty-alert-with-30-bytes-of-padding-using-ha
 }
 
 plzn tls "server/tls13-empty-alert/empty-alert-using-application-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -54,6 +58,7 @@ plzn tls "server/tls13-empty-alert/empty-alert-using-application-keys" {
 }
 
 plzn tls "server/tls13-empty-alert/empty-alert-with-5-bytes-of-padding-using-application-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -67,6 +72,7 @@ plzn tls "server/tls13-empty-alert/empty-alert-with-5-bytes-of-padding-using-app
 }
 
 plzn tls "server/tls13-empty-alert/empty-alert-with-30-bytes-of-padding-using-application-keys" {
+  syntax 1.0
   rfc 8446 section 5.1
   chain: [default]
   uut server { versions: [tls13] }

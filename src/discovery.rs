@@ -290,6 +290,7 @@ mod tests {
     #[test]
     fn tls13_server_seed_has_typed_candidates_in_priority_order() {
         let source = r#"plzn tls "seed" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake {
@@ -310,6 +311,7 @@ mod tests {
     #[test]
     fn generated_source_uses_the_normal_parser_and_lowerer() {
         let source = r#"plzn tls "seed" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls12] }
   flow handshake {
@@ -340,6 +342,7 @@ mod tests {
     #[test]
     fn dtls13_candidates_cover_valid_and_invalid_unified_headers() {
         let source = r#"plzn tls "seed" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls13] }
   flow handshake {
@@ -360,6 +363,7 @@ mod tests {
     #[test]
     fn retry_client_hello_waits_for_occurrence_selectors() {
         let source = r#"plzn tls "seed" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [tls13] }
   flow handshake { close }
@@ -375,6 +379,7 @@ mod tests {
     #[test]
     fn dtls12_cookie_client_hellos_wait_for_occurrence_selectors() {
         let source = r#"plzn tls "seed" {
+  syntax 1.0
   chain: [default]
   uut server { versions: [dtls12] }
   flow handshake {}

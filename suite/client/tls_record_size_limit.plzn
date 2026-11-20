@@ -1,4 +1,5 @@
 plzn tls "client/tls12-record-size-limit/advertised-and-enforced" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut client { versions: [tls12], record_size_limit: 512 }
@@ -19,6 +20,7 @@ plzn tls "client/tls12-record-size-limit/advertised-and-enforced" {
 }
 
 plzn tls "client/tls13-record-size-limit/advertised-and-enforced" {
+  syntax 1.0
   rfc 8449 section 4
   chain: [default]
   uut client { versions: [tls13], record_size_limit: 513 }

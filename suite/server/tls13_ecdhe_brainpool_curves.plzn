@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ecdhe-brainpool-curves/right-0-padded" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/right-0-padded" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/right-truncated" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -31,6 +33,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/right-truncated" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/point-at-infinity" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -47,6 +50,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/point-at-infinity" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/point-outside-curve" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -63,6 +67,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/point-outside-curve" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/x-and-y-zero" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -79,6 +84,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/x-and-y-zero" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/share-from-other-curve-256" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -93,6 +99,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/share-from-other-curve-256" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/share-from-other-curve-384" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {
@@ -107,6 +114,7 @@ plzn tls "server/tls13-ecdhe-brainpool-curves/share-from-other-curve-384" {
 }
 
 plzn tls "server/tls13-ecdhe-brainpool-curves/tls12-codepoint-in-tls13" {
+  syntax 1.0
   rfc 8734 section 2
   chain: [default]
   uut server {

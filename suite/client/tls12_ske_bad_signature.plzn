@@ -1,4 +1,5 @@
 plzn tls "client/tls12-ske-bad-signature" {
+  syntax 1.0
   rfc 5246 section 7.4.3
   chain: [default]
   uut client {

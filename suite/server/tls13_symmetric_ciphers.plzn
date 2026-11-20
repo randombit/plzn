@@ -1,4 +1,5 @@
 plzn tls "server/tls13-aead-tag-corruption/application-data" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -16,6 +17,7 @@ plzn tls "server/tls13-aead-tag-corruption/application-data" {
 }
 
 plzn tls "server/tls13-aead-tag-corruption/application-data-ccm-8" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -32,6 +34,7 @@ plzn tls "server/tls13-aead-tag-corruption/application-data-ccm-8" {
 }
 
 plzn tls "server/tls13-aead-tag-corruption/finished" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }

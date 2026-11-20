@@ -1,4 +1,5 @@
 plzn tls "server/tls13-rejects-grease-client-certificate-extension" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   rfc 8701 section 4.1
   chain: [rsa_2048]

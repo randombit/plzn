@@ -1,4 +1,5 @@
 plzn tls "server/tls13-eddsa-in-certificate-verify/valid-handshake" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -25,6 +26,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/valid-handshake" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha1" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -46,6 +48,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha1" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha224" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -67,6 +70,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_sha224" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp521r1_sha512" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -89,6 +93,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp521r1_sha5
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ed448" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -110,6 +115,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ed448" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp256r1_sha256" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -132,6 +138,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp256r1_sha2
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp384r1_sha384" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -154,6 +161,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/labelled-ecdsa_secp384r1_sha3
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/corrupted-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   matrix {
@@ -180,6 +188,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/corrupted-signature" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -202,6 +211,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-signature" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-r-component" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -224,6 +234,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-r-component" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-s-component" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]
@@ -246,6 +257,7 @@ plzn tls "server/tls13-eddsa-in-certificate-verify/all-zero-s-component" {
 }
 
 plzn tls "server/tls13-eddsa-in-certificate-verify/empty-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   skip botan "no Ed25519 TLS signature scheme"
   chain: [default]

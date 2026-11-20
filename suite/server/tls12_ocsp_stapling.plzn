@@ -1,4 +1,5 @@
 plzn tls "server/tls12-ocsp-stapling" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [default]
   uut server {
@@ -25,6 +26,7 @@ plzn tls "server/tls12-ocsp-stapling" {
 }
 
 plzn tls "server/tls12-ocsp-not-requested" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [default]
   uut server {
@@ -49,6 +51,7 @@ plzn tls "server/tls12-ocsp-not-requested" {
 }
 
 plzn tls "server/tls13-ocsp-stapling" {
+  syntax 1.0
   rfc 8446 section 4.4.2.1
   chain: [default]
   uut server {
@@ -66,6 +69,7 @@ plzn tls "server/tls13-ocsp-stapling" {
 }
 
 plzn tls "server/tls13-ocsp-not-requested" {
+  syntax 1.0
   rfc 8446 section 4.4.2.1
   chain: [default]
   uut server {
@@ -83,6 +87,7 @@ plzn tls "server/tls13-ocsp-not-requested" {
 # RFC 6066 defines only the ocsp status_type. A request with any other type
 # cannot be answered and must not be treated as an OCSP request.
 plzn tls "server/tls12-ocsp-unknown-status-type-ignored" {
+  syntax 1.0
   rfc 6066 section 8
   chain: [default]
   uut server {
@@ -108,6 +113,7 @@ plzn tls "server/tls12-ocsp-unknown-status-type-ignored" {
 }
 
 plzn tls "server/tls13-ocsp-unknown-status-type-ignored" {
+  syntax 1.0
   rfc 8446 section 4.4.2.1
   chain: [default]
   uut server {

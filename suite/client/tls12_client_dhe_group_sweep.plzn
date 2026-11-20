@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-dhe-group-sweep" {
+  syntax 1.0
   rfc 7919 section 3
   chain: [rsa_2048]
   uut client {

@@ -1,4 +1,5 @@
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/valid-pkcs1-padding" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -21,6 +22,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/valid-pkcs1-pad
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-3" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -38,6 +40,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-typ
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-1" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -55,6 +58,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-typ
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-in-padding" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -72,6 +76,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-in-padding
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding-end" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -89,6 +94,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding-start" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -106,6 +112,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/zero-at-padding
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-leading-zero" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -123,6 +130,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-leading
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-padding-separator" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -140,6 +148,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-padding
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-separator-before-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -157,6 +166,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/missing-separat
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/two-byte-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -174,6 +184,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/two-byte-premas
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/three-byte-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -191,6 +202,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/three-byte-prem
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/wrong-premaster-version" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -208,6 +220,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/wrong-premaster
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/49-byte-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -225,6 +238,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/49-byte-premast
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/47-byte-premaster" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -242,6 +256,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/47-byte-premast
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-1-with-ff-padding" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -259,6 +274,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-typ
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/non-random-nonzero-padding" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {
@@ -281,6 +297,7 @@ plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/non-random-nonz
 }
 
 plzn tls "server/tls12-rsa-padding-failures-deferred-to-finished/pkcs1-block-type-3-no-early-response" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   uut server {

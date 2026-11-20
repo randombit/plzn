@@ -1,4 +1,5 @@
 plzn tls "server/tls13-pre-shared-key-not-last" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   uut server { versions: [tls13] }

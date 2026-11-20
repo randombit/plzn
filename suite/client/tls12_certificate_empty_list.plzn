@@ -1,4 +1,5 @@
 plzn tls "client/tls12-certificate-empty-list" {
+  syntax 1.0
   rfc 5246 section 7.4.2
   chain: [default]
   uut client {

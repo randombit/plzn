@@ -1,4 +1,5 @@
 plzn tls "client/tls12-ske-bogus-named-curve" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [default]
   uut client {

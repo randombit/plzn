@@ -1,4 +1,5 @@
 plzn tls "client/tls12-does-not-offer-obsolete-key-exchange" {
+  syntax 1.0
   rfc 10015 section 2
   rfc 10015 section 3
   rfc 10015 section 4
@@ -20,6 +21,7 @@ plzn tls "client/tls12-does-not-offer-obsolete-key-exchange" {
 }
 
 plzn tls "client/tls12-does-not-offer-rc4" {
+  syntax 1.0
   rfc 7465 section 2
   chain: [default]
   uut client { versions: [tls12] }

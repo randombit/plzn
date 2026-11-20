@@ -10,6 +10,7 @@
 # tls12_server_empty_app_data_record).
 
 plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hello-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -41,6 +42,7 @@ plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hell
 }
 
 plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hello-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -70,6 +72,7 @@ plzn tls "client/tls12-empty-record-flood/plaintext-handshake-before-server-hell
 }
 
 plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-exchange-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -98,6 +101,7 @@ plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-e
 }
 
 plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-exchange-over-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -124,6 +128,7 @@ plzn tls "client/tls12-empty-record-flood/plaintext-handshake-after-server-key-e
 }
 
 plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-one-to-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -145,6 +150,7 @@ plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-fini
 }
 
 plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-thirty-three-to-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -170,6 +176,7 @@ plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-fini
 }
 
 plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-finished-over-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -196,6 +203,7 @@ plzn tls "client/tls12-empty-record-flood/protected-handshake-before-server-fini
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-two-to-sixteen" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -215,6 +223,7 @@ plzn tls "client/tls12-empty-record-flood/application-data-two-to-sixteen" {
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-seventeen-to-thirty-one" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -235,6 +244,7 @@ plzn tls "client/tls12-empty-record-flood/application-data-seventeen-to-thirty-o
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-thirty-two" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -256,6 +266,7 @@ plzn tls "client/tls12-empty-record-flood/application-data-thirty-two" {
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-thirty-three" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -281,6 +292,7 @@ plzn tls "client/tls12-empty-record-flood/application-data-thirty-three" {
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-thirty-four-to-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {
@@ -307,6 +319,7 @@ plzn tls "client/tls12-empty-record-flood/application-data-thirty-four-to-two-hu
 }
 
 plzn tls "client/tls12-empty-record-flood/application-data-over-two-hundred" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut client {

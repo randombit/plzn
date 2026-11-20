@@ -1,4 +1,5 @@
 plzn tls "client/legacy-exporter" {
+  syntax 1.0
   rfc 5705 section 4
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -11,6 +12,7 @@ plzn tls "client/legacy-exporter" {
 }
 
 plzn tls "client/legacy-tls-unique" {
+  syntax 1.0
   rfc 5929 section 3
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -21,6 +23,7 @@ plzn tls "client/legacy-tls-unique" {
 }
 
 plzn tls "client/legacy-encrypt-then-mac" {
+  syntax 1.0
   rfc 7366 section 3
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }

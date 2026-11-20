@@ -1,4 +1,5 @@
 plzn tls "dtls13/client-key-share-fresh-across-connections" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut client {
@@ -16,6 +17,7 @@ plzn tls "dtls13/client-key-share-fresh-across-connections" {
 }
 
 plzn tls "dtls13/server-key-share-fresh-across-connections" {
+  syntax 1.0
   rfc 9147 section 5.3
   chain: [default]
   uut server {

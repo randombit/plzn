@@ -1,4 +1,5 @@
 plzn tls "server/tls12-invalid-server-name-extension-resumption/valid-sni" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -14,6 +15,7 @@ plzn tls "server/tls12-invalid-server-name-extension-resumption/valid-sni" {
 }
 
 plzn tls "server/tls12-invalid-server-name-extension-resumption/bad-sni" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {
@@ -27,6 +29,7 @@ plzn tls "server/tls12-invalid-server-name-extension-resumption/bad-sni" {
 }
 
 plzn tls "server/tls12-invalid-server-name-extension-resumption/resume-with-malformed-sni" {
+  syntax 1.0
   rfc 6066 section 3
   chain: [default]
   uut server {

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-length/client-hello-message" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -11,6 +12,7 @@ plzn tls "server/tls13-length/client-hello-message" {
 }
 
 plzn tls "server/tls13-length/client-hello-session-id" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -23,6 +25,7 @@ plzn tls "server/tls13-length/client-hello-session-id" {
 }
 
 plzn tls "server/tls13-length/client-hello-cipher-suites" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -35,6 +38,7 @@ plzn tls "server/tls13-length/client-hello-cipher-suites" {
 }
 
 plzn tls "server/tls13-length/client-hello-compression-methods" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -47,6 +51,7 @@ plzn tls "server/tls13-length/client-hello-compression-methods" {
 }
 
 plzn tls "server/tls13-length/client-hello-extensions" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -59,6 +64,7 @@ plzn tls "server/tls13-length/client-hello-extensions" {
 }
 
 plzn tls "server/tls13-length/client-certificate-message" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -72,6 +78,7 @@ plzn tls "server/tls13-length/client-certificate-message" {
 }
 
 plzn tls "server/tls13-length/client-certificate-request-context" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -86,6 +93,7 @@ plzn tls "server/tls13-length/client-certificate-request-context" {
 }
 
 plzn tls "server/tls13-length/client-certificate-list" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -99,6 +107,7 @@ plzn tls "server/tls13-length/client-certificate-list" {
 }
 
 plzn tls "server/tls13-length/client-certificate-entry" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -112,6 +121,7 @@ plzn tls "server/tls13-length/client-certificate-entry" {
 }
 
 plzn tls "server/tls13-length/client-certificate-entry-extensions" {
+  syntax 1.0
   rfc 8446 section 4.4.2
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -125,6 +135,7 @@ plzn tls "server/tls13-length/client-certificate-entry-extensions" {
 }
 
 plzn tls "server/tls13-length/client-certificate-verify-message" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -137,6 +148,7 @@ plzn tls "server/tls13-length/client-certificate-verify-message" {
 }
 
 plzn tls "server/tls13-length/client-certificate-verify-signature" {
+  syntax 1.0
   rfc 8446 section 4.4.3
   chain: [default]
   client_chain: [ecdsa_p256]
@@ -149,6 +161,7 @@ plzn tls "server/tls13-length/client-certificate-verify-signature" {
 }
 
 plzn tls "server/tls13-length/client-finished-message" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut server { versions: [tls13] }
@@ -160,6 +173,7 @@ plzn tls "server/tls13-length/client-finished-message" {
 }
 
 plzn tls "server/tls13-length/signature-algorithms-extension" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -172,6 +186,7 @@ plzn tls "server/tls13-length/signature-algorithms-extension" {
 }
 
 plzn tls "server/tls13-length/signature-algorithms-list" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -183,6 +198,7 @@ plzn tls "server/tls13-length/signature-algorithms-list" {
 }
 
 plzn tls "server/tls13-length/supported-versions-extension" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -195,6 +211,7 @@ plzn tls "server/tls13-length/supported-versions-extension" {
 }
 
 plzn tls "server/tls13-length/supported-versions-list" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -206,6 +223,7 @@ plzn tls "server/tls13-length/supported-versions-list" {
 }
 
 plzn tls "server/tls13-length/key-share-extension" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server { versions: [tls13] }
@@ -218,6 +236,7 @@ plzn tls "server/tls13-length/key-share-extension" {
 }
 
 plzn tls "server/tls13-length/key-share-entry-list" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server { versions: [tls13] }
@@ -229,6 +248,7 @@ plzn tls "server/tls13-length/key-share-entry-list" {
 }
 
 plzn tls "server/tls13-length/psk-key-exchange-modes-extension" {
+  syntax 1.0
   rfc 8446 section 4.2.9
   chain: [default]
   uut server { versions: [tls13] }
@@ -241,6 +261,7 @@ plzn tls "server/tls13-length/psk-key-exchange-modes-extension" {
 }
 
 plzn tls "server/tls13-length/psk-key-exchange-modes-list" {
+  syntax 1.0
   rfc 8446 section 4.2.9
   xfail gnutls "accepts psk_key_exchange_modes with a short modes vector"
   skip wolfssl "built without PSK or session tickets: psk_key_exchange_modes is ignored unparsed"
@@ -254,6 +275,7 @@ plzn tls "server/tls13-length/psk-key-exchange-modes-list" {
 }
 
 plzn tls "server/tls13-length/pre-shared-key-extension" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   uut server { versions: [tls13] }
@@ -269,6 +291,7 @@ plzn tls "server/tls13-length/pre-shared-key-extension" {
 }
 
 plzn tls "server/tls13-length/pre-shared-key-identity-list" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   uut server { versions: [tls13] }
@@ -284,6 +307,7 @@ plzn tls "server/tls13-length/pre-shared-key-identity-list" {
 }
 
 plzn tls "server/tls13-length/pre-shared-key-binder-list" {
+  syntax 1.0
   rfc 8446 section 4.2.11
   chain: []
   uut server { versions: [tls13] }
@@ -299,6 +323,7 @@ plzn tls "server/tls13-length/pre-shared-key-binder-list" {
 }
 
 plzn tls "server/tls13-length/renegotiation-info-extension" {
+  syntax 1.0
   rfc 5746 section 3.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -311,6 +336,7 @@ plzn tls "server/tls13-length/renegotiation-info-extension" {
 }
 
 plzn tls "server/tls13-length/alpn-extension" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut server { versions: [tls13], alpn_select: "h2" }
@@ -323,6 +349,7 @@ plzn tls "server/tls13-length/alpn-extension" {
 }
 
 plzn tls "server/tls13-length/alpn-protocol-list" {
+  syntax 1.0
   rfc 7301 section 3.1
   xfail gnutls "accepts an ALPN extension with a short ProtocolNameList length"
   chain: [default]
@@ -335,6 +362,7 @@ plzn tls "server/tls13-length/alpn-protocol-list" {
 }
 
 plzn tls "server/tls13-length/encrypt-then-mac-extension" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -347,6 +375,7 @@ plzn tls "server/tls13-length/encrypt-then-mac-extension" {
 }
 
 plzn tls "server/tls13-length/extended-master-secret-extension" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -359,6 +388,7 @@ plzn tls "server/tls13-length/extended-master-secret-extension" {
 }
 
 plzn tls "server/tls13-length/heartbeat-extension" {
+  syntax 1.0
   rfc 8446 section 4.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -371,6 +401,7 @@ plzn tls "server/tls13-length/heartbeat-extension" {
 }
 
 plzn tls "server/tls13-length/padding-extension" {
+  syntax 1.0
   rfc 7685 section 3
   chain: [default]
   uut server { versions: [tls13] }

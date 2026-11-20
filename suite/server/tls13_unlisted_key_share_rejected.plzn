@@ -1,4 +1,5 @@
 plzn tls "server/tls13-unlisted-key-share-rejected" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   skip rustls "RFC 8446 permits ignoring the unlisted share; the sibling HRR case covers that policy"

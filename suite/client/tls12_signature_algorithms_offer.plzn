@@ -1,4 +1,5 @@
 plzn tls "client/tls12-signature-algorithms-offer-excludes-md5-sha1-and-anonymous" {
+  syntax 1.0
   rfc 9155 section 2
   chain: [default]
   uut client { versions: [tls12] }
@@ -17,6 +18,7 @@ plzn tls "client/tls12-signature-algorithms-offer-excludes-md5-sha1-and-anonymou
 }
 
 plzn tls "client/tls12-signature-algorithms-offer-excludes-rsa-and-ecdsa-sha1" {
+  syntax 1.0
   rfc 9155 section 2
   chain: [default]
   uut client { versions: [tls12] }

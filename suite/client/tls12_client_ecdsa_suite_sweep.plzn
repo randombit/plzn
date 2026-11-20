@@ -1,4 +1,5 @@
 plzn tls "client/tls12-client-sweep-ecdsa" {
+  syntax 1.0
   rfc 8422 section 6
   chain: [ecdsa_p256]
   uut client {

@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ecdsa-support/ecdsa_secp256r1_sha256" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
@@ -12,6 +13,7 @@ plzn tls "server/tls13-ecdsa-support/ecdsa_secp256r1_sha256" {
 }
 
 plzn tls "server/tls13-ecdsa-support/ecdsa_sha1" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
@@ -22,6 +24,7 @@ plzn tls "server/tls13-ecdsa-support/ecdsa_sha1" {
 }
 
 plzn tls "server/tls13-ecdsa-support/ecdsa_sha224" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
@@ -32,6 +35,7 @@ plzn tls "server/tls13-ecdsa-support/ecdsa_sha224" {
 }
 
 plzn tls "server/tls13-ecdsa-support/ecdsa_secp384r1_sha384" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }
@@ -42,6 +46,7 @@ plzn tls "server/tls13-ecdsa-support/ecdsa_secp384r1_sha384" {
 }
 
 plzn tls "server/tls13-ecdsa-support/ecdsa_secp521r1_sha512" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [ecdsa_p256]
   uut server { versions: [tls13] }

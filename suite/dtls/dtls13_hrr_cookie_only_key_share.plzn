@@ -7,6 +7,7 @@
 # negotiate with a client that changes its key shares anyway.
 
 plzn tls "dtls13/hrr-cookie-only-accepts-unchanged-key-shares" {
+  syntax 1.0
   rfc 9846 section 4.2.2
   rfc 9147 section 5.1
   chain: [default]
@@ -36,6 +37,7 @@ plzn tls "dtls13/hrr-cookie-only-accepts-unchanged-key-shares" {
 # The share value changes (here to the curve generator) although the
 # cookie-only HelloRetryRequest requested no replacement.
 plzn tls "dtls13/hrr-cookie-only-rejects-changed-key-share-value" {
+  syntax 1.0
   rfc 9846 section 4.2.2
   rfc 9147 section 5.1
   chain: [default]
@@ -58,6 +60,7 @@ plzn tls "dtls13/hrr-cookie-only-rejects-changed-key-share-value" {
 # The offered group changes although the cookie-only HelloRetryRequest
 # requested no replacement; the share is the well-formed P-256 generator.
 plzn tls "dtls13/hrr-cookie-only-rejects-changed-key-share-group" {
+  syntax 1.0
   rfc 9846 section 4.2.2
   rfc 9147 section 5.1
   chain: [default]

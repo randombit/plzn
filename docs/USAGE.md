@@ -4,9 +4,12 @@ This document is for LLMs (and humans) writing and running plzn tests. For the
 full DSL grammar and design rationale, see [DSL.md](DSL.md). Historical coverage
 audits against BoGo, tlsfuzzer and TLS-Anvil are under `notes/audit/`.
 
-Start each TLS or DTLS test with `plzn tls "name" { ... }`. A `.plzn` file may
-also contain other protocols: `plzn` ignores `plzn quic`, `plzn http`, and
-other protocol declarations, and leaves their text intact when formatting.
+Start each TLS or DTLS test with `plzn tls "name" { ... }`, and make
+`syntax 1.0` its first statement: that is the DSL revision the test is written
+in, and plzn rejects a test that names a revision it does not implement. A
+`.plzn` file may also contain other protocols: `plzn` ignores `plzn quic`,
+`plzn http`, and other protocol declarations, and leaves their text intact
+when formatting.
 
 ## Workflow
 
@@ -281,6 +284,7 @@ list can.
 
 ```
 plzn tls "group/name" {
+  syntax 1.0                 # required, first: the DSL revision this test is written in
   rfc 8446 section 4.1.2     # optional, repeatable; cited in the report
   uut server {                         # required: policy applied to the UUT/shim
     versions: [tls13]           # first is plzn's peer driver; all are enabled in the shim
@@ -312,6 +316,7 @@ Comments start with `#`. Statements end at newlines; inside `{ }`, `[ ]` and
 
 ```
 plzn tls "usage/happy" {
+  syntax 1.0
   chain: [default]
   uut server {
     versions: [tls13]
@@ -362,6 +367,7 @@ remaining 31 bytes together in a second record, which this modifier does not do.
 
 ```
 plzn tls "usage/bad-finished" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -381,6 +387,7 @@ plzn sends a Finished with all-zero verify_data. The server rejects it with
 
 ```
 plzn tls "usage/xor-last-byte" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -400,6 +407,7 @@ with 0xff. Negative indices count from the end.
 
 ```
 plzn tls "usage/xor-verify-data-byte-0" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -421,6 +429,7 @@ target the record after encryption (see the mutation table below).
 
 ```
 plzn tls "usage/high-legacy-version" {
+  syntax 1.0
   chain: [rsa_2048]
   # Botan rejects the out-of-range version (decode_error); see the note on
   # mixed ok/failure expectations under "Per-backend expectations" below.
@@ -446,6 +455,7 @@ the app-data round trip completes.
 
 ```
 plzn tls "usage/check-server-version" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -469,6 +479,7 @@ and `lacks_ext: 0xNNNN` assert an extension's presence or absence;
 
 ```
 plzn tls "usage/extension-deltas" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -503,6 +514,7 @@ Lint rejects a delta on a message the driver would not apply it to.
 
 ```
 plzn tls "usage/sweep-finished-bytes" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -563,6 +575,7 @@ each one rather than loosening the expectation:
 
 ```
 plzn tls "usage/bad-record-after-handshake" {
+  syntax 1.0
   rfc 5246 section 6.2
   chain: [rsa_2048]
   uut server {
@@ -607,6 +620,7 @@ backend expectation configures both the runner and the shim self-check.
 
 ```
 plzn tls "usage/aead-tag-flip" {
+  syntax 1.0
   chain: [rsa_2048]
   uut server {
     versions: [tls12]
@@ -636,6 +650,7 @@ desynchronize plzn's own datagram packer.
 
 ```
 plzn tls "usage/keyupdate-requested" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server {
@@ -651,6 +666,7 @@ plzn tls "usage/keyupdate-requested" {
 }
 
 plzn tls "usage/tls13-renegotiation-forbidden" {
+  syntax 1.0
   rfc 8446 section 4.1.2
   chain: [default]
   uut server {
@@ -664,6 +680,7 @@ plzn tls "usage/tls13-renegotiation-forbidden" {
 }
 
 plzn tls "usage/tls12-renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [rsa_2048]
   uut server {
@@ -730,6 +747,7 @@ plzn tls "usage/tls12-renegotiation" {
 
 ```
 plzn tls "usage/tls12-client-version-too-old" {
+  syntax 1.0
   rfc 8446 section 4.2.1
   chain: [rsa_2048]
   uut server {
@@ -972,6 +990,7 @@ With `dial --pcap`, multi-session captures use `stem-<test-id-hash>.pcap`
 
 ```
 plzn tls "usage/tls13-resume" {
+  syntax 1.0
   rfc 8446 section 4.6.1
   chain: [default]
   uut server {
@@ -1097,6 +1116,7 @@ The behavior-oriented resumption cases `tls12_session_id_resumption`,
 
 ```
 plzn tls "usage/tls13-psk-ke" {
+  syntax 1.0
   rfc 8446 section 4.2.9
   chain: []
   skip rustls
@@ -1170,6 +1190,7 @@ in `tls/psk/` and `dtls/psk/`.
 
 ```
 plzn tls "usage/robot-oracle-probe" {
+  syntax 1.0
   rfc 5246 section 7.4.7.1
   chain: [rsa_2048]
   skip rustls
@@ -1208,6 +1229,7 @@ plzn plays the TLS server; the shim plays the client. Same CLI, same DSL.
 
 ```
 plzn tls "usage/client-tls13-roundtrip" {
+  syntax 1.0
   chain: [default]
   uut client {
     versions: [tls13]
@@ -1296,6 +1318,7 @@ Adversarial ServerHello overrides force values negotiation would never produce:
 
 ```
 plzn tls "usage/client-tls12-bogus-cipher" {
+  syntax 1.0
   rfc 5246 section 7.4.1.3
   chain: [default]
   uut client {
@@ -1317,6 +1340,7 @@ mutations too, for example the wrong-message-type family:
 
 ```
 plzn tls "usage/client-tls13-wrong-finished-type" {
+  syntax 1.0
   rfc 8446 section 4.4.4
   chain: [default]
   uut client {
@@ -1438,6 +1462,7 @@ rather than answered twice.
 
 ```
 plzn tls "usage/dtls12-replay-final-flight" {
+  syntax 1.0
   rfc 6347 section 4.1.2.6
   chain: [ecdsa_p256]
   uut server {
@@ -2305,6 +2330,8 @@ failure matched the expectation).
 ## Tips for LLMs
 
 - **Start with `plzn lint`** to catch syntax and schema errors before running.
+- **Open every test with `syntax 1.0`.** It is required, and nothing but
+  comments may come before it inside the braces.
 - **Verify against the corpus-enabled backends** (Botan, OpenSSL, LibreSSL,
   rustls, and Go) before committing an expectation; also probe GnuTLS and wolfSSL when
   the case is within their current shim surface. Then

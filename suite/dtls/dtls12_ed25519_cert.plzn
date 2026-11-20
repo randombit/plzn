@@ -1,4 +1,5 @@
 plzn tls "dtls12/ed25519-cert" {
+  syntax 1.0
   rfc 8422 section 5.4
   chain: [ed25519]
   uut server {

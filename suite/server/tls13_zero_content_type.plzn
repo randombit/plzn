@@ -1,4 +1,5 @@
 plzn tls "server/tls13-zero-content-type/zero-content-type-after-handshake" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -12,6 +13,7 @@ plzn tls "server/tls13-zero-content-type/zero-content-type-after-handshake" {
 }
 
 plzn tls "server/tls13-zero-content-type/zero-content-type-with-padding-after-handshake" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -25,6 +27,7 @@ plzn tls "server/tls13-zero-content-type/zero-content-type-with-padding-after-ha
 }
 
 plzn tls "server/tls13-zero-content-type/zero-content-type-during-handshake" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -39,6 +42,7 @@ plzn tls "server/tls13-zero-content-type/zero-content-type-during-handshake" {
 }
 
 plzn tls "server/tls13-zero-content-type/zero-content-type-with-padding-during-handshake" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -53,6 +57,7 @@ plzn tls "server/tls13-zero-content-type/zero-content-type-with-padding-during-h
 }
 
 plzn tls "server/tls13-zero-content-type/zero-content-type-during-application-data" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -68,6 +73,7 @@ plzn tls "server/tls13-zero-content-type/zero-content-type-during-application-da
 }
 
 plzn tls "server/tls13-zero-content-type/zero-content-type-with-padding-during-application-data" {
+  syntax 1.0
   rfc 8446 section 5.2
   chain: [default]
   uut server { versions: [tls13] }

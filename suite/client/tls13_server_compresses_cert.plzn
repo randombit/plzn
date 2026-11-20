@@ -1,4 +1,5 @@
 plzn tls "client/tls13-server-compresses-cert" {
+  syntax 1.0
   rfc 8879 section 4
   chain: [default]
   uut client {

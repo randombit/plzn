@@ -5,6 +5,7 @@
 # report an offer of nothing but curveSM2 as unsupported and skip.
 
 plzn tls "server/tls13-curvesm2/key-share-negotiated" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -19,6 +20,7 @@ plzn tls "server/tls13-curvesm2/key-share-negotiated" {
 
 # curveSM2 listed but not key-shared: the server retries for it.
 plzn tls "server/tls13-curvesm2/hrr-to-curvesm2" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   rfc 8446 section 4.1.4
   chain: [default]
@@ -35,6 +37,7 @@ plzn tls "server/tls13-curvesm2/hrr-to-curvesm2" {
 
 # The last byte of the share flipped: a point off the curve must be rejected.
 plzn tls "server/tls13-curvesm2/point-outside-curve" {
+  syntax 1.0
   rfc 8446 section 4.2.8.2
   chain: [default]
   uut server { versions: [tls13] }
@@ -49,6 +52,7 @@ plzn tls "server/tls13-curvesm2/point-outside-curve" {
 # draft-yang-tls-hybrid-sm2-mlkem: curveSM2MLKEM768 (0x11ee) is curveSM2
 # ECDHE first, then ML-KEM-768, in both the shares and the 64-byte secret.
 plzn tls "server/tls13-curvesm2/hybrid-key-share-negotiated" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   chain: [default]
   uut server { versions: [tls13] }
@@ -62,6 +66,7 @@ plzn tls "server/tls13-curvesm2/hybrid-key-share-negotiated" {
 }
 
 plzn tls "server/tls13-curvesm2/hrr-to-hybrid" {
+  syntax 1.0
   rfc 8998 section 3.3.1
   rfc 8446 section 4.1.4
   chain: [default]
@@ -79,6 +84,7 @@ plzn tls "server/tls13-curvesm2/hrr-to-hybrid" {
 # RFC 8998 3.1: the group exists only in TLS 1.3, so a TLS 1.2 server offered
 # nothing else has no curve to use.
 plzn tls "server/tls12-ignores-curvesm2" {
+  syntax 1.0
   rfc 8998 section 3.1
   chain: [default]
   uut server {

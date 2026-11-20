@@ -1,4 +1,5 @@
 plzn tls "client/tls12-server-warning-user-canceled"{
+  syntax 1.0
   rfc 5246 section 7.2.1
   chain: [default]
   uut client {

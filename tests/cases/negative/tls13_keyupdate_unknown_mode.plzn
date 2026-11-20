@@ -2,6 +2,7 @@
 # RFC 8446 §4.6.3 defines only 0 (update_not_requested) and
 # 1 (update_requested). Value 0x03 should trigger illegal_parameter.
 plzn tls "server/tls13-keyupdate-unknown-mode" {
+  syntax 1.0
   rfc 8446 section 4.6.3
   chain: [default]
   uut server { versions: [tls13] }

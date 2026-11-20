@@ -1,4 +1,5 @@
 plzn tls "client/tls13-hrr-empty-cookie" {
+  syntax 1.0
   rfc 8446 section 4.2.2
   chain: [default]
   uut client {
@@ -15,6 +16,7 @@ plzn tls "client/tls13-hrr-empty-cookie" {
 }
 
 plzn tls "client/tls13-hrr-missing-supported-versions" {
+  syntax 1.0
   rfc 8446 section 4.1.4
   chain: [default]
   uut client {

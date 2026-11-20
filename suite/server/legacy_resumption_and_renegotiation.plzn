@@ -1,4 +1,5 @@
 plzn tls "server/legacy-session-id-resumption" {
+  syntax 1.0
   rfc 2246 section 7.4.1.2
   rfc 4346 section 7.4.1.2
   chain: [rsa_2048]
@@ -29,6 +30,7 @@ plzn tls "server/legacy-session-id-resumption" {
 }
 
 plzn tls "server/legacy-secure-renegotiation" {
+  syntax 1.0
   rfc 5746 section 3.5
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -48,6 +50,7 @@ plzn tls "server/legacy-secure-renegotiation" {
 }
 
 plzn tls "server/legacy-insecure-renegotiation" {
+  syntax 1.0
   rfc 5746 section 4.2
   chain: [rsa_2048]
   matrix { version in [tls10, tls11] }
@@ -70,6 +73,7 @@ plzn tls "server/legacy-insecure-renegotiation" {
 }
 
 plzn tls "server/legacy-ecdsa-client-certificate" {
+  syntax 1.0
   rfc 4492 section 5.5
   chain: [rsa_2048]
   client_chain: [ecdsa_p256]

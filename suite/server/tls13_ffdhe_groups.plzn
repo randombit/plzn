@@ -1,4 +1,5 @@
 plzn tls "server/tls13-ffdhe-groups/duplicated-key-share-entry" {
+  syntax 1.0
   rfc 8446 section 4.2.8
   chain: [default]
   uut server {
@@ -19,6 +20,7 @@ plzn tls "server/tls13-ffdhe-groups/duplicated-key-share-entry" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/right-0-padded" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -36,6 +38,7 @@ plzn tls "server/tls13-ffdhe-groups/right-0-padded" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/right-truncated" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -53,6 +56,7 @@ plzn tls "server/tls13-ffdhe-groups/right-truncated" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/zero-as-one-byte" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -70,6 +74,7 @@ plzn tls "server/tls13-ffdhe-groups/zero-as-one-byte" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/zero-share" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -87,6 +92,7 @@ plzn tls "server/tls13-ffdhe-groups/zero-share" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/one" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -104,6 +110,7 @@ plzn tls "server/tls13-ffdhe-groups/one" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/all-bits-set" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -121,6 +128,7 @@ plzn tls "server/tls13-ffdhe-groups/all-bits-set" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/p-minus-1" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -138,6 +146,7 @@ plzn tls "server/tls13-ffdhe-groups/p-minus-1" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/p" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -155,6 +164,7 @@ plzn tls "server/tls13-ffdhe-groups/p" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/empty-entry" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -171,6 +181,7 @@ plzn tls "server/tls13-ffdhe-groups/empty-entry" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/share-from-other-group-2048" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -186,6 +197,7 @@ plzn tls "server/tls13-ffdhe-groups/share-from-other-group-2048" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/share-from-other-group-3072" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {
@@ -200,6 +212,7 @@ plzn tls "server/tls13-ffdhe-groups/share-from-other-group-3072" {
 }
 
 plzn tls "server/tls13-ffdhe-groups/share-from-other-group-large" {
+  syntax 1.0
   rfc 8446 section 4.2.8.1
   chain: [default]
   uut server {

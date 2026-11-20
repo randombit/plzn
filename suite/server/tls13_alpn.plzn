@@ -1,4 +1,5 @@
 plzn tls "server/tls13-alpn-selection" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [default]
   uut server {
@@ -16,6 +17,7 @@ plzn tls "server/tls13-alpn-selection" {
 }
 
 plzn tls "server/tls13-alpn-declined" {
+  syntax 1.0
   rfc 7301 section 3.2
   chain: [default]
   uut server {
@@ -32,6 +34,7 @@ plzn tls "server/tls13-alpn-declined" {
 }
 
 plzn tls "server/tls13-alpn-empty-protocol-name" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut server {
@@ -45,6 +48,7 @@ plzn tls "server/tls13-alpn-empty-protocol-name" {
 }
 
 plzn tls "server/tls13-alpn-resumption" {
+  syntax 1.0
   rfc 7301 section 3.1
   chain: [default]
   uut server {

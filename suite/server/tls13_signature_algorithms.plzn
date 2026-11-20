@@ -1,4 +1,5 @@
 plzn tls "server/tls13-signature-algorithms/legacy-pkcs1-tolerance" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -14,6 +15,7 @@ plzn tls "server/tls13-signature-algorithms/legacy-pkcs1-tolerance" {
 }
 
 plzn tls "server/tls13-signature-algorithms/unallocated-first" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -29,6 +31,7 @@ plzn tls "server/tls13-signature-algorithms/unallocated-first" {
 }
 
 plzn tls "server/tls13-signature-algorithms/duplicated-n-non-rsa" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -47,6 +50,7 @@ plzn tls "server/tls13-signature-algorithms/duplicated-n-non-rsa" {
 }
 
 plzn tls "server/tls13-signature-algorithms/duplicated-215-non-rsa" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -63,6 +67,7 @@ plzn tls "server/tls13-signature-algorithms/duplicated-215-non-rsa" {
 }
 
 plzn tls "server/tls13-signature-algorithms/n-invalid-pkcs1" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -81,6 +86,7 @@ plzn tls "server/tls13-signature-algorithms/n-invalid-pkcs1" {
 }
 
 plzn tls "server/tls13-signature-algorithms/invalid-pkcs1-215" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -102,6 +108,7 @@ plzn tls "server/tls13-signature-algorithms/invalid-pkcs1-215" {
 # caps the list too (32 entries before 4.4.1, 256 since) and answers
 # decode_error when it is exceeded.
 plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -122,6 +129,7 @@ plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown" {
 # 215 entries: above OpenSSL's 128-entry truncation, below LibreSSL 4.4.1's
 # 256-entry cap.
 plzn tls "server/tls13-signature-algorithms/tolerance-215-unknown" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -138,6 +146,7 @@ plzn tls "server/tls13-signature-algorithms/tolerance-215-unknown" {
 }
 
 plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
@@ -155,6 +164,7 @@ plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert" {
 }
 
 plzn tls "server/tls13-signature-algorithms/well-known-rsa-last" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -170,6 +180,7 @@ plzn tls "server/tls13-signature-algorithms/well-known-rsa-last" {
 }
 
 plzn tls "server/tls13-signature-algorithms/only-undefined" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -180,6 +191,7 @@ plzn tls "server/tls13-signature-algorithms/only-undefined" {
 }
 
 plzn tls "server/tls13-signature-algorithms/only-legacy" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -190,6 +202,7 @@ plzn tls "server/tls13-signature-algorithms/only-legacy" {
 }
 
 plzn tls "server/tls13-signature-algorithms/empty-list" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -201,6 +214,7 @@ plzn tls "server/tls13-signature-algorithms/empty-list" {
 }
 
 plzn tls "server/tls13-signature-algorithms/one-byte-body" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -211,6 +225,7 @@ plzn tls "server/tls13-signature-algorithms/one-byte-body" {
 }
 
 plzn tls "server/tls13-signature-algorithms/three-byte-body" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -221,6 +236,7 @@ plzn tls "server/tls13-signature-algorithms/three-byte-body" {
 }
 
 plzn tls "server/tls13-signature-algorithms/padded-list" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -231,6 +247,7 @@ plzn tls "server/tls13-signature-algorithms/padded-list" {
 }
 
 plzn tls "server/tls13-signature-algorithms/inner-length-short" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }
@@ -241,6 +258,7 @@ plzn tls "server/tls13-signature-algorithms/inner-length-short" {
 }
 
 plzn tls "server/tls13-signature-algorithms/inner-length-long" {
+  syntax 1.0
   rfc 8446 section 4.2.3
   chain: [default]
   uut server { versions: [tls13] }

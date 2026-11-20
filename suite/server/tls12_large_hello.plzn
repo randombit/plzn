@@ -1,4 +1,5 @@
 plzn tls "server/tls12-large-hello/padding-ext" {
+  syntax 1.0
   rfc 7685 section 3
   chain: [default]
   uut server {
@@ -15,6 +16,7 @@ plzn tls "server/tls12-large-hello/padding-ext" {
 }
 
 plzn tls "server/tls12-large-hello/ext-80" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -31,6 +33,7 @@ plzn tls "server/tls12-large-hello/ext-80" {
 }
 
 plzn tls "server/tls12-large-hello/two-ext" {
+  syntax 1.0
   rfc 5246 section 7.4.1.4
   chain: [default]
   uut server {
@@ -50,6 +53,7 @@ plzn tls "server/tls12-large-hello/two-ext" {
 }
 
 plzn tls "server/tls12-large-hello/n-cipher-suites" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]
@@ -67,6 +71,7 @@ plzn tls "server/tls12-large-hello/n-cipher-suites" {
 }
 
 plzn tls "server/tls12-large-hello/max-cipher-suites" {
+  syntax 1.0
   rfc 5246 section 7.4.1.2
   uut server {
     versions: [tls12]
@@ -83,6 +88,7 @@ plzn tls "server/tls12-large-hello/max-cipher-suites" {
 }
 
 plzn tls "server/tls12-large-hello/fragmented-padding-ext" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {
@@ -99,6 +105,7 @@ plzn tls "server/tls12-large-hello/fragmented-padding-ext" {
 }
 
 plzn tls "server/tls12-large-hello/fragmented-padding-ext-65k" {
+  syntax 1.0
   rfc 5246 section 6.2.1
   chain: [default]
   uut server {

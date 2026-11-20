@@ -2,6 +2,7 @@
 # protocol violation per RFC 5246 §7.1. Complete the handshake
 # exchange to verify the server rejects the duplicate.
 plzn tls "negative/double-ccs" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [default]
   uut server { versions: [tls12] }

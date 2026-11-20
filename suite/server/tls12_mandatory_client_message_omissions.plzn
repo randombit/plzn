@@ -1,4 +1,5 @@
 plzn tls "server/tls12-mandatory-client-message-omissions/client-hello" {
+  syntax 1.0
   rfc 5246 section 7.4
   chain: [default]
   uut server { versions: [tls12] }
@@ -11,6 +12,7 @@ plzn tls "server/tls12-mandatory-client-message-omissions/client-hello" {
 }
 
 plzn tls "server/tls12-mandatory-client-message-omissions/certificate-after-certificate-request" {
+  syntax 1.0
   rfc 5246 section 7.4.6
   chain: [default]
   client_chain: [rsa_2048]
@@ -25,6 +27,7 @@ plzn tls "server/tls12-mandatory-client-message-omissions/certificate-after-cert
 }
 
 plzn tls "server/tls12-mandatory-client-message-omissions/client-key-exchange" {
+  syntax 1.0
   rfc 5246 section 7.4.7
   chain: [default]
   uut server { versions: [tls12] }
@@ -37,6 +40,7 @@ plzn tls "server/tls12-mandatory-client-message-omissions/client-key-exchange" {
 }
 
 plzn tls "server/tls12-mandatory-client-message-omissions/certificate-verify-after-client-certificate" {
+  syntax 1.0
   rfc 5246 section 7.4.8
   chain: [default]
   client_chain: [rsa_2048]
@@ -51,6 +55,7 @@ plzn tls "server/tls12-mandatory-client-message-omissions/certificate-verify-aft
 }
 
 plzn tls "server/tls12-mandatory-client-message-omissions/change-cipher-spec" {
+  syntax 1.0
   rfc 5246 section 7.1
   chain: [default]
   uut server { versions: [tls12] }
@@ -62,6 +67,7 @@ plzn tls "server/tls12-mandatory-client-message-omissions/change-cipher-spec" {
 }
 
 plzn tls "server/tls12-mandatory-client-message-omissions/finished" {
+  syntax 1.0
   rfc 5246 section 7.4.9
   chain: [default]
   uut server { versions: [tls12] }
