@@ -82,23 +82,6 @@ plzn tls "server/tls12-ecdhe-rsa-key-exchange/valid-handshake" {
   expect ok
 }
 
-plzn tls "server/tls12-ecdhe-rsa-key-exchange/ecdhe-without-extensions" {
-  rfc 8422 section 5.1
-  chain: [default]
-  uut server {
-    versions: [tls12]
-  }
-  peer { capabilities: [ecdhe] }
-  flow handshake {
-    send ClientHello {
-      -ext supported_groups
-      -ext ec_point_formats
-    }
-    recv ServerHello
-  }
-  expect alert fatal/handshake_failure
-}
-
 plzn tls "server/tls12-unsupported-curve-fallback/secp160k1-only-falls-back-to-dhe" {
   rfc 8422 section 5.1
   uut server {

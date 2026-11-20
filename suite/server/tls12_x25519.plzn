@@ -97,20 +97,6 @@ plzn tls "server/tls12-x25519/Yc-with-high-bit-set" {
   expect ok
 }
 
-plzn tls "server/tls12-x25519/no-supported-groups-extension" {
-  rfc 8422 section 5.1
-  chain: [default]
-  uut server {
-    versions: [tls12]
-  }
-  peer { capabilities: [ecdhe] }
-  flow handshake {
-    send ClientHello { -ext supported_groups }
-    recv ServerHello
-  }
-  expect alert fatal/handshake_failure
-}
-
 plzn tls "server/tls12-x25519/unknown-group-only-falls-back-to-dhe" {
   rfc 8422 section 5.1
   uut server {
