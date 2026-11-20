@@ -174,20 +174,24 @@ plzn tls "dtls13/client-rejects-key-update-with-extra-data" {
 
 plzn tls "dtls13/server-rejects-unknown-key-update-request" {
   rfc 9147 section 8
+  rfc 9846 section 4.7.3
   chain: [default]
   uut server { versions: [dtls13], session_tickets: 0 }
   flow handshake {
     send KeyUpdate { request_update: 0x03 }
   }
-  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
 }
 
 plzn tls "dtls13/client-rejects-unknown-key-update-request" {
   rfc 9147 section 8
+  rfc 9846 section 4.7.3
   chain: [default]
   uut client { versions: [dtls13], session_tickets: 0 }
   flow handshake {
     send KeyUpdate { request_update: 0x03 }
   }
-  expect alert fatal/decode_error
+  expect alert fatal/illegal_parameter
+  expect alert fatal/decode_error if boringssl
 }
