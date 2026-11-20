@@ -1600,7 +1600,7 @@ ignored.
 | `hold_retransmit` | set a fresh-sequence retransmission of the last flight aside |
 | `release_flight` / `release_flight [1]` | send the held datagram, or only its listed records; an indexed release retains the unselected records for a later `release_flight` (whose indices refer to the smaller held set) |
 | `replay_flight 2` | send the Nth flushed datagram (1-based) again, byte-identical |
-| `map_record_sequences identity` / `multiply N` / `xor N` | map subsequently allocated outbound record sequence numbers before sealing; use `multiply 1023` for large replay-window gaps or `xor 255` for backwards groups with forward jumps |
+| `map_record_sequences identity` / `multiply N` / `xor N` | map subsequently allocated outbound record sequence numbers before sealing; use `multiply 1023` for large replay-window gaps or `xor 63` for descending runs of 64 with forward jumps between them (the oldest record is N behind the newest, so `xor N` needs a replay window of N + 1 records) |
 | `send HelloRequest` (server role) | open a stepped renegotiation; a second one while it is pending is a crossed request |
 | `recv ClientHello` after the initial Finished (server role) | take a client-initiated renegotiation (`uut client { renegotiate_after_handshake }`): spell out the second handshake, `send HelloVerifyRequest` first for a cookie exchange on it, or refuse it with `send alert warning/no_renegotiation` and carry on at epoch 1; a renegotiation ClientHello that arrives during `recv AppData` is accepted on its own, and application data crossing it under the old keys is delivered by the next read |
 | `begin_renegotiation` (client role) | reset to a renegotiation handshake, then drive it with explicit `send`/`recv` steps |
