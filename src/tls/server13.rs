@@ -204,7 +204,7 @@ struct SelectedPsk {
 
 /// The TLS 1.3 cipher suites the harness-server implements, in
 /// default preference order. Used when peer capabilities pin no suite.
-const DEFAULT_TLS13_SUITES: &[u16] = &[0x1301, 0x1302, 0x1303, 0x1304, 0x1305];
+const DEFAULT_TLS13_SUITES: &[u16] = &[0x1301, 0x1302, 0x1303, 0x1304, 0x1305, 0x00c6, 0x00c7];
 
 /// The named groups the harness-server can select a key_share for,
 /// in default preference order. X25519 first because it's the group
@@ -223,6 +223,9 @@ fn tls13_suite_params(wire: u16) -> Option<(HashAlg, AeadAlg)> {
         // RFC 8446 B.4 CCM suites (RFC 6655 nonce/tag rules apply).
         0x1304 => (HashAlg::Sha256, AeadAlg::Aes128Ccm),
         0x1305 => (HashAlg::Sha256, AeadAlg::Aes128Ccm8),
+        // RFC 8998 ShangMi suites: SM4 AEADs over an SM3 key schedule.
+        0x00c6 => (HashAlg::Sm3, AeadAlg::Sm4Gcm),
+        0x00c7 => (HashAlg::Sm3, AeadAlg::Sm4Ccm),
         _ => return None,
     })
 }
@@ -520,6 +523,7 @@ impl Tls13Server {
         let mut ticket = TICKET_MAGIC.to_vec();
         ticket.push(match self.hash {
             HashAlg::Sha384 => 1,
+            HashAlg::Sm3 => 2,
             _ => 0,
         });
         ticket.extend_from_slice(&nonce);
@@ -873,10 +877,14 @@ impl Tls13Server {
         } else {
             &self.cfg.server_suites
         };
-        let chosen_suite = suite_cap
-            .iter()
-            .copied()
-            .find(|s| tls13_suite_params(*s).is_some() && ch.cipher_suites.contains(s));
+        // The SM4 suites are not DTLS-OK (IANA, RFC 8998 4), so a DTLS 1.3
+        // server never selects them.
+        let dtls13 = self.records.is_dtls13();
+        let chosen_suite = suite_cap.iter().copied().find(|s| {
+            tls13_suite_params(*s).is_some()
+                && ch.cipher_suites.contains(s)
+                && (!dtls13 || crate::ir::suite_info(*s).is_none_or(|info| info.dtls13_ok()))
+        });
         let chosen_suite = match chosen_suite {
             Some(s) => s,
             None => {
@@ -1026,6 +1034,7 @@ impl Tls13Server {
                         && ss.ticket[TICKET_MAGIC.len()]
                             == match self.hash {
                                 HashAlg::Sha384 => 1,
+                                HashAlg::Sm3 => 2,
                                 _ => 0,
                             };
                     if ticket_hash_ok {

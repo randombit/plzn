@@ -6,8 +6,10 @@
 # The DTLS ClientHello carries a cookie field after the session id. Botan
 # chooses the parse format from legacy_version, so a TLS legacy_version makes
 # it read the DTLS-format body as TLS and fail with decode_error. OpenSSL
-# treats any non-DTLS number as a future DTLS version and negotiates DTLS 1.2,
-# and ignores supported_versions over DTLS altogether. LibreSSL requires major
+# treats any non-DTLS number as a future DTLS version and negotiates DTLS 1.2;
+# since 4.1 (with DTLS 1.3) it honours supported_versions over DTLS and answers
+# a list of stream-TLS codes with protocol_version, where 3.6 ignored the
+# extension and completed. LibreSSL requires major
 # 0xfe in legacy_version but compares supported_versions entries against
 # TLS-space bounds, and its record layer frames by version number, so a TLS
 # number that reaches its version field flips it to 5-byte TLS framing.
@@ -42,7 +44,6 @@ plzn tls "dtls12/clienthello-supported-versions-tls13-only" {
     send ClientHello { +ext supported_versions = [tls13] }
   }
   expect alert fatal/protocol_version
-  expect ok if openssl
 }
 
 plzn tls "dtls12/clienthello-supported-versions-tls12-only" {
@@ -56,7 +57,6 @@ plzn tls "dtls12/clienthello-supported-versions-tls12-only" {
     send ClientHello { +ext supported_versions = [tls12] }
   }
   expect alert fatal/protocol_version
-  expect ok if openssl
 }
 
 plzn tls "dtls12/clienthello-supported-versions-tls13-and-tls12" {
@@ -70,7 +70,6 @@ plzn tls "dtls12/clienthello-supported-versions-tls13-and-tls12" {
     send ClientHello { +ext supported_versions = [tls13, tls12] }
   }
   expect alert fatal/protocol_version
-  expect ok if openssl
 }
 
 # The correct DTLS form of the extension. Botan's DTLS 1.2 client sends

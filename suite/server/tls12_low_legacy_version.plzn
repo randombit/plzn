@@ -8,5 +8,4 @@ plzn tls "server/tls12-low-legacy-version" {
     send ClientHello { legacy_version: 0x0300 }
   }
   expect alert fatal/protocol_version
-  expect alert fatal/handshake_failure if openssl
 }

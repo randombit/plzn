@@ -240,7 +240,8 @@ deadline.
 Botan, OpenSSL, and LibreSSL are the fully corpus-enabled DTLS 1.2 backends
 (LibreSSL's retransmit schedule is fixed, so it skips cases that set another
 one or rescale a live timer). BoringSSL is
-the oracle for the focused DTLS 1.3 corpus. GnuTLS supports
+the oracle for the focused DTLS 1.3 corpus; the OpenSSL shim also runs DTLS 1.3
+when built against OpenSSL 4.1 or later (see [DTLS 1.3](#dtls-13)). GnuTLS supports
 baseline DTLS 1.2 in both roles, but currently skips virtual-clock, timeout-
 policy, datagram-rewrite, PSK, and renegotiation cases. The wolfSSL shim skips
 DTLS until its datagram framing is wired (and an installed wolfSSL build may
@@ -1346,6 +1347,24 @@ make -C shims boringssl PLZN_BORINGSSL_ROOT=/path/to/boringssl
 plzn run --shim shims/build/boringssl_shim suite/dtls/dtls13_*.plzn
 ```
 
+An OpenSSL shim built against OpenSSL 4.1 or later (the first release with
+RFC 9147) runs DTLS 1.3 too, but it is not yet a corpus backend for it: about
+a quarter of the `dtls13_*` cases differ from BoringSSL and are untriaged.
+Two things to know when running them by hand. OpenSSL drives the RFC 9147 5.1
+cookie exchange (a HelloRetryRequest carrying `cookie`) from the same
+`SSL_OP_COOKIE_EXCHANGE` setup as its DTLS 1.2 HelloVerifyRequest; the shim
+leaves it off for DTLS 1.3 unless a case sets `dtls_require_cookie: true`,
+because plzn's DTLS 1.3 client preset has no optional cookie step and fails on
+the HelloRetryRequest. And OpenSSL 4.1.0's server answers an ACK that arrives
+before the client's Finished with a fatal `unexpected_message` (fixed on its
+master); `suite/dtls/dtls13_early_ack.plzn` sends such ACKs on purpose and
+carries the `xfail openssl`.
+
+plzn's own ACK policy follows RFC 9147 7.1: it acknowledges received handshake
+records automatically only once it holds application write keys, so the
+server's flight, which the client's Finished implicitly acknowledges, is not
+ACKed, while the client's final flight and every post-handshake message are.
+
 The implemented surface includes all three TLS 1.3 AEAD suites, X25519,
 P-256/P-384 and X25519MLKEM768, HRR, RSA-PSS and ECDSA signatures, client
 authentication, adversarial handshake fragmentation/reassembly, both unified
@@ -1501,8 +1520,8 @@ resume DTLS inside their multi-session loop, so no knob is needed.
 
 Cross-version DTLS sequences use the same per-session `version: dtls12|dtls13`,
 `assert resumed`, and adversarial `force_resume` controls described above.
-Only BoringSSL currently runs the DTLS 1.3 half; the other shims report the
-mixed-version tests unsupported before connecting.
+BoringSSL and an OpenSSL 4.1+ shim run the DTLS 1.3 half; the other shims
+report the mixed-version tests unsupported before connecting.
 
 DTLS-only steps:
 
@@ -1523,7 +1542,7 @@ ignored.
 | `set_timeout 250ms` | rescale the UUT's live timeout schedule, preserving the current backoff level; OpenSSL and BoringSSL (Botan has no live setter API and SKIPs) |
 | `set_mtu 512` | DTLS 1.3: change the UUT's live path MTU before a retransmission |
 | `expect_retransmit` | read one datagram and require the peer's resent flight |
-| `suppress_ack` | DTLS 1.3: stop plzn's automatic ACKs and capture the received flight's record numbers for explicit ACK tests |
+| `suppress_ack` | DTLS 1.3: stop plzn's automatic ACKs (sent, per RFC 9147 7.1, only for records read once plzn holds application write keys) and capture the received flight's record numbers for explicit ACK tests |
 | `send_ack all \| first \| last \| even \| odd` | DTLS 1.3: ACK the selected captured records; optional `outer_epoch N` and `overflow_epoch` encode bad-epoch negatives |
 | `expect_ack` | DTLS 1.3: read, authenticate, and require one ACK record |
 | `send_previous_epoch Finished` | DTLS 1.3: send a fresh message_seq copy of the prior Finished under the retained previous write epoch |
@@ -1594,7 +1613,7 @@ reachable through `uut`:
 | `initial_timeout_ms`, `dtls_max_timeout_ms` | `dtls_initial_timeout`, `dtls_maximum_timeout` | the virtual-clock retransmit schedule (`DTLS_set_timer_cb`, doubling, capped) |
 | `dtls_max_retransmissions` | `dtls_maximum_retransmissions` (the handshake gives up past it) | the budget the timer callback enforces before it stops re-sending |
 | `dtls_max_hello_verify_requests` | `dtls_maximum_hello_verify_requests` | unsupported (SKIPs) |
-| `dtls_require_cookie` | `dtls_server_require_cookie_exchange` | `SSL_OP_COOKIE_EXCHANGE` |
+| `dtls_require_cookie` | `dtls_server_require_cookie_exchange` | `SSL_OP_COOKIE_EXCHANGE` (DTLS 1.3: the HelloRetryRequest cookie; the shim defaults it off there) |
 | `dtls_epoch0_restart` | `allow_dtls_epoch0_restart` | unsupported (SKIPs) |
 
 Inside a non-anchored `flow handshake { ... }` body, `send`/`recv` of handshake
@@ -1655,7 +1674,7 @@ The names: cipher suites are the IANA names without the `TLS_` prefix
 `PSK_WITH_AES_128_CBC_SHA`; a `TLS_` prefix and any letter case are accepted,
 the canonical form is printed), plus `EMPTY_RENEGOTIATION_INFO_SCSV` and
 `FALLBACK_SCSV`; groups are the IANA spellings (`secp256r1`, `x25519`,
-`ffdhe2048`, `brainpoolP256r1tls13`, `X25519MLKEM768`, `X448MLKEM1024`, `MLKEM768`); signature
+`ffdhe2048`, `brainpoolP256r1tls13`, `curveSM2`, `X25519MLKEM768`, `curveSM2MLKEM768`, `MLKEM1024X448`, `MLKEM768`); signature
 schemes the RFC 8446 / RFC 5246 names (`rsa_pss_rsae_sha256`,
 `ecdsa_secp256r1_sha256`, `rsa_pkcs1_sha1`, `ecdsa_sha224`); extension types
 the RFC names (`key_share`, `alpn`, `renegotiation_info`); certificate types
@@ -1692,8 +1711,8 @@ SHA-2 CBC suites remain TLS 1.2-only.
 |------|--------|--------|
 | Key exchange | `rsa`, `dhe_rsa`, `ecdhe_rsa`, `ecdhe_ecdsa`, `ecdhe`, `psk`, `ecdhe_psk` | `ecdhe` is ECDHE under whatever the explicitly named chain signs with (both families when several chains are named; see "Certificate chains"). `uut server`: filters the suites plzn offers; `uut client`: what plzn's TLS 1.0-1.2 / DTLS 1.2 server may select. `psk` / `ecdhe_psk` (RFC 4279 / RFC 5489, TLS 1.0-1.2 and DTLS 1.2, both roles) need a `psk { }` block and normally use `chain: []`. Filters are ANDed, so a `matrix { suite in [...] }` over several exchanges takes no kex token |
 | Cipher mode | `aead`, `gcm`, `cbc`, `aes128_cbc_sha`, `aes128_gcm_sha256` | Filters plzn's offered suites (`uut server`) or selectable suites (`uut client`) by record protection |
-| TLS 1.3 suites | `aes128_gcm_sha256`, `aes256_gcm_sha384`, `chacha20_poly1305_sha256` | `uut client`: the server's suite capability set |
-| Groups | `x25519`, `x448`, `secp256r1`, `secp384r1`, `secp521r1`, all five RFC 7919 groups (`ffdhe2048` through `ffdhe8192`), the RFC 7027 / RFC 8734 brainpool curves `brainpoolP256r1`, `brainpoolP384r1` (TLS 1.2) and `brainpoolP256r1tls13`, `brainpoolP384r1tls13` (TLS 1.3), the ML-KEM groups `mlkem512`, `mlkem768`, `mlkem1024` and the hybrids `x25519mlkem768`, `x448mlkem1024`, `secp256r1mlkem768`, `secp384r1mlkem1024` (all key-shareable); `brainpoolP512r1[tls13]` (advertise only) | `uut server`: the client's supported_groups, in order, with a key share for the first (so `uut server { versions: [tls13] }; peer { capabilities: [secp256r1] }` is a 1-RTT P-256 handshake); `uut client`: the server's group capability set -- for TLS 1.2 the ECDHE curves it may select from the client's supported_groups, in this order, and the DHE_RSA group (`ffdhe2048` default). X448 uses a deliberately simple, non-constant-time `num-bigint` implementation suitable only for the harness. The ML-KEM groups are TLS 1.3 only (draft-ietf-tls-mlkem / draft-ietf-tls-ecdhe-mlkem: the X25519MLKEM768 share is ML-KEM || X25519; the other hybrids follow name order, ECDH || ML-KEM; plzn is the encapsulation-key side as a client and encapsulates as a server). `X448MLKEM1024` uses the repository's pre-existing experimental codepoint 0x11ee; it is not one of the three hybrids in the current IETF draft. rustls's aws-lc-rs provider has no X448, FFDHE, brainpool or P-521, and of the KEM groups only X25519MLKEM768, SecP256r1MLKEM768, MLKEM768 and MLKEM1024 (`requires.any_group` SKIPs the rest). Botan's default policy no longer offers FFDHE though the library implements it, so the Botan shim re-enables the RFC 7919 groups (and appends the pure ML-KEM groups, which its default policy also leaves out); a test wanting Botan's exact default posture pins `uut client|server { curves }` |
+| TLS 1.3 suites | `aes128_gcm_sha256`, `aes256_gcm_sha384`, `chacha20_poly1305_sha256`, `aes128_ccm_sha256`, `aes128_ccm_8_sha256`, and the RFC 8998 `sm4_gcm_sm3`, `sm4_ccm_sm3` (SM3 key schedule; OpenSSL 4 is the only backend with them) | `uut client`: the server's suite capability set |
+| Groups | `x25519`, `x448`, `secp256r1`, `secp384r1`, `secp521r1`, all five RFC 7919 groups (`ffdhe2048` through `ffdhe8192`), the RFC 7027 / RFC 8734 brainpool curves `brainpoolP256r1`, `brainpoolP384r1` (TLS 1.2) and `brainpoolP256r1tls13`, `brainpoolP384r1tls13` (TLS 1.3), the ML-KEM groups `mlkem512`, `mlkem768`, `mlkem1024`, the hybrids `x25519mlkem768`, `mlkem1024x448`, `secp256r1mlkem768`, `secp384r1mlkem1024`, RFC 8998 `curveSM2` and the draft-yang-tls-hybrid-sm2-mlkem hybrid `curveSM2MLKEM768` (TLS 1.3 only; OpenSSL 4 is the only backend that has them) (all key-shareable); `brainpoolP512r1[tls13]` (advertise only) | `uut server`: the client's supported_groups, in order, with a key share for the first (so `uut server { versions: [tls13] }; peer { capabilities: [secp256r1] }` is a 1-RTT P-256 handshake); `uut client`: the server's group capability set -- for TLS 1.2 the ECDHE curves it may select from the client's supported_groups, in this order, and the DHE_RSA group (`ffdhe2048` default). X448 uses a deliberately simple, non-constant-time `num-bigint` implementation suitable only for the harness. The ML-KEM groups are TLS 1.3 only (draft-ietf-tls-mlkem / RFC 10024: the hybrids concatenate in name order, so X25519MLKEM768 and MLKEM1024X448 are ML-KEM || ECDH and the rest ECDH || ML-KEM; plzn is the encapsulation-key side as a client and encapsulates as a server). `MLKEM1024X448` is draft-preussmattsson-tls-mlkem1024-x448 at IANA 0x11ef (1624-byte shares, 88-byte secret); no released backend negotiates it yet (OpenSSL PR 33433 adds it for 4.2), so every backend SKIPs its rows. rustls's aws-lc-rs provider has no X448, FFDHE, brainpool or P-521, and of the KEM groups only X25519MLKEM768, SecP256r1MLKEM768, MLKEM768 and MLKEM1024 (`requires.any_group` SKIPs the rest). Botan's default policy no longer offers FFDHE though the library implements it, so the Botan shim re-enables the RFC 7919 groups (and appends the pure ML-KEM groups, which its default policy also leaves out); a test wanting Botan's exact default posture pins `uut client|server { curves }` |
 | Signature schemes | `rsa_pss_rsae_sha256`, `ecdsa_secp256r1_sha256`, `ecdsa_secp384r1_sha384`, `ed25519`, ... | `uut server`: plzn's TLS/DTLS client advertises these signature algorithms in order. `uut client` (TLS 1.2 only): plzn's server signing preferences and CertificateRequest schemes. Other server drivers reject these capabilities |
 | Flags | `hrr`, `second_hrr` | `uut client`: explicit HelloRetryRequest preset / second HRR |
 | | `session_id` | `uut server`, TLS 1.0-1.2: session-ID resumption -- the initial session offers no SessionTicket extension and remembers the id the server assigned, the `resumes:` session echoes it; `recv ServerHello { resumed: true \| false }` asserts whether the server accepted (echoed the id) or answered with a fresh full handshake, which plzn's client then follows |
@@ -1718,9 +1737,9 @@ narrow the offer (client role) or the server's selection (server role):
 
 | Token | Selects |
 |-------|---------|
-| `aead`, `gcm`, `cbc`, `ccm`, `ccm8`, `aria`, `camellia`, `chacha20_poly1305`, `des3`, `null` | a cipher family, any key exchange and hash |
-| `sha384` | the suites whose PRF / handshake hash is SHA-384 |
-| `aes128_gcm_sha256`, `aes256_gcm_sha384`, `aes128_cbc_sha`, `aes256_cbc_sha`, `aes128_ccm_sha256`, `aes128_ccm_8_sha256` | one bulk cipher (and, for `*_cbc_sha`, HMAC-SHA1) |
+| `aead`, `gcm`, `cbc`, `ccm`, `ccm8`, `aria`, `camellia`, `sm4`, `chacha20_poly1305`, `des3`, `null` | a cipher family, any key exchange and hash |
+| `sha384`, `sm3` | the suites whose PRF / handshake hash is SHA-384, or SM3 (the RFC 8998 suites) |
+| `aes128_gcm_sha256`, `aes256_gcm_sha384`, `aes128_cbc_sha`, `aes256_cbc_sha`, `aes128_ccm_sha256`, `aes128_ccm_8_sha256`, `sm4_gcm_sm3`, `sm4_ccm_sm3` | one bulk cipher (and, for `*_cbc_sha`, HMAC-SHA1) |
 | `matrix { suite in [0xc02f, ...] }` | exactly one suite per point, in either role (`recv ServerHello { cipher_suite: $suite }` pins the server's choice) |
 
 The shims expose every suite their library implements when `uut client|server {

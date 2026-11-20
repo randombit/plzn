@@ -5,7 +5,6 @@ plzn tls "client/tls13-hrr-empty-cookie" {
     versions: [tls13]
     curves: [x25519, secp384r1, secp256r1]
   }
-  xfail openssl "ignores an empty HRR cookie instead of rejecting its invalid zero length"
   xfail gnutls "accepts an empty HRR cookie"
   peer { capabilities: [secp256r1, hrr] }
   flow handshake {

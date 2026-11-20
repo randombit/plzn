@@ -8,4 +8,9 @@ plzn tls "server/tls12-client-hello-one-byte" {
   }
   expect alert fatal/decode_error
   expect close if libressl
+  # OpenSSL 4 (ECH enabled) scans the ClientHello for its ECH offsets before
+  # parsing it; on a one-byte body ossl_ech_get_ch_offsets fails with
+  # illegal_parameter (BAD_EXTENSION), ahead of the decode_error the parser
+  # would give.
+  expect alert fatal/illegal_parameter if openssl
 }

@@ -690,15 +690,19 @@ fn lower_with_binding(
             "aes128_ccm_8_sha256" => {
                 suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Aes128Ccm8))
             }
+            "sm4_gcm_sm3" => suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Sm4Gcm)),
+            "sm4_ccm_sm3" => suite_filters.push(ir::SuiteFilter::Cipher(ir::BulkCipher::Sm4Ccm)),
             "ccm" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Ccm)),
             "ccm8" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Ccm8)),
             "aria" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Aria)),
             "camellia" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Camellia)),
+            "sm4" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Sm4)),
             "des3" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::TripleDes)),
             "null" => suite_filters.push(ir::SuiteFilter::Mode(ir::CipherMode::Null)),
             "sha384" => {
                 suite_filters.push(ir::SuiteFilter::Prf(crate::tls::crypto::HashAlg::Sha384))
             }
+            "sm3" => suite_filters.push(ir::SuiteFilter::Prf(crate::tls::crypto::HashAlg::Sm3)),
             "session_ticket" => session_ticket = true,
             "session_id" => resume_by_session_id = true,
             "hrr" => hrr = true,
@@ -825,10 +829,10 @@ fn lower_with_binding(
                     message: format!(
                         "plzn's client cannot generate a key share for `{}`; list an \
                          implemented group first (x25519, x448, secp256r1, secp384r1, secp521r1, \
-                         brainpoolP256r1tls13, brainpoolP384r1tls13, ffdhe2048, ffdhe3072, \
+                         brainpoolP256r1tls13, brainpoolP384r1tls13, curveSM2, ffdhe2048, ffdhe3072, \
                          ffdhe4096, ffdhe6144, ffdhe8192, \
-                         mlkem512/768/1024, x25519mlkem768, x448mlkem1024, secp256r1mlkem768, \
-                         secp384r1mlkem1024) or use `+ext key_share = [...]` to choose \
+                         mlkem512/768/1024, x25519mlkem768, mlkem1024x448, secp256r1mlkem768, \
+                         secp384r1mlkem1024, curvesm2mlkem768) or use `+ext key_share = [...]` to choose \
                          the shared groups",
                         schema_group_name(first)
                     ),
@@ -4875,8 +4879,8 @@ fn lower_key_share_entries(
                         message: format!(
                             "plzn's client cannot generate a key share for `{}`; implemented: \
                              x25519, x448, secp256r1, secp384r1, secp521r1, ffdhe2048, ffdhe3072, \
-                             ffdhe4096, ffdhe6144, ffdhe8192, \
-                             x448mlkem1024 -- \
+                             ffdhe4096, ffdhe6144, ffdhe8192, curvesm2, \
+                             mlkem1024x448, curvesm2mlkem768 -- \
                              give an opaque key instead: `{} : 0xab * 32`",
                             name, name
                         ),

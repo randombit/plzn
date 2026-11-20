@@ -1,0 +1,36 @@
+# RFC 8998 ShangMi suites from the client side: plzn's server accepts only the
+# SM4 suite under test, so the handshake completes only if the client offers
+# it and both ends agree on the SM3 key schedule and the SM4 record
+# protection. Only OpenSSL 4 implements the suites; the other shims skip.
+
+plzn tls "client/tls13-sm4-suites/negotiated" {
+  rfc 8998 section 3.5
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [SM4_GCM_SM3, SM4_CCM_SM3]
+  }
+  matrix { suite in [SM4_GCM_SM3, SM4_CCM_SM3] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}
+
+# The client offers AES-GCM ahead of SM4; plzn's server accepts only the SM4
+# suite, so the client must take SM4 out of a mixed offer.
+plzn tls "client/tls13-sm4-suites/selected-from-mixed-offer" {
+  rfc 8998 section 3.3.1.2
+  chain: [default]
+  uut client {
+    versions: [tls13]
+    cipher_suites: [AES_128_GCM_SHA256, SM4_GCM_SM3]
+  }
+  peer { capabilities: [sm4_gcm_sm3] }
+  flow handshake {
+    send AppData
+    recv AppData
+  }
+  expect ok
+}

@@ -32,6 +32,9 @@ pub const CIPHER_SUITES: &[&str] = &[
     "aes128_ccm_sha256",
     "aes128_ccm_8_sha256",
     // TLS 1.3 uses the same names; mapping is context-dependent.
+    // RFC 8998 ShangMi suites (TLS 1.3 only).
+    "sm4_gcm_sm3",
+    "sm4_ccm_sm3",
 ];
 
 pub const GROUPS: &[&str] = &[
@@ -60,7 +63,11 @@ pub const GROUPS: &[&str] = &[
     "x25519mlkem768",
     "secp256r1mlkem768",
     "secp384r1mlkem1024",
-    "x448mlkem1024",
+    // draft-preussmattsson-tls-mlkem1024-x448 (IANA 0x11ef, ML-KEM first).
+    "mlkem1024x448",
+    // RFC 8998 curveSM2 and draft-yang-tls-hybrid-sm2-mlkem's hybrid (TLS 1.3 only).
+    "curvesm2",
+    "curvesm2mlkem768",
 ];
 
 pub const SIG_ALGS: &[&str] = &[
@@ -103,9 +110,11 @@ pub const CIPHER_MODES: &[&str] = &[
     "ccm8",
     "aria",
     "camellia",
+    "sm4",
     "des3",
     "null",
     "sha384",
+    "sm3",
     "chacha20_poly1305",
 ];
 
@@ -645,7 +654,9 @@ pub fn group_wire_value(name: &str) -> Option<u16> {
             "secp256r1mlkem768" => 0x11eb,
             "x25519mlkem768" => 0x11ec,
             "secp384r1mlkem1024" => 0x11ed,
-            "x448mlkem1024" => 0x11ee,
+            "mlkem1024x448" => 0x11ef,
+            "curvesm2" => 0x0029,
+            "curvesm2mlkem768" => 0x11ee,
             _ => return None,
         },
     })
@@ -663,6 +674,8 @@ pub fn tls13_suite_wire_value(name: &str) -> Option<u16> {
         "chacha20_poly1305_sha256" => 0x1303,
         "aes128_ccm_sha256" => 0x1304,
         "aes128_ccm_8_sha256" => 0x1305,
+        "sm4_gcm_sm3" => 0x00c6,
+        "sm4_ccm_sm3" => 0x00c7,
         _ => return None,
     })
 }
@@ -1351,7 +1364,9 @@ const GROUP_NAMES: &[(&str, u16)] = &[
     ("SecP256r1MLKEM768", 0x11eb),
     ("X25519MLKEM768", 0x11ec),
     ("SecP384r1MLKEM1024", 0x11ed),
-    ("X448MLKEM1024", 0x11ee),
+    ("MLKEM1024X448", 0x11ef),
+    ("curveSM2", 0x0029),
+    ("curveSM2MLKEM768", 0x11ee),
 ];
 
 /// The canonical name of a named-group wire value.

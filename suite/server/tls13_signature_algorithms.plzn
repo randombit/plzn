@@ -32,7 +32,7 @@ plzn tls "server/tls13-signature-algorithms/duplicated-n-non-rsa" {
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
-  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  matrix { n in [2355, 8132, 23754, 32000] }
   flow handshake {
     send ClientHello {
       +ext signature_algorithms = [dsa_sha1 * $n, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
@@ -43,13 +43,30 @@ plzn tls "server/tls13-signature-algorithms/duplicated-n-non-rsa" {
   }
   expect ok
   expect alert fatal/decode_error if libressl
+  expect alert fatal/handshake_failure if openssl
+}
+
+plzn tls "server/tls13-signature-algorithms/duplicated-215-non-rsa" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [dsa_sha1 * 215, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-signature-algorithms/n-invalid-pkcs1" {
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
-  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  matrix { n in [2355, 8132, 23754, 32000] }
   flow handshake {
     send ClientHello {
       +ext signature_algorithms = [rsa_pkcs1_sha1 * $n, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
@@ -60,13 +77,35 @@ plzn tls "server/tls13-signature-algorithms/n-invalid-pkcs1" {
   }
   expect ok
   expect alert fatal/decode_error if libressl
+  expect alert fatal/handshake_failure if openssl
 }
 
+plzn tls "server/tls13-signature-algorithms/invalid-pkcs1-215" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [rsa_pkcs1_sha1 * 215, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
+}
+
+# OpenSSL (since 4.0, 447426a06c) keeps only the first 128 entries of
+# signature_algorithms and signature_algorithms_cert, so the usable algorithms
+# listed after the padding entries are dropped: handshake_failure. LibreSSL
+# caps the list too (32 entries before 4.4.1, 256 since) and answers
+# decode_error when it is exceeded.
 plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown" {
   rfc 8446 section 4.2.3
   uut server { versions: [tls13] }
   chain: [rsa_2048]
-  matrix { n in [215, 2355, 8132, 23754, 32000] }
+  matrix { n in [2355, 8132, 23754, 32000] }
   flow handshake {
     send ClientHello {
       +ext signature_algorithms = [0x0a00..$n + 0x09ff, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
@@ -77,6 +116,25 @@ plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown" {
   }
   expect ok
   expect alert fatal/decode_error if libressl
+  expect alert fatal/handshake_failure if openssl
+}
+
+# 215 entries: above OpenSSL's 128-entry truncation, below LibreSSL 4.4.1's
+# 256-entry cap.
+plzn tls "server/tls13-signature-algorithms/tolerance-215-unknown" {
+  rfc 8446 section 4.2.3
+  uut server { versions: [tls13] }
+  chain: [rsa_2048]
+  flow handshake {
+    send ClientHello {
+      +ext signature_algorithms = [0x0a00..0x0ad6, rsa_pss_rsae_sha256, rsa_pss_rsae_sha384, rsa_pss_rsae_sha512]
+    } @ fragment 16384
+    recv ServerHello
+    send AppData
+    recv AppData
+  }
+  expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert" {
@@ -93,6 +151,7 @@ plzn tls "server/tls13-signature-algorithms/tolerance-n-unknown-sig-alg-cert" {
     recv AppData
   }
   expect ok
+  expect alert fatal/handshake_failure if openssl
 }
 
 plzn tls "server/tls13-signature-algorithms/well-known-rsa-last" {
@@ -118,7 +177,6 @@ plzn tls "server/tls13-signature-algorithms/only-undefined" {
     send ClientHello { +ext signature_algorithms = [0x0a00..0x0a63] }
   }
   expect alert fatal/handshake_failure
-  expect alert fatal/decode_error if libressl
 }
 
 plzn tls "server/tls13-signature-algorithms/only-legacy" {

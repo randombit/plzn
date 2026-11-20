@@ -1,3 +1,6 @@
+# OpenSSL 4.0 removed SSLv2 ClientHello parsing, so an SSLv2 record header is
+# read as a TLS record header with an impossible version and the connection is
+# closed without an alert (3.6 answered handshake_failure or decode_error).
 plzn tls "server/tls12-sslv2-client-hello" {
   rfc 5246 section E.2
   chain: [rsa_2048]
@@ -20,7 +23,7 @@ plzn tls "server/tls12-sslv2-client-hello" {
   }
   expect ok
   expect close if botan
-  expect alert fatal/handshake_failure if openssl
+  expect close if openssl
   expect alert fatal/protocol_version if libressl
 }
 
@@ -71,7 +74,6 @@ plzn tls "server/tls12-sslv2-empty-record-type-1" {
     recv ServerHello
   }
   expect close
-  expect alert fatal/decode_error if openssl
   expect alert fatal/protocol_version if boringssl
   expect alert fatal/protocol_version if libressl
 }
@@ -89,6 +91,6 @@ plzn tls "server/tls12-sslv2-just-version" {
     recv ServerHello
   }
   expect close
-  expect alert fatal/decode_error if openssl
   skip libressl "reads the truncated SSLv2 header as a TLS record header of length 771 and waits for that body; the runner can only time out"
+  skip openssl "reads the truncated SSLv2 header as a TLS record header of length 771 and waits for that body; the runner can only time out"
 }

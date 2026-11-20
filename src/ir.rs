@@ -589,6 +589,8 @@ pub enum CipherMode {
     Aria,
     /// Camellia-GCM.
     Camellia,
+    /// SM4-GCM / SM4-CCM (RFC 8998).
+    Sm4,
     /// ChaCha20-Poly1305.
     ChaCha,
     /// 3DES-EDE-CBC.
@@ -613,6 +615,9 @@ pub enum BulkCipher {
     Aria256Gcm,
     Camellia128Gcm,
     Camellia256Gcm,
+    /// RFC 8998 SM4 in GCM / CCM (TLS 1.3 suites 0x00c6 / 0x00c7).
+    Sm4Gcm,
+    Sm4Ccm,
     ChaCha20Poly1305,
     Aes128Cbc,
     Aes256Cbc,
@@ -629,6 +634,8 @@ impl BulkCipher {
             | BulkCipher::Aes128Ccm8
             | BulkCipher::Aria128Gcm
             | BulkCipher::Camellia128Gcm
+            | BulkCipher::Sm4Gcm
+            | BulkCipher::Sm4Ccm
             | BulkCipher::Aes128Cbc => 16,
             BulkCipher::Aes256Gcm
             | BulkCipher::Aes256Ccm
@@ -678,6 +685,7 @@ impl BulkCipher {
                 | BulkCipher::Aria256Gcm
                 | BulkCipher::Camellia128Gcm
                 | BulkCipher::Camellia256Gcm
+                | BulkCipher::Sm4Gcm
         )
     }
     pub fn is_ccm(self) -> bool {
@@ -687,7 +695,12 @@ impl BulkCipher {
                 | BulkCipher::Aes256Ccm
                 | BulkCipher::Aes128Ccm8
                 | BulkCipher::Aes256Ccm8
+                | BulkCipher::Sm4Ccm
         )
+    }
+    /// The RFC 8998 SM4 ciphers.
+    pub fn is_sm4(self) -> bool {
+        matches!(self, BulkCipher::Sm4Gcm | BulkCipher::Sm4Ccm)
     }
     pub fn is_ccm8(self) -> bool {
         matches!(self, BulkCipher::Aes128Ccm8 | BulkCipher::Aes256Ccm8)
@@ -706,7 +719,8 @@ impl BulkCipher {
 
 /// A cipher suite plzn implements, with everything the drivers need to run
 /// it: key exchange, record cipher, MAC hash (None for AEAD) and the PRF /
-/// handshake hash (RFC 5246 5: SHA-256 unless the suite names SHA-384).
+/// handshake hash (RFC 5246 5: SHA-256 unless the suite names SHA-384; SM3
+/// for the RFC 8998 suites).
 #[derive(Clone, Copy, Debug)]
 pub struct SuiteInfo {
     pub wire: u16,
@@ -738,6 +752,13 @@ impl SuiteInfo {
         self.version == TlsVersion::Tls12 && !self.cipher.is_cbc() && !self.cipher.is_ccm8()
     }
 
+    /// Whether a TLS 1.3 suite may be used over DTLS 1.3. IANA marks the
+    /// RFC 8998 SM4 suites "DTLS-OK: No"; everything else in the TLS 1.3
+    /// namespace is fine.
+    pub fn dtls13_ok(&self) -> bool {
+        !self.cipher.is_sm4()
+    }
+
     pub fn matches_filter(&self, f: &SuiteFilter) -> bool {
         match f {
             SuiteFilter::Kex(k) => self.kex == *k,
@@ -755,6 +776,7 @@ impl SuiteInfo {
                     BulkCipher::Camellia128Gcm | BulkCipher::Camellia256Gcm
                 )
             }
+            SuiteFilter::Mode(CipherMode::Sm4) => self.cipher.is_sm4(),
             SuiteFilter::Mode(CipherMode::ChaCha) => self.cipher == BulkCipher::ChaCha20Poly1305,
             SuiteFilter::Mode(CipherMode::TripleDes) => self.cipher == BulkCipher::TripleDesCbc,
             SuiteFilter::Mode(CipherMode::Null) => self.cipher == BulkCipher::Null,
@@ -1668,6 +1690,28 @@ pub const ALL_SUITES: &[SuiteInfo] = &[
         cipher: BulkCipher::Aes128Ccm8,
         mac: None,
         prf: HashAlg::Sha256,
+        version: TlsVersion::Tls13,
+    },
+    // RFC 8998 ShangMi suites: SM4 AEADs with SM3 as the handshake hash. The
+    // profile also wants sm2sig_sm3 authentication, but the suites negotiate
+    // independently of the signature scheme (OpenSSL 4 runs them under RSA
+    // or ECDSA certificates).
+    SuiteInfo {
+        wire: 0x00c6,
+        name: "SM4_GCM_SM3",
+        kex: KexType::EcdheRsa,
+        cipher: BulkCipher::Sm4Gcm,
+        mac: None,
+        prf: HashAlg::Sm3,
+        version: TlsVersion::Tls13,
+    },
+    SuiteInfo {
+        wire: 0x00c7,
+        name: "SM4_CCM_SM3",
+        kex: KexType::EcdheRsa,
+        cipher: BulkCipher::Sm4Ccm,
+        mac: None,
+        prf: HashAlg::Sm3,
         version: TlsVersion::Tls13,
     },
 ];
@@ -3422,16 +3466,19 @@ pub struct RfcRef {
 
 /// Named groups the TLS 1.3 client can generate a key share for: x25519, x448,
 /// secp256r1, secp384r1, secp521r1, brainpoolP256r1tls13 / P384r1tls13
-/// (RFC 8734 codepoints), all five RFC 7919 FFDHE groups, ML-KEM-512/768/1024 and the
-/// X25519MLKEM768 / X448MLKEM1024 / SecP256r1MLKEM768 /
-/// SecP384r1MLKEM1024 hybrids. brainpoolP512r1tls13 can be advertised
-/// in supported_groups but not key-shared, and the RFC 7027 brainpool
-/// codepoints are TLS 1.2-only. Not every backend implements all of these
-/// (rustls has neither P-521, brainpool nor FFDHE), which is why the
+/// (RFC 8734 codepoints), all five RFC 7919 FFDHE groups, ML-KEM-512/768/1024, the
+/// RFC 10024 X25519MLKEM768 / SecP256r1MLKEM768 / SecP384r1MLKEM1024 hybrids,
+/// RFC 8998 curveSM2 (TLS 1.3 only, ECDHE on the SM2 curve),
+/// draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (0x11ee) and
+/// draft-preussmattsson-tls-mlkem1024-x448's MLKEM1024X448 (0x11ef).
+/// brainpoolP512r1tls13 can be advertised in supported_groups but not
+/// key-shared, and the RFC 7027 brainpool codepoints are TLS 1.2-only. Not
+/// every backend implements all of these (rustls has neither P-521, brainpool
+/// nor FFDHE; only OpenSSL 4 has the SM2 groups), which is why the
 /// `groups(tls13)` matrix set is narrower.
 pub const CLIENT_KEY_SHARE_GROUPS: &[u16] = &[
-    0x001d, 0x001e, 0x0017, 0x0018, 0x0019, 0x001f, 0x0020, 0x0100, 0x0101, 0x0102, 0x0103, 0x0104,
-    0x0200, 0x0201, 0x0202, 0x11eb, 0x11ec, 0x11ed, 0x11ee,
+    0x001d, 0x001e, 0x0017, 0x0018, 0x0019, 0x001f, 0x0020, 0x0029, 0x0100, 0x0101, 0x0102, 0x0103,
+    0x0104, 0x0200, 0x0201, 0x0202, 0x11eb, 0x11ec, 0x11ed, 0x11ee, 0x11ef,
 ];
 
 #[cfg(test)]
@@ -3445,19 +3492,22 @@ mod suite_catalogue_tests {
             assert!(seen.insert(s.wire), "duplicate suite 0x{:04x}", s.wire);
             // AEAD suites have no MAC hash; the others do.
             assert_eq!(s.mac.is_none(), s.cipher.is_aead(), "{}", s.name);
-            // SHA-384 PRF exactly for the *_SHA384 suites.
+            // SHA-384 PRF exactly for the *_SHA384 suites, SM3 exactly for the
+            // RFC 8998 *_SM3 suites.
             assert_eq!(
                 s.prf == HashAlg::Sha384,
                 s.name.ends_with("SHA384"),
                 "{}",
                 s.name
             );
+            assert_eq!(s.prf == HashAlg::Sm3, s.name.ends_with("SM3"), "{}", s.name);
+            assert_eq!(s.cipher.is_sm4(), s.name.starts_with("SM4_"), "{}", s.name);
             // Names carry the cipher.
             if s.cipher == BulkCipher::Null {
                 assert!(s.name.contains("NULL"), "{}", s.name);
             }
         }
-        assert_eq!(ALL_SUITES.len(), 98);
+        assert_eq!(ALL_SUITES.len(), 100);
     }
 
     /// Botan's DTLS rule: no CBC-with-HMAC, no CCM_8; AEAD-with-full-tag and
@@ -3582,7 +3632,7 @@ mod suite_catalogue_tests {
         );
         assert_eq!(
             filter_suites(TlsVersion::Tls13, &[SuiteFilter::Mode(CipherMode::Ccm)]),
-            vec![0x1304, 0x1305]
+            vec![0x1304, 0x1305, 0x00c7]
         );
         // The historical offer order is preserved at the head of the table.
         assert_eq!(

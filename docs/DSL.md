@@ -208,7 +208,7 @@ or handshake mode. Versions belong in `uut.versions`, not this list.
 | Capability category | Accepted tokens |
 | --- | --- |
 | Key exchange | `rsa`, `dhe_rsa`, `ecdhe_rsa`, `ecdhe_ecdsa`, `ecdhe`, `psk`, `ecdhe_psk`, `psk_ke`, `psk_dhe_ke` |
-| Specific cipher selectors | `aes128_cbc_sha`, `aes256_cbc_sha`, `aes128_gcm_sha256`, `aes256_gcm_sha384`, `chacha20_poly1305_sha256`, `aes128_ccm_sha256`, `aes128_ccm_8_sha256` |
+| Specific cipher selectors | `aes128_cbc_sha`, `aes256_cbc_sha`, `aes128_gcm_sha256`, `aes256_gcm_sha384`, `chacha20_poly1305_sha256`, `aes128_ccm_sha256`, `aes128_ccm_8_sha256`, `sm4_gcm_sm3`, `sm4_ccm_sm3` |
 | Cipher/hash filters | `aead`, `cbc`, `gcm`, `ccm`, `ccm8`, `aria`, `camellia`, `des3`, `null`, `sha384`, `chacha20_poly1305` |
 | Handshake modes | `session_ticket`, `session_id`, `hrr`, `second_hrr`, `offer_rpk`, `compress_cert` |
 | Groups | The identifiers in `schema::GROUPS` |

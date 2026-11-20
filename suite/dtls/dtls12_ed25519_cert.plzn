@@ -11,6 +11,5 @@ plzn tls "dtls12/ed25519-cert" {
     recv AppData
   }
   expect ok
-  xfail openssl "cannot use an Ed25519 certificate in DTLS 1.2 (its version check expects a TLS version number; fixed after 3.6)"
   expect alert fatal/handshake_failure if botan
 }

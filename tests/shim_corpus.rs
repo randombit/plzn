@@ -247,9 +247,12 @@ fn dtls13_corpus_boringssl() {
 
 // A shim without RFC 9147 must refuse DTLS 1.3 from the explicit 0xFEFC
 // version bounds before dialing. In particular, it must not ignore the bound
-// and accidentally run the case as DTLS 1.2.
+// and accidentally run the case as DTLS 1.2. A shim whose library has DTLS 1.3
+// (OpenSSL 4.1 and later) runs the case instead; plzn's DTLS 1.3 driver only
+// completes against a DTLS 1.3 ServerHello, so a pass there is not a silent
+// DTLS 1.2 negotiation either.
 #[test]
-fn dtls13_is_skipped_by_backends_without_support() {
+fn dtls13_is_skipped_or_run_by_other_backends() {
     let _permit = corpus_permit();
     let case = suite_dir("dtls/dtls13_basic_connection.plzn");
     let mut shims = vec![
@@ -278,10 +281,19 @@ fn dtls13_is_skipped_by_backends_without_support() {
         eprintln!("{}\n{}", stdout, stderr);
         let summary = stdout
             .lines()
-            .find(|line| line.contains("tests,") && line.contains("skipped"))
+            .find(|line| line.contains("tests,") && line.contains("passed"))
             .unwrap_or("");
         assert!(
-            out.status.success() && summary.contains("0 failed") && summary.contains("2 skipped"),
+            out.status.success() && summary.contains("0 failed"),
+            "{} neither ran nor cleanly skipped DTLS 1.3: {}",
+            shim,
+            summary
+        );
+        if summary.contains("2 passed") {
+            continue; // the library implements DTLS 1.3 and negotiated it
+        }
+        assert!(
+            summary.contains("2 skipped"),
             "{} did not cleanly skip DTLS 1.3: {}",
             shim,
             summary

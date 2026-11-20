@@ -37,6 +37,7 @@ use rsa::pss::VerifyingKey as RsaPssVerifyingKey;
 use rsa::signature::Verifier as _;
 use sha1::Sha1;
 use sha2::{Digest, Sha256, Sha384, Sha512};
+use sm3::Sm3;
 use x509_cert::Certificate;
 use x509_cert::der::Decode;
 use x509_cert::der::asn1::ObjectIdentifier;
@@ -130,6 +131,9 @@ pub enum HashAlg {
     Sha1,
     Sha256,
     Sha384,
+    /// SM3 (GB/T 32905-2016, ISO/IEC 10118-3): the hash of the RFC 8998
+    /// TLS 1.3 suites, 256-bit output.
+    Sm3,
 }
 
 impl HashAlg {
@@ -138,6 +142,7 @@ impl HashAlg {
             HashAlg::Sha1 => 20,
             HashAlg::Sha256 => 32,
             HashAlg::Sha384 => 48,
+            HashAlg::Sm3 => 32,
         }
     }
 }
@@ -148,6 +153,7 @@ impl HashAlg {
 pub enum TranscriptHash {
     Sha256(Sha256),
     Sha384(Sha384),
+    Sm3(Sm3),
 }
 
 impl TranscriptHash {
@@ -155,6 +161,7 @@ impl TranscriptHash {
         match alg {
             HashAlg::Sha256 => TranscriptHash::Sha256(Sha256::new()),
             HashAlg::Sha384 => TranscriptHash::Sha384(Sha384::new()),
+            HashAlg::Sm3 => TranscriptHash::Sm3(Sm3::new()),
             HashAlg::Sha1 => panic!("SHA-1 is not used for transcript hashing"),
         }
     }
@@ -163,6 +170,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(h) => h.update(bytes),
             TranscriptHash::Sha384(h) => h.update(bytes),
+            TranscriptHash::Sm3(h) => h.update(bytes),
         }
     }
 
@@ -171,6 +179,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(h) => h.clone().finalize().to_vec(),
             TranscriptHash::Sha384(h) => h.clone().finalize().to_vec(),
+            TranscriptHash::Sm3(h) => h.clone().finalize().to_vec(),
         }
     }
 
@@ -178,6 +187,7 @@ impl TranscriptHash {
         match self {
             TranscriptHash::Sha256(_) => HashAlg::Sha256,
             TranscriptHash::Sha384(_) => HashAlg::Sha384,
+            TranscriptHash::Sm3(_) => HashAlg::Sm3,
         }
     }
 }
@@ -188,6 +198,7 @@ pub fn hash(alg: HashAlg, data: &[u8]) -> Vec<u8> {
         HashAlg::Sha1 => Sha1::digest(data).to_vec(),
         HashAlg::Sha256 => Sha256::digest(data).to_vec(),
         HashAlg::Sha384 => Sha384::digest(data).to_vec(),
+        HashAlg::Sm3 => Sm3::digest(data).to_vec(),
     }
 }
 
@@ -212,6 +223,12 @@ pub fn hmac(alg: HashAlg, key: &[u8], data: &[u8]) -> Vec<u8> {
         HashAlg::Sha384 => {
             let mut m = <Hmac<Sha384> as Mac>::new_from_slice(key)
                 .expect("HMAC-SHA384 accepts any key length");
+            m.update(data);
+            m.finalize().into_bytes().to_vec()
+        }
+        HashAlg::Sm3 => {
+            let mut m =
+                <Hmac<Sm3> as Mac>::new_from_slice(key).expect("HMAC-SM3 accepts any key length");
             m.update(data);
             m.finalize().into_bytes().to_vec()
         }
@@ -263,6 +280,11 @@ pub fn hkdf_expand_label_with_prefix(
         }
         HashAlg::Sha384 => {
             let hkdf = Hkdf::<Sha384>::from_prk(secret).expect("secret >= hash output len");
+            hkdf.expand(&info, &mut out)
+                .expect("length fits HKDF-Expand output");
+        }
+        HashAlg::Sm3 => {
+            let hkdf = Hkdf::<Sm3>::from_prk(secret).expect("secret >= hash output len");
             hkdf.expand(&info, &mut out)
                 .expect("length fits HKDF-Expand output");
         }
@@ -361,6 +383,10 @@ pub fn hkdf_extract(alg: HashAlg, salt: &[u8], ikm: &[u8]) -> Vec<u8> {
         }
         HashAlg::Sha384 => {
             let (prk, _) = Hkdf::<Sha384>::extract(Some(salt), ikm);
+            prk.to_vec()
+        }
+        HashAlg::Sm3 => {
+            let (prk, _) = Hkdf::<Sm3>::extract(Some(salt), ikm);
             prk.to_vec()
         }
         HashAlg::Sha1 => panic!("HKDF not supported with SHA-1"),
@@ -486,6 +512,10 @@ pub enum AeadAlg {
     /// RFC 6367 Camellia-GCM.
     Camellia128Gcm,
     Camellia256Gcm,
+    /// RFC 8998 3.5 AEAD_SM4_GCM / AEAD_SM4_CCM: SM4 (GB/T 32907-2016) in GCM
+    /// or CCM, 16-byte key, 12-byte nonce, 16-byte tag.
+    Sm4Gcm,
+    Sm4Ccm,
 }
 
 impl AeadAlg {
@@ -495,7 +525,9 @@ impl AeadAlg {
             | AeadAlg::Aes128Ccm
             | AeadAlg::Aes128Ccm8
             | AeadAlg::Aria128Gcm
-            | AeadAlg::Camellia128Gcm => 16,
+            | AeadAlg::Camellia128Gcm
+            | AeadAlg::Sm4Gcm
+            | AeadAlg::Sm4Ccm => 16,
             AeadAlg::Aes256Gcm
             | AeadAlg::Aes256Ccm
             | AeadAlg::Aes256Ccm8
@@ -526,6 +558,8 @@ type Aes128Ccm = ccm::Ccm<aes::Aes128, U16, U12>;
 type Aes256Ccm = ccm::Ccm<aes::Aes256, U16, U12>;
 type Aes128Ccm8 = ccm::Ccm<aes::Aes128, U8, U12>;
 type Aes256Ccm8 = ccm::Ccm<aes::Aes256, U8, U12>;
+type Sm4Gcm = AesGcm<sm4::Sm4, U12>;
+type Sm4Ccm = ccm::Ccm<sm4::Sm4, U16, U12>;
 
 fn aead_seal<A: KeyInit + Aead>(
     key: &[u8],
@@ -593,6 +627,8 @@ impl AeadKey {
             AeadAlg::Aria256Gcm => aead_seal::<Aria256Gcm>(k, nonce, payload),
             AeadAlg::Camellia128Gcm => aead_seal::<Camellia128Gcm>(k, nonce, payload),
             AeadAlg::Camellia256Gcm => aead_seal::<Camellia256Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Gcm => aead_seal::<Sm4Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Ccm => aead_seal::<Sm4Ccm>(k, nonce, payload),
         }
     }
 
@@ -624,6 +660,8 @@ impl AeadKey {
             AeadAlg::Aria256Gcm => aead_open::<Aria256Gcm>(k, nonce, payload),
             AeadAlg::Camellia128Gcm => aead_open::<Camellia128Gcm>(k, nonce, payload),
             AeadAlg::Camellia256Gcm => aead_open::<Camellia256Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Gcm => aead_open::<Sm4Gcm>(k, nonce, payload),
+            AeadAlg::Sm4Ccm => aead_open::<Sm4Ccm>(k, nonce, payload),
         }
     }
 }
@@ -894,6 +932,9 @@ pub enum EcdheGroup {
     Bp384,
     Bp256Tls13,
     Bp384Tls13,
+    /// curveSM2 (RFC 8998): ECDHE on the SM2 curve of GB/T 32918.5-2017,
+    /// defined for TLS 1.3 only.
+    CurveSm2,
     Ffdhe2048,
     Ffdhe3072,
     Ffdhe4096,
@@ -905,14 +946,17 @@ pub enum EcdheGroup {
     MlKem512,
     MlKem768,
     MlKem1024,
-    /// ECDH + ML-KEM hybrids: the three draft-ietf-tls-ecdhe-mlkem groups plus
-    /// experimental X448MLKEM1024. Shares and shared secrets are plain
-    /// concatenations, ML-KEM first for the historically reversed
-    /// X25519MLKEM768 name and ECDH first otherwise.
+    /// ECDH + ML-KEM hybrids: the three RFC 10024 groups,
+    /// draft-yang-tls-hybrid-sm2-mlkem's curveSM2MLKEM768 (IANA 0x11ee) and
+    /// draft-preussmattsson-tls-mlkem1024-x448's MLKEM1024X448 (IANA 0x11ef).
+    /// Shares and shared secrets are plain concatenations in name order:
+    /// ML-KEM first for X25519MLKEM768 and MLKEM1024X448, ECDH first for the
+    /// rest.
     X25519MlKem768,
-    X448MlKem1024,
+    MlKem1024X448,
     Secp256r1MlKem768,
     Secp384r1MlKem1024,
+    CurveSm2MlKem768,
 }
 
 /// The ML-KEM parameter set behind a pure or hybrid KEM group.
@@ -965,6 +1009,7 @@ impl EcdheGroup {
             0x001b => EcdheGroup::Bp384,
             0x001f => EcdheGroup::Bp256Tls13,
             0x0020 => EcdheGroup::Bp384Tls13,
+            0x0029 => EcdheGroup::CurveSm2,
             0x0100 => EcdheGroup::Ffdhe2048,
             0x0101 => EcdheGroup::Ffdhe3072,
             0x0102 => EcdheGroup::Ffdhe4096,
@@ -974,9 +1019,10 @@ impl EcdheGroup {
             0x0201 => EcdheGroup::MlKem768,
             0x0202 => EcdheGroup::MlKem1024,
             0x11ec => EcdheGroup::X25519MlKem768,
-            0x11ee => EcdheGroup::X448MlKem1024,
+            0x11ef => EcdheGroup::MlKem1024X448,
             0x11eb => EcdheGroup::Secp256r1MlKem768,
             0x11ed => EcdheGroup::Secp384r1MlKem1024,
+            0x11ee => EcdheGroup::CurveSm2MlKem768,
             _ => return None,
         })
     }
@@ -992,6 +1038,7 @@ impl EcdheGroup {
             EcdheGroup::Bp384 => 0x001b,
             EcdheGroup::Bp256Tls13 => 0x001f,
             EcdheGroup::Bp384Tls13 => 0x0020,
+            EcdheGroup::CurveSm2 => 0x0029,
             EcdheGroup::Ffdhe2048 => 0x0100,
             EcdheGroup::Ffdhe3072 => 0x0101,
             EcdheGroup::Ffdhe4096 => 0x0102,
@@ -1001,9 +1048,10 @@ impl EcdheGroup {
             EcdheGroup::MlKem768 => 0x0201,
             EcdheGroup::MlKem1024 => 0x0202,
             EcdheGroup::X25519MlKem768 => 0x11ec,
-            EcdheGroup::X448MlKem1024 => 0x11ee,
+            EcdheGroup::MlKem1024X448 => 0x11ef,
             EcdheGroup::Secp256r1MlKem768 => 0x11eb,
             EcdheGroup::Secp384r1MlKem1024 => 0x11ed,
+            EcdheGroup::CurveSm2MlKem768 => 0x11ee,
         }
     }
 
@@ -1018,6 +1066,7 @@ impl EcdheGroup {
         EcdheGroup::Bp384,
         EcdheGroup::Bp256Tls13,
         EcdheGroup::Bp384Tls13,
+        EcdheGroup::CurveSm2,
         EcdheGroup::Ffdhe2048,
         EcdheGroup::Ffdhe3072,
         EcdheGroup::Ffdhe4096,
@@ -1027,9 +1076,10 @@ impl EcdheGroup {
         EcdheGroup::MlKem768,
         EcdheGroup::MlKem1024,
         EcdheGroup::X25519MlKem768,
-        EcdheGroup::X448MlKem1024,
+        EcdheGroup::MlKem1024X448,
         EcdheGroup::Secp256r1MlKem768,
         EcdheGroup::Secp384r1MlKem1024,
+        EcdheGroup::CurveSm2MlKem768,
     ];
 
     /// The IANA name, for diagnostics.
@@ -1044,6 +1094,7 @@ impl EcdheGroup {
             EcdheGroup::Bp384 => "brainpoolP384r1",
             EcdheGroup::Bp256Tls13 => "brainpoolP256r1tls13",
             EcdheGroup::Bp384Tls13 => "brainpoolP384r1tls13",
+            EcdheGroup::CurveSm2 => "curveSM2",
             EcdheGroup::Ffdhe2048 => "ffdhe2048",
             EcdheGroup::Ffdhe3072 => "ffdhe3072",
             EcdheGroup::Ffdhe4096 => "ffdhe4096",
@@ -1053,9 +1104,10 @@ impl EcdheGroup {
             EcdheGroup::MlKem768 => "MLKEM768",
             EcdheGroup::MlKem1024 => "MLKEM1024",
             EcdheGroup::X25519MlKem768 => "X25519MLKEM768",
-            EcdheGroup::X448MlKem1024 => "X448MLKEM1024",
+            EcdheGroup::MlKem1024X448 => "MLKEM1024X448",
             EcdheGroup::Secp256r1MlKem768 => "SecP256r1MLKEM768",
             EcdheGroup::Secp384r1MlKem1024 => "SecP384r1MLKEM1024",
+            EcdheGroup::CurveSm2MlKem768 => "curveSM2MLKEM768",
         }
     }
 
@@ -1070,7 +1122,7 @@ impl EcdheGroup {
         )
     }
 
-    /// A prime-order Weierstrass curve (NIST or brainpool): SEC1 points.
+    /// A prime-order Weierstrass curve (NIST, brainpool or SM2): SEC1 points.
     pub fn is_weierstrass(self) -> bool {
         matches!(
             self,
@@ -1081,6 +1133,7 @@ impl EcdheGroup {
                 | EcdheGroup::Bp384
                 | EcdheGroup::Bp256Tls13
                 | EcdheGroup::Bp384Tls13
+                | EcdheGroup::CurveSm2
         )
     }
 
@@ -1097,9 +1150,10 @@ impl EcdheGroup {
         matches!(
             self,
             EcdheGroup::X25519MlKem768
-                | EcdheGroup::X448MlKem1024
+                | EcdheGroup::MlKem1024X448
                 | EcdheGroup::Secp256r1MlKem768
                 | EcdheGroup::Secp384r1MlKem1024
+                | EcdheGroup::CurveSm2MlKem768
         )
     }
 
@@ -1110,10 +1164,14 @@ impl EcdheGroup {
         self.is_pure_kem() || self.is_hybrid()
     }
 
-    /// Groups defined for TLS 1.3 only (RFC 8734 brainpool codepoints, every
-    /// KEM group): a TLS 1.2 server never selects them.
+    /// Groups defined for TLS 1.3 only (RFC 8734 brainpool codepoints, RFC
+    /// 8998 curveSM2, every KEM group): a TLS 1.2 server never selects them.
     pub fn is_tls13_only(self) -> bool {
-        self.is_kem() || matches!(self, EcdheGroup::Bp256Tls13 | EcdheGroup::Bp384Tls13)
+        self.is_kem()
+            || matches!(
+                self,
+                EcdheGroup::Bp256Tls13 | EcdheGroup::Bp384Tls13 | EcdheGroup::CurveSm2
+            )
     }
 
     /// The RFC 7027 brainpool codepoints, defined for TLS 1.2 only (RFC 8734 2).
@@ -1125,10 +1183,11 @@ impl EcdheGroup {
     pub fn kem_param(self) -> Option<MlKemParam> {
         Some(match self {
             EcdheGroup::MlKem512 => MlKemParam::M512,
-            EcdheGroup::MlKem768 | EcdheGroup::X25519MlKem768 | EcdheGroup::Secp256r1MlKem768 => {
-                MlKemParam::M768
-            }
-            EcdheGroup::MlKem1024 | EcdheGroup::X448MlKem1024 | EcdheGroup::Secp384r1MlKem1024 => {
+            EcdheGroup::MlKem768
+            | EcdheGroup::X25519MlKem768
+            | EcdheGroup::Secp256r1MlKem768
+            | EcdheGroup::CurveSm2MlKem768 => MlKemParam::M768,
+            EcdheGroup::MlKem1024 | EcdheGroup::MlKem1024X448 | EcdheGroup::Secp384r1MlKem1024 => {
                 MlKemParam::M1024
             }
             _ => return None,
@@ -1139,17 +1198,19 @@ impl EcdheGroup {
     pub fn ecdh_component(self) -> Option<EcdheGroup> {
         Some(match self {
             EcdheGroup::X25519MlKem768 => EcdheGroup::X25519,
-            EcdheGroup::X448MlKem1024 => EcdheGroup::X448,
+            EcdheGroup::MlKem1024X448 => EcdheGroup::X448,
             EcdheGroup::Secp256r1MlKem768 => EcdheGroup::P256,
             EcdheGroup::Secp384r1MlKem1024 => EcdheGroup::P384,
+            EcdheGroup::CurveSm2MlKem768 => EcdheGroup::CurveSm2,
             _ => return None,
         })
     }
 
-    /// Whether a hybrid's shares and secret put the ML-KEM half first. Only
-    /// X25519MLKEM768 has the historical reverse-of-name ordering.
+    /// Whether a hybrid's shares and secret put the ML-KEM half first: the
+    /// two whose names lead with ML-KEM (RFC 10024 3.1.2 and
+    /// draft-preussmattsson-tls-mlkem1024-x448 3).
     pub fn kem_first(self) -> bool {
-        self == EcdheGroup::X25519MlKem768
+        matches!(self, EcdheGroup::X25519MlKem768 | EcdheGroup::MlKem1024X448)
     }
 
     /// Length of the share the INITIATOR (client) sends for this group.
@@ -1157,7 +1218,10 @@ impl EcdheGroup {
         match self {
             EcdheGroup::X25519 => 32,
             EcdheGroup::X448 => 56,
-            EcdheGroup::P256 | EcdheGroup::Bp256 | EcdheGroup::Bp256Tls13 => 65,
+            EcdheGroup::P256
+            | EcdheGroup::Bp256
+            | EcdheGroup::Bp256Tls13
+            | EcdheGroup::CurveSm2 => 65,
             EcdheGroup::P384 | EcdheGroup::Bp384 | EcdheGroup::Bp384Tls13 => 97,
             EcdheGroup::P521 => 133,
             EcdheGroup::Ffdhe2048 => 256,
@@ -1169,9 +1233,10 @@ impl EcdheGroup {
                 self.kem_param().expect("kem").ek_len()
             }
             EcdheGroup::X25519MlKem768
-            | EcdheGroup::X448MlKem1024
+            | EcdheGroup::MlKem1024X448
             | EcdheGroup::Secp256r1MlKem768
-            | EcdheGroup::Secp384r1MlKem1024 => {
+            | EcdheGroup::Secp384r1MlKem1024
+            | EcdheGroup::CurveSm2MlKem768 => {
                 self.kem_param().expect("kem").ek_len()
                     + self.ecdh_component().expect("hybrid").initiator_share_len()
             }
@@ -1287,6 +1352,8 @@ pub enum EcdhePrivate {
         sk: bp384::r1::SecretKey,
         group: EcdheGroup,
     },
+    /// curveSM2 (RFC 8998), one codepoint.
+    Sm2(sm2::SecretKey),
     /// RFC 7919 finite-field group: the exponent bound to its prime.
     Ffdhe {
         key: FfdhePrivate,
@@ -1411,6 +1478,15 @@ fn bp256_secret(rng: &mut Rng) -> bp256::r1::SecretKey {
     }
 }
 
+fn sm2_secret(rng: &mut Rng) -> sm2::SecretKey {
+    loop {
+        let bytes: [u8; 32] = rng.random_array();
+        if let Ok(sk) = sm2::SecretKey::from_slice(&bytes) {
+            return sk;
+        }
+    }
+}
+
 fn bp384_secret(rng: &mut Rng) -> bp384::r1::SecretKey {
     loop {
         let bytes: [u8; 48] = rng.random_array();
@@ -1516,6 +1592,7 @@ impl EcdhePrivate {
                 sk: bp384_secret(rng),
                 group,
             },
+            EcdheGroup::CurveSm2 => EcdhePrivate::Sm2(sm2_secret(rng)),
             EcdheGroup::Ffdhe2048
             | EcdheGroup::Ffdhe3072
             | EcdheGroup::Ffdhe4096
@@ -1540,9 +1617,10 @@ impl EcdhePrivate {
                 group,
             },
             EcdheGroup::X25519MlKem768
-            | EcdheGroup::X448MlKem1024
+            | EcdheGroup::MlKem1024X448
             | EcdheGroup::Secp256r1MlKem768
-            | EcdheGroup::Secp384r1MlKem1024 => {
+            | EcdheGroup::Secp384r1MlKem1024
+            | EcdheGroup::CurveSm2MlKem768 => {
                 let ecdh = EcdhePrivate::generate(group.ecdh_component().expect("hybrid"), rng);
                 let kem = EcdhePrivate::generate(group.kem_param().expect("hybrid").group(), rng);
                 EcdhePrivate::Hybrid {
@@ -1606,6 +1684,7 @@ impl EcdhePrivate {
             EcdhePrivate::P256(_) => EcdheGroup::P256,
             EcdhePrivate::P384(_) => EcdheGroup::P384,
             EcdhePrivate::P521(_) => EcdheGroup::P521,
+            EcdhePrivate::Sm2(_) => EcdheGroup::CurveSm2,
             EcdhePrivate::Bp256 { group, .. }
             | EcdhePrivate::Bp384 { group, .. }
             | EcdhePrivate::Ffdhe { group, .. }
@@ -1652,6 +1731,10 @@ impl EcdhePrivate {
                 use ec14::sec1::ToSec1Point;
                 sk.public_key().to_sec1_point(false).as_bytes().to_vec()
             }
+            EcdhePrivate::Sm2(sk) => {
+                use ec14::sec1::ToSec1Point;
+                sk.public_key().to_sec1_point(false).as_bytes().to_vec()
+            }
             // RFC 8446 4.2.8.1: Y = g^x mod p, left-padded to the prime's length.
             EcdhePrivate::Ffdhe { key, .. } => key.public_bytes(&FFDHE_G),
             EcdhePrivate::MlKem { dk, .. } => match dk {
@@ -1690,6 +1773,10 @@ impl EcdhePrivate {
                 Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
             }
             EcdhePrivate::Bp384 { sk, .. } => {
+                use ec14::sec1::ToSec1Point;
+                Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
+            }
+            EcdhePrivate::Sm2(sk) => {
                 use ec14::sec1::ToSec1Point;
                 Some(sk.public_key().to_sec1_point(true).as_bytes().to_vec())
             }
@@ -1790,6 +1877,14 @@ impl EcdhePrivate {
             }
             EcdhePrivate::Bp384 { sk, .. } => {
                 let pk = ec14::PublicKey::<bp384::BrainpoolP384r1>::from_sec1_bytes(peer_public)
+                    .map_err(|_| CryptoError::BadPublicKey)?;
+                let shared = ec14::ecdh::diffie_hellman(sk.to_nonzero_scalar(), pk.as_affine());
+                Ok(shared.raw_secret_bytes().to_vec())
+            }
+            // RFC 8998 3.3: an ordinary ECDHE on curveSM2, the shared secret is
+            // the x-coordinate; `from_sec1_bytes` rejects a point off the curve.
+            EcdhePrivate::Sm2(sk) => {
+                let pk = ec14::PublicKey::<sm2::Sm2>::from_sec1_bytes(peer_public)
                     .map_err(|_| CryptoError::BadPublicKey)?;
                 let shared = ec14::ecdh::diffie_hellman(sk.to_nonzero_scalar(), pk.as_affine());
                 Ok(shared.raw_secret_bytes().to_vec())
@@ -4423,7 +4518,10 @@ mod tests {
             let expect_len = match group {
                 EcdheGroup::X25519 => 32,
                 EcdheGroup::X448 => 56,
-                EcdheGroup::P256 | EcdheGroup::Bp256 | EcdheGroup::Bp256Tls13 => 32,
+                EcdheGroup::P256
+                | EcdheGroup::Bp256
+                | EcdheGroup::Bp256Tls13
+                | EcdheGroup::CurveSm2 => 32,
                 EcdheGroup::P384 | EcdheGroup::Bp384 | EcdheGroup::Bp384Tls13 => 48,
                 EcdheGroup::P521 => 66,
                 EcdheGroup::Ffdhe2048 => 256,
@@ -4432,8 +4530,10 @@ mod tests {
                 EcdheGroup::Ffdhe6144 => 768,
                 EcdheGroup::Ffdhe8192 => 1024,
                 EcdheGroup::MlKem512 | EcdheGroup::MlKem768 | EcdheGroup::MlKem1024 => 32,
-                EcdheGroup::X25519MlKem768 | EcdheGroup::Secp256r1MlKem768 => 64,
-                EcdheGroup::X448MlKem1024 => 88,
+                EcdheGroup::X25519MlKem768
+                | EcdheGroup::Secp256r1MlKem768
+                | EcdheGroup::CurveSm2MlKem768 => 64,
+                EcdheGroup::MlKem1024X448 => 88,
                 EcdheGroup::Secp384r1MlKem1024 => 80,
             };
             assert_eq!(ss_c.len(), expect_len, "{}", group.name());
@@ -4441,8 +4541,8 @@ mod tests {
         }
     }
 
-    /// X25519MLKEM768 puts the ML-KEM half first in both shares and in the
-    /// secret; all other hybrids follow their names and put ECDH first.
+    /// X25519MLKEM768 and MLKEM1024X448 put the ML-KEM half first in both
+    /// shares and in the secret; the other hybrids put ECDH first.
     #[test]
     fn hybrid_shares_follow_their_defined_order() {
         let mut rng_c = Rng::from_seed([31u8; 32]);
@@ -4460,25 +4560,39 @@ mod tests {
         let server = EcdhePrivate::respond(EcdheGroup::X25519MlKem768, &share, &mut rng_s).unwrap();
         assert_eq!(server.public_bytes().len(), 1120);
 
-        // X448MLKEM1024 follows the normal name order: x448(56) || ek(1568).
-        let client = EcdhePrivate::generate(EcdheGroup::X448MlKem1024, &mut rng_c);
+        // MLKEM1024X448 (draft-preussmattsson-tls-mlkem1024-x448 3): ek(1568) ||
+        // x448(56); server: ct(1568) || x448(56); secret ML-KEM(32) || X448(56).
+        let client = EcdhePrivate::generate(EcdheGroup::MlKem1024X448, &mut rng_c);
         let share = client.public_bytes();
         assert_eq!(share.len(), 1624);
-        let (ecdh, kem) = match &client {
-            EcdhePrivate::Hybrid { ecdh, kem, .. } => (ecdh.public_bytes(), kem.public_bytes()),
+        let (ecdh_client, kem_client) = match client {
+            EcdhePrivate::Hybrid { ecdh, kem, .. } => (*ecdh, *kem),
             _ => panic!("hybrid"),
         };
-        assert_eq!(&share[..56], &ecdh[..]);
-        assert_eq!(&share[56..], &kem[..]);
-        let server = EcdhePrivate::respond(EcdheGroup::X448MlKem1024, &share, &mut rng_s).unwrap();
-        assert_eq!(server.public_bytes().len(), 1624);
+        assert_eq!(&share[..1568], &kem_client.public_bytes()[..]);
+        assert_eq!(&share[1568..], &ecdh_client.public_bytes()[..]);
+        let server = EcdhePrivate::respond(EcdheGroup::MlKem1024X448, &share, &mut rng_s).unwrap();
+        let sshare = server.public_bytes();
+        assert_eq!(sshare.len(), 1624);
+        let ss_server = server.agree(&share).unwrap();
+        assert_eq!(ss_server.len(), 88);
+        assert_eq!(
+            &ss_server[..32],
+            &kem_client.agree(&sshare[..1568]).unwrap()[..],
+            "ML-KEM secret leads"
+        );
+        assert_eq!(
+            &ss_server[32..],
+            &ecdh_client.agree(&sshare[1568..]).unwrap()[..],
+            "X448 secret trails"
+        );
 
         // The hybrid fails if its classical component has a low-order point.
-        let client = EcdhePrivate::generate(EcdheGroup::X448MlKem1024, &mut rng_c);
+        let client = EcdhePrivate::generate(EcdheGroup::MlKem1024X448, &mut rng_c);
         let mut client_share = client.public_bytes();
-        client_share[..56].fill(0);
+        client_share[1568..].fill(0);
         let server =
-            EcdhePrivate::respond(EcdheGroup::X448MlKem1024, &client_share, &mut rng_s).unwrap();
+            EcdhePrivate::respond(EcdheGroup::MlKem1024X448, &client_share, &mut rng_s).unwrap();
         assert_eq!(server.agree(&client_share), Err(CryptoError::BadPublicKey));
 
         // SecP256r1MLKEM768: p256(65) || ek(1184); server p256(65) || ct(1088).
@@ -4518,6 +4632,149 @@ mod tests {
         );
         let c = EcdhePrivate::generate(EcdheGroup::Bp384, &mut rng);
         assert_eq!(c.public_bytes().len(), 97);
+    }
+
+    /// curveSM2 against an independent implementation: a key pair and shared
+    /// secret produced by Botan (ECDH on sm2p256v1, raw x-coordinate KDF), and
+    /// the generator of RFC 8998 3.2.1 as the public key of scalar 1.
+    #[test]
+    fn curvesm2_matches_botan_known_answer() {
+        let a_scalar =
+            hex_to_bytes("e9e802805283b05c672dc89ccf1371fe32d72e373b516ead1a9b4492b1b7a770");
+        let a_pub = hex_to_bytes(
+            "04a15ea26e7eaf71dd30a5a2a01310545a9170e65dcdcc5fb89f1d97b01be42bbb\
+             af27eb42d6abf8d003caee4de6b04e41aaa1cfe6b037abab2490dd414bca23c4",
+        );
+        let b_scalar =
+            hex_to_bytes("82295c520b9ccdc5ad43a4b4b23153cdcbd2b511a036c7ea36bfbc23d51dd9fc");
+        let b_pub = hex_to_bytes(
+            "04d4f1a75d7eb6d7c31d11c7517154a1fd30125d09116fa21350ec7ffcbe3bcfae\
+             6b438204790cd73104abe2779fdbc05701bac233a992fea1de37b5761e169746",
+        );
+        let shared =
+            hex_to_bytes("8a81f3dff5cbcc2e2b7348b6fdaee45b41073ffe5e101a0364b022c5fee801f5");
+        // `agree` consumes the key, so build each side as needed.
+        let key = |scalar: &[u8]| EcdhePrivate::Sm2(sm2::SecretKey::from_slice(scalar).unwrap());
+        let a = key(&a_scalar);
+        assert_eq!(a.group(), EcdheGroup::CurveSm2);
+        assert_eq!(a.public_bytes(), a_pub);
+        assert_eq!(a.public_bytes_compressed().unwrap().len(), 33);
+        assert_eq!(key(&b_scalar).public_bytes(), b_pub);
+        assert_eq!(a.agree(&b_pub).unwrap(), shared);
+        assert_eq!(key(&b_scalar).agree(&a_pub).unwrap(), shared);
+
+        let mut one = [0u8; 32];
+        one[31] = 1;
+        let g = EcdhePrivate::Sm2(sm2::SecretKey::from_slice(&one).unwrap());
+        assert_eq!(
+            g.public_bytes(),
+            hex_to_bytes(
+                "0432c4ae2c1f1981195f9904466a39c9948fe30bbff2660be1715a4589334c74c7\
+                 bc3736a2f4f6779c59bdcee36b692153d0a9877cc62a474002df32e52139f0a0"
+            )
+        );
+
+        let mut off_curve = b_pub.clone();
+        off_curve[64] ^= 1;
+        assert!(
+            key(&a_scalar).agree(&off_curve).is_err(),
+            "off-curve SM2 point must be rejected"
+        );
+        assert!(EcdheGroup::CurveSm2.is_tls13_only());
+        assert!(EcdheGroup::CurveSm2.is_weierstrass());
+        assert_eq!(EcdheGroup::from_wire(0x0029), Some(EcdheGroup::CurveSm2));
+    }
+
+    /// SM3 against the GB/T 32905-2016 example ("abc"), through both the
+    /// one-shot and the transcript wrappers; HMAC/HKDF-SM3 have no published
+    /// vectors and are covered by the OpenSSL interop of the SM4 suites.
+    #[test]
+    fn sm3_matches_the_gbt_32905_example() {
+        let expected =
+            hex_to_bytes("66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0");
+        assert_eq!(hash(HashAlg::Sm3, b"abc"), expected);
+        let mut t = TranscriptHash::new(HashAlg::Sm3);
+        t.update(b"a");
+        t.update(b"bc");
+        assert_eq!(t.digest(), expected);
+        assert_eq!(t.alg(), HashAlg::Sm3);
+        assert_eq!(HashAlg::Sm3.output_len(), 32);
+        assert_eq!(hmac(HashAlg::Sm3, b"key", b"data").len(), 32);
+        assert_eq!(hkdf_extract(HashAlg::Sm3, b"salt", b"ikm").len(), 32);
+    }
+
+    /// RFC 8998 Appendix A: the SM4-GCM and SM4-CCM test vectors.
+    #[test]
+    fn sm4_aeads_match_rfc8998_appendix_a() {
+        let key = hex_to_bytes("0123456789ABCDEFFEDCBA9876543210");
+        let nonce = hex_to_bytes("00001234567800000000ABCD");
+        let aad = hex_to_bytes("FEEDFACEDEADBEEFFEEDFACEDEADBEEFABADDAD2");
+        let plaintext = hex_to_bytes(
+            "AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBBCCCCCCCCCCCCCCCCDDDDDDDDDDDDDDDD\
+             EEEEEEEEEEEEEEEEFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEAAAAAAAAAAAAAAAA",
+        );
+        let gcm_expected = hex_to_bytes(
+            "17F399F08C67D5EE19D0DC9969C4BB7D5FD46FD3756489069157B282BB200735\
+             D82710CA5C22F0CCFA7CBF93D496AC15A56834CBCF98C397B4024A2691233B8D\
+             83DE3541E4C2B58177E065A9BF7B62EC",
+        );
+        let ccm_expected = hex_to_bytes(
+            "48AF93501FA62ADBCD414CCE6034D895DDA1BF8F132F042098661572E7483094\
+             FD12E518CE062C98ACEE28D95DF4416BED31A2F04476C18BB40C84A74B97DC5B\
+             16842D4FA186F56AB33256971FA110F4",
+        );
+        for (alg, expected) in [
+            (AeadAlg::Sm4Gcm, gcm_expected),
+            (AeadAlg::Sm4Ccm, ccm_expected),
+        ] {
+            assert_eq!(alg.key_len(), 16);
+            assert_eq!(alg.nonce_len(), 12);
+            assert_eq!(alg.tag_len(), 16);
+            let k = AeadKey::new(alg, &key).unwrap();
+            let sealed = k.seal(&nonce, &aad, &plaintext).unwrap();
+            assert_eq!(sealed, expected, "{alg:?}");
+            assert_eq!(k.open(&nonce, &aad, &sealed).unwrap(), plaintext, "{alg:?}");
+            let mut tampered = sealed.clone();
+            tampered[0] ^= 1;
+            assert!(k.open(&nonce, &aad, &tampered).is_err(), "{alg:?}");
+        }
+    }
+
+    /// draft-yang-tls-hybrid-sm2-mlkem: curveSM2MLKEM768 is ECDH first, a
+    /// 1249-byte client share (65 + 1184), a 1153-byte server share (65 +
+    /// 1088) and a 64-byte secret (SM2 x-coordinate || ML-KEM). The SM2 half
+    /// of the client share is a valid uncompressed point.
+    #[test]
+    fn curvesm2_mlkem768_hybrid_layout() {
+        let g = EcdheGroup::CurveSm2MlKem768;
+        assert_eq!(EcdheGroup::from_wire(0x11ee), Some(g));
+        assert_eq!(
+            EcdheGroup::from_wire(0x11ef),
+            Some(EcdheGroup::MlKem1024X448)
+        );
+        assert!(g.is_hybrid() && !g.kem_first() && g.is_tls13_only());
+        assert_eq!(g.ecdh_component(), Some(EcdheGroup::CurveSm2));
+        assert_eq!(g.initiator_share_len(), 1249);
+        assert_eq!(g.responder_share_len(), 1153);
+        let mut rng_c = Rng::from_seed([61u8; 32]);
+        let mut rng_s = Rng::from_seed([62u8; 32]);
+        let client = EcdhePrivate::generate(g, &mut rng_c);
+        let share = client.public_bytes();
+        assert_eq!(share.len(), 1249);
+        assert_eq!(share[0], 0x04);
+        let sm2_only = EcdhePrivate::generate(EcdheGroup::CurveSm2, &mut rng_s);
+        assert!(
+            sm2_only.agree(&share[..65]).is_ok(),
+            "ECDH half is a valid SM2 point"
+        );
+        let server = EcdhePrivate::respond(g, &share, &mut rng_s).unwrap();
+        let server_share = server.public_bytes();
+        assert_eq!(server_share.len(), 1153);
+        assert_eq!(server_share[0], 0x04);
+        let ss_s = server.agree(&share).unwrap();
+        let ss_c = client.agree(&server_share).unwrap();
+        assert_eq!(ss_s, ss_c);
+        assert_eq!(ss_c.len(), 64);
     }
 
     #[test]

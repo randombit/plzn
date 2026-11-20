@@ -6,7 +6,7 @@ library (Botan, OpenSSL, LibreSSL, BoringSSL, rustls, GnuTLS, wolfSSL, or Go `cr
 
 Botan, OpenSSL, and rustls are the corpus-enabled backends described by the
 full policy matrix below. LibreSSL is also fully triaged against the corpus
-(TLS and DTLS 1.2, both roles); see [LibreSSL](#libressl). BoringSSL is the DTLS 1.3 oracle. GnuTLS, wolfSSL, and Go are newer: all cover TLS 1.2/1.3,
+(TLS and DTLS 1.2, both roles); see [LibreSSL](#libressl). BoringSSL is the DTLS 1.3 oracle; an OpenSSL shim built against OpenSSL 4.1+ runs DTLS 1.3 as well but is not triaged for it. GnuTLS, wolfSSL, and Go are newer: all cover TLS 1.2/1.3,
 both roles, certificate authentication, SNI, application data, and structured
 results; GnuTLS additionally has DTLS 1.2 datagram framing in both roles. They
 report `unsupported_config` for unwired controls so incomplete coverage cannot
@@ -313,9 +313,10 @@ Two rules, in tension, decide what a shim does with its library:
   `[SKIP] <id> — <backend> cannot apply: uut.<knob>: <why>`, counts it as
   skipped, and lists it in the `--- skipped on <backend> (N) ---` block after
   the summary (BoGo's UNSUPPORTED list). The same case covers the protocol:
-  `rustls has no DTLS` is a SKIP, not a FAIL. Botan, OpenSSL, LibreSSL, GnuTLS,
-  wolfSSL, Go, and rustls likewise reject a DTLS 1.3 configuration before dialing;
-  BoringSSL is currently the only DTLS 1.3 shim. The same refusal covers the
+  `rustls has no DTLS` is a SKIP, not a FAIL. Botan, LibreSSL, GnuTLS,
+  wolfSSL, Go, rustls, and an OpenSSL shim built against headers without
+  `DTLS1_3_VERSION` (before 4.1) likewise reject a DTLS 1.3 configuration before
+  dialing; BoringSSL and OpenSSL 4.1+ run it. The same refusal covers the
   OFFER: `ShimConfig.requires` carries the suites and groups the
   `peer.capabilities` selectors produce (any-of), plus `renegotiate_freely` for a `renegotiate` step and the
   external `psk`; every shim checks them against its library before dialing
