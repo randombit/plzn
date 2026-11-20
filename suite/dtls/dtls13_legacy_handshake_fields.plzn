@@ -33,6 +33,7 @@ plzn tls "dtls13/client-rejects-hello-verify-request" {
   }
   expect alert fatal/unexpected_message
   expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if botan
 }
 
 plzn tls "dtls13/client-rejects-empty-cookie-hello-verify-request" {
@@ -50,6 +51,7 @@ plzn tls "dtls13/client-rejects-empty-cookie-hello-verify-request" {
   }
   expect alert fatal/unexpected_message
   expect alert fatal/protocol_version if boringssl
+  expect alert fatal/protocol_version if botan
 }
 
 plzn tls "dtls13/client-rejects-dtls13-after-dtls12-cookie-retry" {
