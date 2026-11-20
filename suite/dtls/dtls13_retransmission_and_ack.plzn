@@ -661,6 +661,7 @@ plzn tls "dtls13/server-rejects-ack-at-lower-epoch" {
   }
   expect alert fatal/decode_error
   expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if botan
 }
 
 plzn tls "dtls13/server-rejects-overflowing-ack-epoch" {
@@ -683,4 +684,5 @@ plzn tls "dtls13/server-rejects-overflowing-ack-epoch" {
   }
   expect alert fatal/decode_error
   expect alert fatal/illegal_parameter if boringssl
+  expect alert fatal/illegal_parameter if botan
 }
