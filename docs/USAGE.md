@@ -1244,7 +1244,11 @@ not sent, so the shim is told the handshake was abandoned. DTLS 1.2 has no
 `hold`; the same shape there is `send Msg @ pad to 4097, @ fragment 256`,
 then `hold_flight` and `release_flight [0]`, which sends only the first
 fragment. `suite/{server,client,dtls}/*max_handshake_message_size*.plzn`
-cover every message type each role receives.
+cover every message type each role receives. Without the knob, the
+`*implausible_handshake_length.plzn` files test each library's built-in
+limit. They use `@ set[handshake.length, 0..2] = 0xff` to announce
+2^24 - 1 bytes without building such a body, follow it with `wait 300 ms`,
+and pin each backend's alert or close.
 
 ### Anchored presets
 
@@ -2121,7 +2125,7 @@ forms.
 | `@ truncate N` | keep only the first N bytes (N may be a matrix variable) |
 | `@ trailing "HEX"` | TLS handshake messages only: append bytes after the complete framed message without changing its declared length or transcript; this places a prefix of the next handshake message in the current record |
 | `@ omit_prefix N` | TLS handshake messages only: omit the first N encoded bytes on the wire while retaining the complete logical message in the transcript; pair with an earlier `@ trailing` to finish a message across a flight or key boundary |
-| `@ xor[a..b] = V`, `@ set[path, a..b] = V` | every byte of the range (end exclusive; negatives count from the end) |
+| `@ xor[a..b] = V`, `@ set[path, a..b] = V` | every byte of the range, both ends included as in every plzn range (`set[handshake.length, 0..2]` is the whole 3-byte length); negatives count from the end |
 | `@ record_version 0xNNNN` | the record header's version field for this send (tlsfuzzer's Connect(version) / SetRecordVersion) |
 | `@ record_pad N` / `@ record_pad fill` | TLS or DTLS 1.3: N zero bytes of record padding after the inner content type, or pad the record to the 2^14 + 1 plaintext maximum |
 | `@ dtls13_short_sequence` | DTLS 1.3: use the one-byte unified-header record number instead of two bytes |

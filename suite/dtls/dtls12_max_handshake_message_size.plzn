@@ -94,6 +94,7 @@ plzn tls "dtls12/server-max-handshake-message-size/cookie-client-hello-over-limi
   uut server {
     versions: [dtls12]
     max_handshake_message_size: 4096
+    dtls_require_cookie: true
   }
   flow handshake until send ClientHello {
     send ClientHello
@@ -112,6 +113,7 @@ plzn tls "dtls12/server-max-handshake-message-size/cookie-client-hello-at-limit"
   uut server {
     versions: [dtls12]
     max_handshake_message_size: 4096
+    dtls_require_cookie: true
   }
   flow handshake until send ClientHello {
     send ClientHello

@@ -1287,6 +1287,43 @@ plzn tls "uut/max-handshake-message-size" {{
 }
 
 #[test]
+fn handshake_header_mutation_indices_must_fit_the_field() {
+    // The post-framing pass that applies these has no error channel, so an
+    // index past the 3-byte length (or 1-byte type) must fail lint instead of
+    // silently leaving the header alone.
+    let test = |mutation: &str| {
+        format!(
+            r#"
+plzn tls "lint/header-index" {{
+  syntax 1.0
+  chain: [ecdsa_p256]
+  uut server {{ versions: [tls13] }}
+  flow handshake until send ClientHello {{
+    send ClientHello @ {mutation}
+    wait 100 ms
+  }}
+  expect alert fatal
+}}
+"#
+        )
+    };
+    lint_ok(&test("set[handshake.length, 0..2] = 0xff"));
+    lint_ok(&test("xor[handshake.length, -1] = 0x01"));
+    lint_ok(&test("set[handshake.msg_type, 0] = 0x02"));
+    for bad in [
+        "set[handshake.length, 0..3] = 0xff",
+        "xor[handshake.length, 3] = 0x01",
+        "set[handshake.msg_type, 1] = 0x02",
+    ] {
+        let rendered = lint_err(&test(bad));
+        assert!(
+            rendered.contains("is out of range for"),
+            "{bad}: {rendered}"
+        );
+    }
+}
+
+#[test]
 fn uut_peer_knob_values_are_checked() {
     let rendered = lint_err(
         r#"

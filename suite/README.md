@@ -32,7 +32,7 @@ plzn run --shim shims/build/openssl_shim suite/client/
 Every case explicitly names its server chain (or explicitly requests no chain),
 so no directory-level certificate option is needed.
 
-The inventory currently contains 977 files and 2,842 source test declarations;
+The inventory currently contains 982 files and 2,885 source test declarations;
 matrices and repeats expand these into thousands of concrete cases.
 `tests/suite_inventory.rs` rejects duplicate IDs, byte-equivalent scenarios,
 provenance-labelled filenames, and IDs outside the canonical `server/`,
