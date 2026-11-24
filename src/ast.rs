@@ -152,6 +152,9 @@ pub struct UutBlock {
     pub max_cert_list: Option<u32>,
     /// RFC 8449 maximum TLSPlaintext/TLSInnerPlaintext size advertised to the peer.
     pub record_size_limit: Option<u32>,
+    /// Largest handshake message body (bytes) the UUT accepts from its peer;
+    /// 0 = no per-message limit.
+    pub max_handshake_message_size: Option<u32>,
     /// `records_per_traffic_key: N`: automatic TLS 1.3 KeyUpdate after N records (0 = never).
     pub records_per_traffic_key: Option<u32>,
     /// Ask the shim to initiate one post-handshake KeyUpdate before its
@@ -716,6 +719,12 @@ pub enum MutationOp {
     },
     PadMinus {
         n: MutValue,
+    },
+    /// `pad to N [0xNN]` — append bytes (zero, or the given pad byte) until
+    /// the body is exactly N bytes; N may be a matrix variable.
+    PadTo {
+        n: MutValue,
+        byte: Option<IntLit>,
     },
     Truncate {
         n: MutValue,

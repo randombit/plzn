@@ -247,6 +247,12 @@ fn check_policy(cfg: &ShimConfig) -> Result<(), Fail> {
             "uut.record_size_limit: rustls exposes no RFC 8449 record-size-limit policy",
         ));
     }
+    if cfg.max_handshake_message_size.is_some() {
+        return Err(Fail::new(
+            UNSUPPORTED_CONFIG,
+            "uut.max_handshake_message_size: rustls has a fixed 0xffff-byte handshake message limit",
+        ));
+    }
     if cfg.renegotiate_freely {
         return Err(Fail::new(
             UNSUPPORTED_CONFIG,

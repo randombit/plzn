@@ -1,0 +1,290 @@
+# TLS 1.2 client: the handshake message size cap applies to the header of
+# every message a client receives.
+#
+# The UUT is configured to accept handshake message bodies of at most 4096
+# bytes (`uut.max_handshake_message_size`). Each over-limit case sends a
+# message whose header announces 4097 bytes and then only the bare 4-byte
+# handshake header (`pad to` grows the body to the announced size; `fragment 4
+# hold_all` sends the first 4-byte record and withholds the rest), so a peer
+# that enforces the cap from the header alone rejects at once, while one that
+# waits for (and buffers) the announced body sends nothing and the case fails
+# when no alert arrives. Each over-limit case has an at-limit control: the
+# same delivery announcing exactly 4096 bytes, which must NOT be refused; the
+# peer stays silent through `wait 300 ms`, waiting for the rest of the message.
+# The pair pins the comparison (`length > cap`) on every message type this
+# role receives. The 65536 pair repeats the first message at Botan's default
+# cap, where 65537 (0x010001) needs the high byte of the 24-bit length.
+#
+# No RFC sets a handshake message size limit (the 24-bit length allows up to
+# 2^24 - 1 bytes); the cap is local policy. Only shims whose library can apply
+# one cap to every handshake message type run these cases; the others refuse
+# the knob and SKIP (shims/DESIGN.md, "Corpus-enabled knob matrix").
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerHello {
+    send ServerHello @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerHello {
+    send ServerHello @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-over-limit-65536" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 65536
+  }
+  flow handshake until send ServerHello {
+    send ServerHello @ pad to 65537, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-at-limit-65536" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 65536
+  }
+  flow handshake until send ServerHello {
+    send ServerHello @ pad to 65536, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/certificate-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send Certificate {
+    send Certificate @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/certificate-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send Certificate {
+    send Certificate @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-key-exchange-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-key-exchange-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/certificate-request-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/certificate-request-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  peer { request_client_cert: true }
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-done-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerHelloDone {
+    send ServerHelloDone @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/server-hello-done-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send ServerHelloDone {
+    send ServerHelloDone @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/new-session-ticket-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  peer { capabilities: [session_ticket] }
+  flow handshake until send ChangeCipherSpec {
+    send NewSessionTicket @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/new-session-ticket-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  peer { capabilities: [session_ticket] }
+  flow handshake until send ChangeCipherSpec {
+    send NewSessionTicket @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/finished-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send Finished {
+    send Finished @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/finished-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake until send Finished {
+    send Finished @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}
+
+plzn tls "client/tls12-max-handshake-message-size/hello-request-over-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send HelloRequest @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+
+plzn tls "client/tls12-max-handshake-message-size/hello-request-at-limit" {
+  syntax 1.1
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut client {
+    versions: [tls12]
+    max_handshake_message_size: 4096
+  }
+  flow handshake {
+    send AppData
+    recv AppData
+    send HelloRequest @ pad to 4096, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect ok
+}

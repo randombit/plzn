@@ -1206,6 +1206,9 @@ void configure_ctx(SSL_CTX* ctx, const ShimConfig& cfg) {
    if(cfg.record_size_limit.has_value()) {
       plzn::report_unsupported("record_size_limit", "OpenSSL exposes no RFC 8449 record_size_limit policy");
    }
+   if(cfg.max_handshake_message_size.has_value()) {
+      plzn::report_unsupported("max_handshake_message_size", "OpenSSL has fixed per-message-type limits; only Certificate and CertificateRequest follow SSL_CTX_set_max_cert_list (uut.max_cert_list)");
+   }
 
    // A peer that closes the TCP connection without a close_notify is, since
    // OpenSSL 3.0, reported as a fatal SSL_ERROR_SSL (unexpected EOF). The runner

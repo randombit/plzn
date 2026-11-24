@@ -340,6 +340,13 @@ class Shim_Policy final : public Botan::TLS::Policy {
          return m_cfg.max_cert_list.value_or(Botan::TLS::Policy::maximum_certificate_chain_size());
       }
 
+      // `uut { max_handshake_message_size: N }`: the largest handshake message
+      // body accepted from the peer (0 = unlimited), checked against the length
+      // in each message's header (TLS 1.2, TLS 1.3 and DTLS 1.2 alike).
+      size_t maximum_handshake_message_size() const override {
+         return m_cfg.max_handshake_message_size.value_or(Botan::TLS::Policy::maximum_handshake_message_size());
+      }
+
       std::optional<uint16_t> record_size_limit() const override {
          if(m_cfg.record_size_limit.has_value()) {
             return static_cast<uint16_t>(*m_cfg.record_size_limit);

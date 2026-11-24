@@ -351,6 +351,7 @@ struct ShimConfig {
       std::optional<bool> expect_early_data_accepted;
       std::optional<uint32_t> max_cert_list;              // maximum encoded peer chain size
       std::optional<uint32_t> record_size_limit;           // RFC 8449 receive limit to advertise
+      std::optional<uint32_t> max_handshake_message_size;  // largest peer handshake body; 0 = no limit
       std::optional<uint32_t> records_per_traffic_key;  // automatic TLS 1.3 KeyUpdate after N records            // tickets per handshake; 0 = no resumption at all
       std::optional<std::string> extended_master_secret;  // "require" | "allow" | "off"
       std::optional<bool> encrypt_then_mac;

@@ -20,7 +20,7 @@ use crate::lex::{Tok, Token};
 /// reset MINOR, when a test that was valid stops parsing or changes meaning.
 /// There is one grammar: a test from another major revision is rejected, not
 /// parsed under its own rules.
-pub const SYNTAX_VERSION: (u32, u32) = (1, 0);
+pub const SYNTAX_VERSION: (u32, u32) = (1, 1);
 
 /// Whether a parser implementing `implemented` can run a test written against
 /// `declared`: the same major revision, and no newer minor revision.
@@ -1363,6 +1363,7 @@ impl<'a> Parser<'a> {
             max_early_data: None,
             max_cert_list: None,
             record_size_limit: None,
+            max_handshake_message_size: None,
             records_per_traffic_key: None,
             key_update: false,
             extended_master_secret: None,
@@ -1483,6 +1484,22 @@ impl<'a> Parser<'a> {
                     }
                     block.record_size_limit = Some(limit)
                 }
+                "max_handshake_message_size" => {
+                    let limit = self.parse_uut_u32("max_handshake_message_size")?;
+                    // The handshake length field is 24 bits; a larger cap
+                    // could never be reached.
+                    if limit > 0xff_ffff {
+                        return Err(ParseError {
+                            span: field.span,
+                            message: format!(
+                                "uut.max_handshake_message_size must be 0 (no limit) through \
+                                 16777215, not {}",
+                                limit
+                            ),
+                        });
+                    }
+                    block.max_handshake_message_size = Some(limit)
+                }
                 "records_per_traffic_key" => {
                     block.records_per_traffic_key =
                         Some(self.parse_uut_u32("records_per_traffic_key")?)
@@ -1544,7 +1561,7 @@ impl<'a> Parser<'a> {
                              require_client_cert, request_client_cert, verify_peer, \
                              alpn_advertise, alpn_select, alpn_select_from, expect_alpn, alpn_decline, \
                              srtp_profiles, expect_srtp_profile, server_preference, renegotiation, \
-                             session_tickets, max_early_data, max_cert_list, record_size_limit, records_per_traffic_key, key_update, extended_master_secret, encrypt_then_mac, \
+                             session_tickets, max_early_data, max_cert_list, record_size_limit, max_handshake_message_size, records_per_traffic_key, key_update, extended_master_secret, encrypt_then_mac, \
                              middlebox_compat, compress_certificate, raw_public_key, server_certificate_types, client_certificate_types, mtu, initial_timeout_ms, dtls_max_retransmissions, \
                              dtls_max_timeout_ms, dtls_require_cookie, dtls_epoch0_restart, \
                              dtls_max_hello_verify_requests, \
@@ -3441,6 +3458,18 @@ impl<'a> Parser<'a> {
                 } else if self.eat(&Tok::Minus) {
                     let n = self.parse_mut_value()?;
                     MutationOp::PadMinus { n }
+                } else if self.at_ident("to") {
+                    // `pad to N [0xNN]`: grow the body to exactly N bytes.
+                    self.bump();
+                    let n = self.parse_mut_value()?;
+                    let byte = match self.peek().cloned() {
+                        Some(Token {
+                            tok: Tok::Int(_) | Tok::Hex(_),
+                            ..
+                        }) => Some(self.expect_int()?),
+                        _ => None,
+                    };
+                    MutationOp::PadTo { n, byte }
                 } else if matches!(
                     self.peek(),
                     Some(Token {
@@ -3455,7 +3484,8 @@ impl<'a> Parser<'a> {
                 } else {
                     return Err(ParseError {
                         span: op_id.span,
-                        message: "`pad` requires `+N [0xNN]`, `-N` or `\"HEX\"`".into(),
+                        message: "`pad` requires `+N [0xNN]`, `-N`, `to N [0xNN]` or `\"HEX\"`"
+                            .into(),
                     });
                 }
             }

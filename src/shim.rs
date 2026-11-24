@@ -445,6 +445,10 @@ pub struct ShimConfig {
     /// RFC 8449 receive limit the UUT advertises to its peer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub record_size_limit: Option<u32>,
+    /// Largest handshake message body the UUT accepts from its peer, in
+    /// bytes (0 = no per-message limit).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub max_handshake_message_size: Option<u32>,
     #[serde(skip_serializing_if = "Option::is_none")]
     /// Automatic TLS 1.3 KeyUpdate after this many sent records (Botan policy; 0 = never).
     pub records_per_traffic_key: Option<u32>,
@@ -860,6 +864,7 @@ impl ShimConfig {
             cfg.max_early_data = u.max_early_data;
             cfg.max_cert_list = u.max_cert_list;
             cfg.record_size_limit = u.record_size_limit;
+            cfg.max_handshake_message_size = u.max_handshake_message_size;
             cfg.records_per_traffic_key = u.records_per_traffic_key;
             cfg.key_update = u.key_update;
             cfg.extended_master_secret = u.extended_master_secret.clone();
@@ -1006,6 +1011,9 @@ pub fn program_completes_handshake(program: &crate::ir::Program) -> bool {
     else {
         return false;
     };
+    if finished_withheld(steps, last) {
+        return false;
+    }
     let observes = |s: &Step| match s {
         Step::HandshakeSteps { steps, .. } => {
             steps.iter().any(|h| matches!(h, HandshakeStep::Recv(_)))
@@ -1033,6 +1041,53 @@ pub fn program_completes_handshake(program: &crate::ir::Program) -> bool {
         }
     }
     steps[last + 1..].iter().any(observes)
+}
+
+/// True when the Finished sent by `steps[at]` never fully left plzn, so the
+/// peer is still waiting for the rest of it: TLS `@ fragment N hold` /
+/// `hold_all` with no `flush_fragment` afterwards, or a DTLS flight set aside
+/// by an immediately following `hold_flight` that is never released whole.
+fn finished_withheld(steps: &[crate::ir::Step], at: usize) -> bool {
+    use crate::ir::{DtlsFragScheme, DtlsOp, MessageKind, MutationOp, Step};
+    let after = &steps[at + 1..];
+    let held_fragments = match &steps[at] {
+        Step::HandshakeSteps {
+            config: Some(config),
+            ..
+        } => config
+            .mutations
+            .iter()
+            .filter(|m| m.message == MessageKind::Finished)
+            .any(|m| {
+                matches!(m.dtls_frag, Some(DtlsFragScheme::HeldFragment { .. }))
+                    || m.mutations
+                        .iter()
+                        .any(|x| matches!(x.op, MutationOp::Fragment { hold, .. } if hold.holds()))
+            }),
+        _ => false,
+    };
+    if held_fragments
+        && !after
+            .iter()
+            .any(|s| matches!(s, Step::FlushFragment { .. }))
+    {
+        return true;
+    }
+    matches!(
+        after.first(),
+        Some(Step::Dtls {
+            op: DtlsOp::HoldFlight,
+            ..
+        })
+    ) && !after.iter().any(|s| {
+        matches!(
+            s,
+            Step::Dtls {
+                op: DtlsOp::ReleaseFlight { records: None },
+                ..
+            }
+        )
+    })
 }
 
 /// The suites and groups plzn will offer (client role) or select from (server
@@ -1264,6 +1319,7 @@ impl Default for ShimConfig {
             expect_early_data_accepted: None,
             max_cert_list: None,
             record_size_limit: None,
+            max_handshake_message_size: None,
             records_per_traffic_key: None,
             key_update: false,
             post_handshake_auth: None,
@@ -2990,6 +3046,48 @@ plzn tls "req/abandoned" {
         // No backend: the base expectation.
         let cfg = ShimConfig::for_program(&p, Some("c"), Some("k"), None).unwrap();
         assert!(cfg.expect.handshake_abandoned);
+    }
+
+    #[test]
+    fn a_withheld_finished_does_not_complete_the_handshake() {
+        let abandoned = |flow: &str| {
+            let p = lower_one(&format!(
+                r#"
+plzn tls "req/withheld-finished" {{
+  syntax 1.1
+  chain: [ecdsa_p256]
+  uut {flow}
+  expect ok
+}}
+"#
+            ));
+            ShimConfig::for_program(&p, Some("c"), Some("k"), None)
+                .unwrap()
+                .expect
+                .handshake_abandoned
+        };
+        // TLS: only the first record of the Finished is sent.
+        assert!(abandoned(
+            "server { versions: [tls13] }\n  flow handshake until send Finished {\n    \
+             send Finished @ fragment 4 hold_all\n    wait 100 ms\n  }"
+        ));
+        // ... unless the held records are flushed afterwards.
+        assert!(!abandoned(
+            "server { versions: [tls13] }\n  flow handshake until send Finished {\n    \
+             send Finished @ fragment 4 hold\n    flush_fragment\n    send AppData\n    \
+             recv AppData\n  }"
+        ));
+        // DTLS: the Finished's flight is held and only partly released.
+        assert!(abandoned(
+            "server { versions: [dtls12] }\n  flow handshake until send Finished {\n    \
+             send Finished @ fragment 4\n    hold_flight\n    release_flight [0]\n    \
+             wait 100 ms\n  }"
+        ));
+        assert!(!abandoned(
+            "server { versions: [dtls12] }\n  flow handshake until send Finished {\n    \
+             send Finished\n    hold_flight\n    release_flight\n    recv ChangeCipherSpec\n    \
+             recv Finished\n  }"
+        ));
     }
 
     #[test]

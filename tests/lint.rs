@@ -400,13 +400,13 @@ fn syntax_declaration_is_required_first_and_once() {
     for head in ["", "  rfc 8446 section 4.1.2\n  syntax 1.0"] {
         let rendered = lint_err(&with_head(head));
         assert!(
-            rendered.contains("expected `syntax 1.0` as the first statement of the test"),
+            rendered.contains("expected `syntax 1.1` as the first statement of the test"),
             "{head:?}: {rendered}"
         );
     }
     let empty = lint_err("plzn tls \"syntax/empty\" {}\n");
     assert!(
-        empty.contains("expected `syntax 1.0`") && empty.contains("found `}`"),
+        empty.contains("expected `syntax 1.1`") && empty.contains("found `}`"),
         "{empty}"
     );
     let duplicate = lint_err(&with_head("  syntax 1.0\n  syntax 1.0"));
@@ -423,16 +423,16 @@ fn unsupported_syntax_versions_are_rejected_before_the_body_is_read() {
     // body still has to tokenize: the whole file is lexed before any parsing.)
     for (version, expected) in [
         (
-            "1.1",
-            "test requires syntax 1.1, which is newer than the syntax 1.0 this plzn implements",
+            "1.2",
+            "test requires syntax 1.2, which is newer than the syntax 1.1 this plzn implements",
         ),
         (
             "2.0",
-            "syntax 2.0 is not supported; this plzn implements syntax 1.0",
+            "syntax 2.0 is not supported; this plzn implements syntax 1.1",
         ),
         (
             "0.1",
-            "syntax 0.1 is not supported; this plzn implements syntax 1.0",
+            "syntax 0.1 is not supported; this plzn implements syntax 1.1",
         ),
     ] {
         let source = format!(
@@ -1247,6 +1247,43 @@ plzn tls "uut/knobs" {
 }
 "#,
     );
+}
+
+#[test]
+fn max_handshake_message_size_and_pad_to_parse_and_are_range_checked() {
+    let test = |limit: &str, pad: &str| {
+        format!(
+            r#"
+plzn tls "uut/max-handshake-message-size" {{
+  syntax 1.1
+  chain: [ecdsa_p256]
+  uut server {{
+    versions: [tls13]
+    max_handshake_message_size: {limit}
+  }}
+  flow handshake until send ClientHello {{
+    send ClientHello @ {pad}, @ fragment 4 hold_all
+  }}
+  expect alert fatal/handshake_failure
+}}
+"#
+        )
+    };
+    lint_ok(&test("4096", "pad to 4097"));
+    lint_ok(&test("0", "pad to 4097 0xff"));
+    lint_ok(&test("16777215", "pad to 16777215"));
+    let rendered = lint_err(&test("16777216", "pad to 4097"));
+    assert!(
+        rendered.contains("max_handshake_message_size must be 0 (no limit) through 16777215"),
+        "{rendered}"
+    );
+    let rendered = lint_err(&test("4096", "pad to 16777216"));
+    assert!(
+        rendered.contains("pad to N takes 0..=16777215 bytes"),
+        "{rendered}"
+    );
+    let rendered = lint_err(&test("4096", "pad 4097"));
+    assert!(rendered.contains("`to N [0xNN]`"), "{rendered}");
 }
 
 #[test]

@@ -3259,6 +3259,7 @@ fn lower_with_binding(
             max_early_data: u.max_early_data,
             max_cert_list: u.max_cert_list,
             record_size_limit: u.record_size_limit,
+            max_handshake_message_size: u.max_handshake_message_size,
             records_per_traffic_key: u.records_per_traffic_key,
             key_update: u.key_update,
             extended_master_secret: u.extended_master_secret.clone(),
@@ -5599,6 +5600,24 @@ fn lower_one_mutation(
                 });
             }
             MutationOp::PadMinus(n as usize)
+        }
+        ast::MutationOp::PadTo { n, byte } => {
+            let n = resolve_mut_value(n, binding, span)?;
+            // A handshake body length is a 24-bit field.
+            if !(0..=0xff_ffff).contains(&n) {
+                return Err(LowerError {
+                    span,
+                    message: format!("pad to N takes 0..=16777215 bytes, not {n}"),
+                });
+            }
+            let byte = match byte {
+                None => 0,
+                Some(b) => range_u8(b.value, b.span)?,
+            };
+            MutationOp::PadTo {
+                len: n as usize,
+                byte,
+            }
         }
         ast::MutationOp::Truncate { n } => {
             let n = resolve_mut_value(n, binding, span)?;
