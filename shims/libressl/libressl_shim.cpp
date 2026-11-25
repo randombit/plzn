@@ -780,6 +780,9 @@ void refuse_unsupported(const ShimConfig& cfg) {
    if(cfg.record_size_limit.has_value()) {
       report_unsupported("record_size_limit", "LibreSSL does not implement RFC 8449 record_size_limit");
    }
+   if(cfg.max_handshake_message_size.has_value()) {
+      report_unsupported("max_handshake_message_size", "LibreSSL has fixed per-message-type limits (256 KiB for every TLS 1.3 message); SSL_CTX_set_max_cert_list covers only some legacy-stack messages");
+   }
    if(cfg.max_early_data.has_value() || cfg.early_data_send > 0 || cfg.early_data_expect > 0 ||
       cfg.expect_early_data_accepted.has_value() ||
       std::any_of(cfg.connection_early_data.begin(), cfg.connection_early_data.end(), [](const auto& e) {

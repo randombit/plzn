@@ -1191,6 +1191,13 @@ void preflight(const ShimConfig& cfg) {
       cfg.min_key_update_interval_ms.has_value()) {
       plzn::report_unsupported("uut", "one or more requested policy knobs are not wired in the GnuTLS shim yet");
    }
+   if(cfg.max_handshake_message_size.has_value()) {
+      // gnutls_handshake_set_max_packet_length bounds the whole transcript
+      // (both directions), checked once each message is complete.
+      plzn::report_unsupported("max_handshake_message_size",
+                               "GnuTLS has no per-message limit; gnutls_handshake_set_max_packet_length caps the "
+                               "cumulative handshake transcript once each message is complete");
+   }
    if(!cfg.requires_any_suite.empty() &&
       std::none_of(cfg.requires_any_suite.begin(), cfg.requires_any_suite.end(),
                    [&cfg](uint16_t id) { return suite_enabled_by_priority(cfg, id); })) {

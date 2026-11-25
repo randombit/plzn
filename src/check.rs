@@ -587,6 +587,7 @@ fn check_mutation(mu: &Mutation, matrix_vars: &[&str], errs: &mut Vec<CheckError
         MutationOp::Fragment { n, .. }
         | MutationOp::PadPlus { n, .. }
         | MutationOp::PadMinus { n }
+        | MutationOp::PadTo { n, .. }
         | MutationOp::Truncate { n }
         | MutationOp::OmitPrefix { n } => check_mut_value(n, matrix_vars, errs),
         // T2: value ranges are checked at lowering.

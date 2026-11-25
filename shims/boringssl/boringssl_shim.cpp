@@ -424,6 +424,9 @@ void configure_context(SSL_CTX* ctx, const ShimConfig& cfg) {
    if(cfg.record_size_limit.has_value()) {
       report_unsupported("record_size_limit", "BoringSSL exposes no RFC 8449 record_size_limit policy");
    }
+   if(cfg.max_handshake_message_size.has_value()) {
+      report_unsupported("max_handshake_message_size", "BoringSSL caps every message at max(16384, max_cert_list) (16384 on a server without peer verification, fixed post-handshake), so it cannot apply an arbitrary limit");
+   }
    SSL_CTX_set_current_time_cb(ctx, current_time);
    SSL_CTX_set_session_cache_mode(ctx, SSL_SESS_CACHE_BOTH);
    SSL_CTX_sess_set_new_cb(ctx, new_session_callback);

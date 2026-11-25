@@ -1,0 +1,139 @@
+# TLS 1.2 server: a handshake header announcing 2^24 - 1 bytes is rejected
+# from the header alone, with no size limit configured.
+#
+# Each case sets the 24-bit handshake length of one message to 0xffffff and
+# sends only that 4-byte header (`fragment 4 hold_all` withholds the real
+# body), then requires the peer to give up within `wait 300 ms`. No RFC caps a
+# handshake message below the 24-bit field, but every library has a built-in
+# limit far below 16 MiB; a peer that waits instead is ready to buffer the
+# whole announced body before looking at it.
+#
+# The response is unspecified, so each backend's is pinned: Botan sends
+# handshake_failure (65536-byte default limit); OpenSSL, BoringSSL and the
+# LibreSSL legacy stack illegal_parameter; Go internal_error.
+#
+# A prompt close without an alert also rejects from the header, so it passes
+# where that is the library's path: rustls returns HandshakePayloadTooLarge
+# without handle_deframe_error's alert, and wolfSSL sends TLS 1.2 alerts only
+# with WOLFSSL_EXTRA_ALERTS. LibreSSL reads the first message (ClientHello /
+# ServerHello) with its TLS 1.3 stack even when only TLS 1.2 is enabled, and
+# that stack fails with TLS13_IO_FAILURE and no alert; it answers a
+# HelloRequest whose length is nonzero with decode_error (ssl_pkt.c).
+#
+# GnuTLS has no header-time size check: parse_handshake_header takes any
+# length, and gnutls_handshake_set_max_packet_length bounds the transcript
+# only once a whole message has arrived, so it waits (xfail).
+# suite/*/*max_handshake_message_size.plzn test a configured limit the same
+# way.
+
+plzn tls "server/tls12-implausible-handshake-length/client-hello" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server { versions: [tls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ClientHello {
+    send ClientHello @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+  expect close if libressl
+}
+
+plzn tls "server/tls12-implausible-handshake-length/certificate" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+  }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Certificate {
+    send Certificate @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-implausible-handshake-length/client-key-exchange" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server { versions: [tls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-implausible-handshake-length/certificate-verify" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [tls12]
+    require_client_cert: true
+  }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-implausible-handshake-length/finished" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server { versions: [tls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Finished {
+    send Finished @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+}
+
+plzn tls "server/tls12-implausible-handshake-length/renegotiation-client-hello" {
+  syntax 1.0
+  rfc 5246 section 7.4
+  chain: [ecdsa_p256]
+  uut server { versions: [tls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake after recv Finished {
+    send AppData
+    recv AppData
+    begin_renegotiation
+    send ClientHello @ set[handshake.length, 0..2] = 0xff, @ fragment 4 hold_all
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/internal_error if go
+  expect close if rustls
+  expect close if wolfssl
+}

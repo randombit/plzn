@@ -801,6 +801,7 @@ The planned control surface is in `shims/DESIGN.md`. Fields today:
 | `max_early_data` | `0`, `1024`, ... | TLS 1.3 server: maximum 0-RTT bytes advertised in each ticket and accepted on resumption |
 | `max_cert_list` | `16384`, ... | maximum encoded peer certificate chain size in bytes |
 | `record_size_limit` | `64` ... `16385` | RFC 8449 receive limit the UUT advertises and enforces |
+| `max_handshake_message_size` | `0` ... `16777215` | largest handshake message body the UUT accepts from plzn, in bytes, every message type alike (`0` = no limit; syntax 1.1). See "Handshake message size limits" |
 | `records_per_traffic_key` | `0`, `4`, ... | TLS 1.3: send an automatic KeyUpdate after this many records (Botan only; `0` = never) |
 | `key_update` | `true` / `false` | initiate one post-handshake KeyUpdate before application data (BoringSSL; useful for DTLS 1.3 ACK/epoch tests) |
 | `extended_master_secret` | `require` / `allow` / `off` | RFC 7627 posture; `require` rejects a client without it, `off` never negotiates it |
@@ -832,6 +833,7 @@ passing vacuously. What each library can switch:
 | `max_early_data` / 0-RTT I/O | unsupported | any / wired | any / wired |
 | `max_cert_list` | any | any | unsupported |
 | `record_size_limit` | TLS 1.3 | unsupported | unsupported |
+| `max_handshake_message_size` | any | unsupported | unsupported |
 | `records_per_traffic_key` | any | unsupported | unsupported |
 | `key_update` | unsupported | unsupported | unsupported |
 | `extended_master_secret` | `require`, `allow` | `allow`, `off` | `require`, `allow` |
@@ -1211,6 +1213,42 @@ sent fails the step and is reported. Here the static-RSA ClientKeyExchange has
 been sent and a server that answered before Finished would be a Bleichenbacher
 oracle. (OpenSSL's shim reports the abandoned handshake as its own failure, so
 that backend is skipped; the ROBOT corpus files carry the full rationale.)
+
+### Handshake message size limits
+
+`uut { max_handshake_message_size: N }` caps the handshake message body the
+UUT accepts. A cap is only a defence if it is applied to the length in the
+message header, before the body has been buffered, so the corpus sends just
+that header and expects the rejection straight away:
+
+```
+plzn tls "usage/oversized-client-hello" {
+  syntax 1.1
+  chain: [ecdsa_p256]
+  uut server { versions: [tls13], max_handshake_message_size: 4096 }
+  flow handshake until send ClientHello {
+    send ClientHello @ pad to 4097, @ fragment 4 hold_all
+  }
+  expect alert fatal/handshake_failure
+}
+```
+
+`pad to 4097` makes the ClientHello body 4097 bytes, one more than the cap,
+and `fragment 4 hold_all` sends only the first 4-byte record, the handshake
+header, and keeps the rest back. A peer that waits for the body sends nothing,
+and the case fails when the post-flow drain finds no alert. The paired
+control is `pad to 4096` with the same fragmenting, followed by `wait 300 ms`
+and `expect ok`. A message of exactly the cap must not be refused, so the
+peer stays silent and waits for the body. A withheld Finished counts as
+not sent, so the shim is told the handshake was abandoned. DTLS 1.2 has no
+`hold`; the same shape there is `send Msg @ pad to 4097, @ fragment 256`,
+then `hold_flight` and `release_flight [0]`, which sends only the first
+fragment. `suite/{server,client,dtls}/*max_handshake_message_size*.plzn`
+cover every message type each role receives. Without the knob, the
+`*implausible_handshake_length.plzn` files test each library's built-in
+limit. They use `@ set[handshake.length, 0..2] = 0xff` to announce
+2^24 - 1 bytes without building such a body, follow it with `wait 300 ms`,
+and pin each backend's alert or close.
 
 ### Anchored presets
 
@@ -2083,10 +2121,11 @@ forms.
 | `@ add[path] = N`, `@ sub[path] = N` | add to or subtract from a complete named big-endian length field without changing its payload; arithmetic wraps at that field's wire width |
 | `@ pad +N [0xNN]` / `@ pad -N` | append N bytes (zero, or the given byte) / drop N trailing bytes; N may be a matrix variable. On a handshake message the handshake length is recomputed (tlsfuzzer's pad_handshake / truncate_handshake), so the fault is the body, not a lying header |
 | `@ pad "HEX"` | append exactly these bytes (`@ pad "ff01000100"`: a stray extension after the extensions block) |
+| `@ pad to N [0xNN]` | append zero (or the given) bytes until the body is exactly N bytes, recomputing the handshake length as `pad +N` does; a body already longer than N fails the send instead of being cut (syntax 1.1) |
 | `@ truncate N` | keep only the first N bytes (N may be a matrix variable) |
 | `@ trailing "HEX"` | TLS handshake messages only: append bytes after the complete framed message without changing its declared length or transcript; this places a prefix of the next handshake message in the current record |
 | `@ omit_prefix N` | TLS handshake messages only: omit the first N encoded bytes on the wire while retaining the complete logical message in the transcript; pair with an earlier `@ trailing` to finish a message across a flight or key boundary |
-| `@ xor[a..b] = V`, `@ set[path, a..b] = V` | every byte of the range (end exclusive; negatives count from the end) |
+| `@ xor[a..b] = V`, `@ set[path, a..b] = V` | every byte of the range, both ends included as in every plzn range (`set[handshake.length, 0..2]` is the whole 3-byte length); negatives count from the end |
 | `@ record_version 0xNNNN` | the record header's version field for this send (tlsfuzzer's Connect(version) / SetRecordVersion) |
 | `@ record_pad N` / `@ record_pad fill` | TLS or DTLS 1.3: N zero bytes of record padding after the inner content type, or pad the record to the 2^14 + 1 plaintext maximum |
 | `@ dtls13_short_sequence` | DTLS 1.3: use the one-byte unified-header record number instead of two bytes |

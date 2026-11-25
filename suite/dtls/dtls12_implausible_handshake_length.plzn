@@ -1,0 +1,258 @@
+# DTLS 1.2, both roles: a handshake fragment whose header announces 2^24 - 1
+# bytes is rejected from the header alone, with no size limit configured.
+#
+# Each case sets the 24-bit message length in one message's only fragment to
+# 0xffffff, so the fragment carries the real body as the start of a 16 MiB
+# message, and requires the peer to give up within `wait 300 ms` rather than
+# set up reassembly for it.
+#
+# Botan sends handshake_failure (65536-byte default limit), BoringSSL
+# illegal_parameter. OpenSSL and LibreSSL hand a fragment with 0 <
+# fragment_length < length to reassembly, whose size check fails without an
+# alert (OpenSSL dtls1_reassemble_fragment, LibreSSL d1_both.c), so they
+# close; RFC 6347 4.1.2.7 lets a DTLS peer drop rather than alert. An empty
+# body (ServerHelloDone, HelloRequest) skips reassembly and reaches the
+# alerting check instead: illegal_parameter, or decode_error from LibreSSL's
+# HelloRequest length check.
+#
+# GnuTLS has no header-time size check: it sizes the reassembly buffer from
+# the announced length and waits (xfail). The cookie case names
+# `dtls_require_cookie: true`: without a HelloVerifyRequest plzn suppresses
+# its second ClientHello, so a library with no cookie exchange (BoringSSL)
+# would be sent nothing at all.
+
+plzn tls "dtls12/server-implausible-handshake-length/client-hello" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow {
+    send ClientHello @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/server-implausible-handshake-length/cookie-client-hello" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    dtls_require_cookie: true
+  }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ClientHello {
+    send ClientHello
+    recv HelloVerifyRequest
+    send ClientHello @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/server-implausible-handshake-length/certificate" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Certificate {
+    send Certificate @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/server-implausible-handshake-length/client-key-exchange" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ClientKeyExchange {
+    send ClientKeyExchange @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/server-implausible-handshake-length/certificate-verify" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server {
+    versions: [dtls12]
+    require_client_cert: true
+  }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send CertificateVerify {
+    send CertificateVerify @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/server-implausible-handshake-length/finished" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut server { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Finished {
+    send Finished @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/hello-verify-request" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow {
+    recv ClientHello
+    send HelloVerifyRequest @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/server-hello" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ServerHello {
+    send ServerHello @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/certificate" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Certificate {
+    send Certificate @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/server-key-exchange" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ServerKeyExchange {
+    send ServerKeyExchange @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/certificate-request" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  peer { request_client_cert: true }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send CertificateRequest {
+    send CertificateRequest @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/server-hello-done" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send ServerHelloDone {
+    send ServerHelloDone @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/finished" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "parses any handshake length and checks its size limit only once the whole message has arrived (CHECK_SIZE in lib/handshake.c), so it waits for the announced 16 MiB"
+  flow handshake until send Finished {
+    send Finished @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect close if openssl
+  expect close if libressl
+}
+
+plzn tls "dtls12/client-implausible-handshake-length/hello-request" {
+  syntax 1.0
+  rfc 6347 section 4.2.2
+  chain: [ecdsa_p256]
+  uut client { versions: [dtls12] }
+  xfail gnutls "never checks the HelloRequest length and starts a renegotiation"
+  flow handshake after send Finished {
+    send AppData
+    recv AppData
+    send HelloRequest @ set[handshake.length, 0..2] = 0xff
+    wait 300 ms
+  }
+  expect alert fatal/illegal_parameter
+  expect alert fatal/handshake_failure if botan
+  expect alert fatal/decode_error if libressl
+}

@@ -248,6 +248,9 @@ void preflight(const ShimConfig& cfg) {
    if(cfg.record_size_limit.has_value()) {
       plzn::report_unsupported("record_size_limit", "this wolfSSL build exposes no RFC 8449 record_size_limit policy");
    }
+   if(cfg.max_handshake_message_size.has_value()) {
+      plzn::report_unsupported("max_handshake_message_size", "wolfSSL's handshake message limit is the compile-time MAX_HANDSHAKE_SZ");
+   }
    if(cfg.server_preference.has_value() || cfg.renegotiation.has_value() ||
       cfg.max_cert_list.has_value() || cfg.records_per_traffic_key.has_value() ||
       cfg.extended_master_secret.has_value() || cfg.middlebox_compat.has_value() ||

@@ -143,6 +143,7 @@ type config struct {
 	ExpectEarlyData    *bool               `json:"expect_early_data_accepted"`
 	MaxCertList        *uint32             `json:"max_cert_list"`
 	RecordSizeLimit    *uint32             `json:"record_size_limit"`
+	MaxHandshakeMsg    *uint32             `json:"max_handshake_message_size"`
 	RecordsPerKey      *uint32             `json:"records_per_traffic_key"`
 	KeyUpdate          bool                `json:"key_update"`
 	ExtendedMS         *string             `json:"extended_master_secret"`
@@ -408,6 +409,9 @@ func preflight(cfg *config) error {
 	}
 	if cfg.RecordSizeLimit != nil {
 		return unsupported("record_size_limit", "Go crypto/tls exposes no RFC 8449 record_size_limit policy")
+	}
+	if cfg.MaxHandshakeMsg != nil {
+		return unsupported("max_handshake_message_size", "Go crypto/tls has fixed limits (65536 bytes, 262144 for Certificate) and no tls.Config knob")
 	}
 	loadedChains := cfg.Credentials.Chains
 	if cfg.Role == "client" {

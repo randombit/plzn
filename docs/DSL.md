@@ -125,7 +125,7 @@ by the bundled shims are `botan`, `openssl`, `rustls`, `gnutls`, `wolfssl`,
 ### Syntax version
 
 The first statement of every test is `syntax MAJOR.MINOR`: the revision of
-this language the test requires. The current revision is `1.0`. Each test
+this language the test requires. The current revision is `1.1`. Each test
 carries its own declaration; there is no file-level default. Only comments
 and blank lines may precede it, and it appears once.
 
@@ -141,6 +141,9 @@ one major revision at a time.
 
 The version is two decimal integers joined by a dot, with no spaces, leading
 zeros, or patch component.
+
+Revision 1.1 added the `uut` field `max_handshake_message_size` and the
+`pad to N` modifier. A test that uses neither may keep `syntax 1.0`.
 
 ### Credentials
 
@@ -198,6 +201,7 @@ Omitted options leave their defaults to the harness/shim unless stated below.
 | `encrypt_then_mac`, `middlebox_compat` | `bool` |
 | `session_tickets`, `max_early_data`, `max_cert_list` | `u32` |
 | `record_size_limit` | Integer from 64 through 16385 |
+| `max_handshake_message_size` | Integer from 0 (no limit) through 16777215 (since 1.1) |
 | `key_update` | `bool` |
 | `records_per_traffic_key`, `min_key_update_interval_ms` | `u32` |
 | `compress_certificate`, `raw_public_key` | `bool` |
@@ -628,6 +632,7 @@ Both endpoints are included, just as in value and matrix ranges.
 | `xor[TARGET] = VALUE`, `set[TARGET] = VALUE` | Change selected bytes |
 | `add[PATH] = N`, `sub[PATH] = N` | Adjust an entire named big-endian length field, wrapping at its wire width |
 | `pad +N [BYTE]`, `pad -N`, `pad "HEX"` | Append zero/fill/literal bytes, or remove trailing bytes |
+| `pad to N [BYTE]` | Append zero/fill bytes until the body is exactly N bytes (since 1.1); a longer body is an error |
 | `truncate N` | Retain at most the first N bytes |
 | `trailing SEGMENT` | Append bytes after the framed TLS handshake message |
 | `omit_prefix N` | Omit an encoded TLS handshake prefix from the wire |

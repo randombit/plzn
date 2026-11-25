@@ -331,6 +331,9 @@ ShimConfig ShimConfig::from_json(const JsonValue& root) {
    if(root.contains("record_size_limit")) {
       c.record_size_limit = static_cast<uint32_t>(root.int_or("record_size_limit", 0));
    }
+   if(root.contains("max_handshake_message_size")) {
+      c.max_handshake_message_size = static_cast<uint32_t>(root.int_or("max_handshake_message_size", 0));
+   }
    if(root.contains("records_per_traffic_key")) {
       c.records_per_traffic_key = static_cast<uint32_t>(root.int_or("records_per_traffic_key", 0));
    }

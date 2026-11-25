@@ -41,6 +41,10 @@ pub enum MutateError {
         delta: i64,
         width: usize,
     },
+    PadToShorterThanBody {
+        len: usize,
+        body_len: usize,
+    },
 }
 
 impl std::fmt::Display for MutateError {
@@ -79,6 +83,11 @@ impl std::fmt::Display for MutateError {
                 f,
                 "adjusting {}-byte length field `{}` from {} by {:+} overflows its wire representation",
                 width, path, value, delta
+            ),
+            MutateError::PadToShorterThanBody { len, body_len } => write!(
+                f,
+                "`pad to {}`: the encoded body is already {} bytes",
+                len, body_len
             ),
         }
     }
@@ -138,6 +147,15 @@ pub fn apply_handshake_mutations(
             MutationOp::PadMinus(n) => {
                 let new_len = body.len().saturating_sub(*n);
                 body.truncate(new_len);
+            }
+            MutationOp::PadTo { len, byte } => {
+                if body.len() > *len {
+                    return Err(MutateError::PadToShorterThanBody {
+                        len: *len,
+                        body_len: body.len(),
+                    });
+                }
+                body.resize(*len, *byte);
             }
             MutationOp::Truncate(n) => {
                 body.truncate(*n);
@@ -616,6 +634,24 @@ mod tests {
         };
         let result = apply_handshake_mutations(body, &enc, &[m]).unwrap();
         assert_eq!(result, vec![0x01, 0x02, 0x00, 0x00, 0x00]);
+    }
+
+    #[test]
+    fn pad_to_grows_the_body_to_exactly_n_bytes() {
+        let body = vec![0x01, 0x02];
+        let enc = make_body(&body, &[]);
+        let pad = |len, byte| Mutation {
+            op: MutationOp::PadTo { len, byte },
+            span: dummy_span(),
+        };
+        let result = apply_handshake_mutations(body.clone(), &enc, &[pad(5, 0xab)]).unwrap();
+        assert_eq!(result, vec![0x01, 0x02, 0xab, 0xab, 0xab]);
+        // Already exactly N: unchanged.
+        let result = apply_handshake_mutations(body.clone(), &enc, &[pad(2, 0)]).unwrap();
+        assert_eq!(result, body);
+        // Never a silent truncation.
+        let err = apply_handshake_mutations(body, &enc, &[pad(1, 0)]).unwrap_err();
+        assert!(err.to_string().contains("already 2 bytes"), "{err}");
     }
 
     #[test]

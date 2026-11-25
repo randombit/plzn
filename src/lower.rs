@@ -3259,6 +3259,7 @@ fn lower_with_binding(
             max_early_data: u.max_early_data,
             max_cert_list: u.max_cert_list,
             record_size_limit: u.record_size_limit,
+            max_handshake_message_size: u.max_handshake_message_size,
             records_per_traffic_key: u.records_per_traffic_key,
             key_update: u.key_update,
             extended_master_secret: u.extended_master_secret.clone(),
@@ -5509,6 +5510,7 @@ fn lower_one_mutation(
     let op = match &m.op {
         ast::MutationOp::Xor { target, value } => {
             let resolved_target = resolve_byte_target(target, binding)?;
+            check_header_target(&resolved_target, span)?;
             let val = resolve_mut_value(value, binding, span)?;
             MutationOp::Xor {
                 target: resolved_target,
@@ -5517,6 +5519,7 @@ fn lower_one_mutation(
         }
         ast::MutationOp::Set { target, value } => {
             let resolved_target = resolve_byte_target(target, binding)?;
+            check_header_target(&resolved_target, span)?;
             let val = resolve_mut_value(value, binding, span)?;
             MutationOp::Set {
                 target: resolved_target,
@@ -5600,6 +5603,24 @@ fn lower_one_mutation(
             }
             MutationOp::PadMinus(n as usize)
         }
+        ast::MutationOp::PadTo { n, byte } => {
+            let n = resolve_mut_value(n, binding, span)?;
+            // A handshake body length is a 24-bit field.
+            if !(0..=0xff_ffff).contains(&n) {
+                return Err(LowerError {
+                    span,
+                    message: format!("pad to N takes 0..=16777215 bytes, not {n}"),
+                });
+            }
+            let byte = match byte {
+                None => 0,
+                Some(b) => range_u8(b.value, b.span)?,
+            };
+            MutationOp::PadTo {
+                len: n as usize,
+                byte,
+            }
+        }
         ast::MutationOp::Truncate { n } => {
             let n = resolve_mut_value(n, binding, span)?;
             if n < 0 {
@@ -5653,6 +5674,22 @@ fn lower_one_mutation(
         }
     };
     Ok(ir::Mutation { op, span })
+}
+
+/// `handshake.msg_type` (1 byte) and `handshake.length` (3 bytes) have fixed
+/// widths, and the post-framing pass that applies them has no error channel,
+/// so an index outside the field is a lint error here rather than a silently
+/// skipped mutation at send time.
+fn check_header_target(target: &ResolvedByteTarget, span: Span) -> Result<(), LowerError> {
+    let width = match target.path.as_deref() {
+        Some([h, f]) if h == "handshake" && f == "msg_type" => 1,
+        Some([h, f]) if h == "handshake" && f == "length" => 3,
+        _ => return Ok(()),
+    };
+    target
+        .indices(width)
+        .map(|_| ())
+        .map_err(|message| LowerError { span, message })
 }
 
 fn resolve_byte_target(

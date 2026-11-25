@@ -319,6 +319,8 @@ pub struct UutConfig {
     pub max_cert_list: Option<u32>,
     /// RFC 8449 receive limit advertised by the UUT.
     pub record_size_limit: Option<u32>,
+    /// Largest handshake message body the UUT accepts (0 = no limit).
+    pub max_handshake_message_size: Option<u32>,
     /// Botan `records_per_traffic_key`: automatic TLS 1.3 KeyUpdate after N sent records.
     pub records_per_traffic_key: Option<u32>,
     /// Initiate one post-handshake KeyUpdate before application data.
@@ -2023,6 +2025,10 @@ pub enum MutationOp {
     PadBytes(Vec<u8>),
     /// `pad -N` — remove N trailing bytes.
     PadMinus(usize),
+    /// `pad to N [0xNN]` — append the pad byte until the body is exactly N
+    /// bytes (the handshake header length is recomputed, as for `pad +N`). A
+    /// body already longer than N is a send error, never a silent truncation.
+    PadTo { len: usize, byte: u8 },
     /// `truncate N` — keep only the first N bytes.
     Truncate(usize),
     /// `trailing "HEX"` — append bytes after the framed handshake message,
